@@ -8,7 +8,6 @@ import Image from 'react-native-image-progress';
 import { Icon } from 'react-native-elements'
 
 export default function EventInfoScreen({ route, navigation }: any) {
-  console.log('event info screen')
   const { eventID, month, day, location, avail, imgUrl, name } = route.params;
   const [vendorList, setVendorList] = useState({});
   const [vendorInfo, setVendorInfo] = useState({});
