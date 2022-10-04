@@ -19,7 +19,7 @@ const SignUpVendorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => 
   });
 
   const onFooterLinkPress = () => {
-    navigation.navigate('Login');
+    navigation.navigate('SignIn');
   };
 
   async function signUp() {
@@ -47,7 +47,7 @@ const SignUpVendorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => 
         type: 'vendor',
         name: value.name,
       });
-      navigation.navigate('Sign In');
+      navigation.navigate('SignIn');
     } catch (error: any) {
       setValue({
         ...value,

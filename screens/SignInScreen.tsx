@@ -21,6 +21,7 @@ const SignInScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   };
 
   async function signIn() {
+    console.log(value.email, value.password)
     if (value.email === '' || value.password === '') {
       setValue({
         ...value,
@@ -32,6 +33,7 @@ const SignInScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     try {
       await signInWithEmailAndPassword(auth, value.email, value.password);
     } catch (error: any) {
+      console.log(error)
       setValue({
         ...value,
         error: error.message,
@@ -43,6 +45,7 @@ const SignInScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <KeyboardAwareScrollView style={{ flex: 1, width: '100%' }} keyboardShouldPersistTaps="always">
         <Text style={styles.title}>log in</Text>
+        {value.error && <Text style={styles.error}>{value.error}</Text>}
         <TextInput
           style={styles.input}
           placeholder="email address"
@@ -92,6 +95,7 @@ const styles = StyleSheet.create({
     padding: 10,
     color: '#fff',
     backgroundColor: '#D54826FF',
+    marginBottom: 40
   },
   title: {
     alignSelf: 'center',

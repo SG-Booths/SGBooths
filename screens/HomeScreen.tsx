@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, ScrollView, SafeAreaView, Pressable, Button } from 'react-native';
-import { SearchBar } from 'react-native-elements';
+import { StyleSheet, View, Text, ScrollView, SafeAreaView, Pressable, Button, TextInput } from 'react-native';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
 import { getAuth, signOut } from 'firebase/auth';
 import { db, storage } from '../config/firebase';
@@ -9,17 +8,20 @@ import { ref as ref_storage, getDownloadURL } from 'firebase/storage';
 import { eachMonthOfInterval, addMonths, getMonth, getYear } from 'date-fns';
 import { StackScreenProps } from '@react-navigation/stack';
 import Image from 'react-native-image-progress';
-import { useLinkBuilder } from '@react-navigation/native';
 
 const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   const { user } = useAuthentication();
   const auth = getAuth();
 
   const [events, setEvents] = useState({});
-  const [value, setValue] = useState(String);
+  const [filteredEvents, setFilteredEvents] = useState([]);
+  const [eventArray, setEventArray]: any = useState({});
 
-  const eventKeys = Object.keys(events);
-  console.log(eventKeys);
+  const [boothsFollowing, setBoothsFollowing]: any = useState({});
+
+  const [search, setSearch] = useState('');
+
+  const eventKeys = Object.keys(filteredEvents);
 
   const today = new Date();
   const months = eachMonthOfInterval({
@@ -42,11 +44,9 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     'december',
   ];
 
-  var arrayholder: any = [];
-
-  const EventItem = ({ eventItem: { location, date, name, avail }, id, month }: any) => {
+  const EventItem = ({ eventItem, month }: any) => {
     const [imgUrl, setImgUrl] = useState<string | undefined>(undefined);
-    const ref = ref_storage(storage, id + '.png');
+    const ref = ref_storage(storage, eventItem['key'] + '.png');
 
     getDownloadURL(ref)
       .then((url) => {
@@ -62,12 +62,12 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           onPress={() =>
             navigation.navigate('EventInfoScreen', {
               imgUrl: imgUrl,
-              eventID: id,
+              eventID: eventItem['key'],
               month: month,
-              day: date.day,
-              location: location,
-              avail: avail,
-              name: name,
+              day: eventItem['date']['day'],
+              location: eventItem['location'],
+              avail: eventItem['avail'],
+              name: eventItem['name'],
             })
           }
         >
@@ -83,8 +83,8 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             />
           </View>
           <View style={styles.eventDetailsContainer}>
-            <Text style={styles.eventDate}>{date.day}</Text>
-            <Text style={styles.eventName}>{name}</Text>
+            <Text style={styles.eventDate}>{eventItem['date']['day']}</Text>
+            <Text style={styles.eventName}>{eventItem['name']}</Text>
           </View>
         </Pressable>
       </View>
@@ -96,31 +96,74 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       let data = querySnapShot.val() || {};
       let eventItems = { ...data };
       setEvents(eventItems);
-      arrayholder = eventItems;
+
+      let newArray: any = Object.values(eventItems).reverse();
+
+      // uses state to set cardArray and filteredCards to the reverse of this data
+      setEventArray(newArray);
+      setFilteredEvents(newArray);
+
+      onValue(ref(db, '/users/' + user?.uid + '/boothsFollowing' ), (querySnapShot) => {
+        let data2 = querySnapShot.val() || {};
+        let boothsFollowing = { ...data2 };
+        setBoothsFollowing(boothsFollowing);
+      })
     });
   }, []);
 
-  function searchFilterFunction(text: string) {
-    setValue(text);
+  
 
-    const newData = arrayholder.filter((item: any) => {
-      const itemData = `${item.name.toUpperCase()} ${item.location.toUpperCase()} `;
-      const textData = text.toUpperCase();
+  const searchEvents = (text: string) => {
+    // sets the search term to the current search box input
+    setSearch(text);
 
-      return itemData.indexOf(textData) > -1;
-    });
-    setEvents(newData);
-  }
+    // applies the search: sets filteredCards to Cards in cardArray that contain the search term
+    // since Card is an object, checks if any of the english, chinese, and pinyin properties include the search term
+    setFilteredEvents(
+      eventArray.filter((obj: { name: string; location: string }) => {
+        return (
+          obj.name.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace(/\s{2,}/g," ").toLowerCase().includes(text) ||
+          obj.location.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace(/\s{2,}/g," ").toLowerCase().includes(text)
+        );
+      })
+    );
+  };
+  // TODO: delete booths after certain amount of time
+  // TODO: when user goes from vendor to visitor account, delete their uid from people's vendorFollowing
+
+  // gets all cards that match the starred filter (while still matching the search term)
+  const getStarred = (newStarredFilter: boolean) => {
+    // if starred is true, filters cardArray by starred and then applies the search
+    if (newStarredFilter) {
+      setFilteredEvents(
+        eventArray.filter((obj: { name: string; location: string, key: any }) => {
+          return (
+            ((obj.name.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace(/\s{2,}/g," ").includes(search) ||
+              obj.location.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace(/\s{2,}/g," ").includes(search)) && boothsFollowing.includes(obj.key))
+          );
+        })
+      );
+    } 
+    // if starred is false, ignores the starred filter and only applies the search
+    else {
+      setFilteredEvents(eventArray);
+      searchEvents(search);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>events</Text>
-      <SearchBar
-        placeholder="Type Here..."
-        lightTheme
-        round
-        value={value}
-        onChangeText={(text) => searchFilterFunction(text)}
+      <TextInput
+        style={styles.searchBar}
+        value={search}
+        placeholder="search by event name or location..."
+        underlineColorAndroid="transparent"
+        onChangeText={(text) => searchEvents(text)}
+        textAlign="left"
+        placeholderTextColor="#C4C4C4"
+        autoCapitalize="none"
+        autoComplete="off"
         autoCorrect={false}
       />
       <ScrollView
@@ -130,24 +173,26 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       >
         {months.map((monthKey) => (
           <View key={monthKey.toString()}>
-            <Text style={styles.monthHeader}>
+            {
+              filteredEvents.some(function (item) {
+                return item['date']['month'] === getMonth(monthKey)}) && 
+              <Text style={styles.monthHeader}>
               {monthNames[getMonth(monthKey)]} '{getYear(monthKey) % 100}
             </Text>
+            }
             <View>
-              {eventKeys.length > 0 ? (
+              {eventKeys.length > 0 && (
                 eventKeys.map((eventKey) =>
-                  events[eventKey as keyof typeof events]['date']['month'] == getMonth(monthKey) &&
-                  events[eventKey as keyof typeof events]['date']['year'] == getYear(monthKey) ? (
+                filteredEvents[eventKey as keyof typeof events]['date']['month'] == getMonth(monthKey) &&
+                filteredEvents[eventKey as keyof typeof events]['date']['year'] == getYear(monthKey) ? (
                     <EventItem
                       key={eventKey}
                       id={eventKey}
-                      eventItem={events[eventKey as keyof typeof events]}
+                      eventItem={filteredEvents[eventKey as keyof typeof events]}
                       month={getMonth(monthKey) + 1}
                     />
                   ) : null
                 )
-              ) : (
-                <Text>No events</Text>
               )}
             </View>
           </View>
@@ -212,6 +257,15 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     color: '#2A3242',
     fontWeight: '500',
+  },
+  searchBar: {
+    height: 40,
+    width: 350,
+    borderRadius: 20,
+    marginLeft: 30,
+    backgroundColor: 'white',
+    marginTop: 20,
+    paddingLeft: 20,
   },
 });
 

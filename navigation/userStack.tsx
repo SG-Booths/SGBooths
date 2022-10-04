@@ -10,7 +10,7 @@ import NotFoundScreen from '../screens/NotFoundScreen';
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
 import HomeScreen from '../screens/HomeScreen';
-import TabTwoScreen from '../screens/TabTwoScreen';
+import FollowingScreen from '../screens/FollowingScreen';
 import EventInfoScreen from '../screens/EventInfoScreen';
 
 const Stack = createStackNavigator();
@@ -56,10 +56,10 @@ function BottomTabNavigator() {
         })}
       />
       <BottomTab.Screen
-        name="TabTwo"
-        component={TabTwoScreen}
+        name="Following"
+        component={FollowingScreen}
         options={{
-          title: 'Tab Two',
+          title: 'Following',
           tabBarIcon: ({ color }) => <TabBarIcon name="people" width={30} color={color} />,
         }}
       />

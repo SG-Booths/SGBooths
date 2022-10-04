@@ -5,7 +5,7 @@ import { db, storage } from '../config/firebase';
 import { Text, View } from '../components/Themed';
 import { ref as ref_storage, getDownloadURL } from 'firebase/storage';
 import Image from 'react-native-image-progress';
-import { Icon } from 'react-native-elements'
+import Icon from 'react-native-vector-icons/AntDesign';
 
 export default function EventInfoScreen({ route, navigation }: any) {
   console.log('test')
@@ -88,7 +88,6 @@ export default function EventInfoScreen({ route, navigation }: any) {
           <Text style={styles.vendorName}>{name}</Text>
           <Icon
           name='instagram'
-          type='ant-design'
           color='#575FCC'
           style={{justifyContent:'flex-end', flex:1, alignSelf:'flex-end', backgroundColor:'blue' }}
         />

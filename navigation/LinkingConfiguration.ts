@@ -25,9 +25,9 @@ const linking: LinkingOptions<RootStackParamList> = {
               EventInfoScreen: 'events',
             },
           },
-          TabTwo: {
+          Following: {
             screens: {
-              TabTwoScreen: 'two',
+              FollowingScreen: 'following',
             },
           },
         },

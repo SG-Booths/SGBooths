@@ -18,7 +18,7 @@ export default function AuthStack() {
           animationEnabled: false,
         }}
       >
-        <Stack.Screen name="Sign In" component={SignInScreen} />
+        <Stack.Screen name="SignIn" component={SignInScreen} />
         <Stack.Screen name="SignUpVendorScreen" component={SignUpVendorScreen} />
         <Stack.Screen name="SignUpVisitorScreen" component={SignUpVisitorScreen} />
       </Stack.Navigator>
