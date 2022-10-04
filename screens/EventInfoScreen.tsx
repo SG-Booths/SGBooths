@@ -1,4 +1,4 @@
-import { StyleSheet, ScrollView } from 'react-native';
+import { StyleSheet, ScrollView, Linking } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { ref as ref_db, onValue } from 'firebase/database';
 import { db, storage } from '../config/firebase';
@@ -8,7 +8,7 @@ import Image from 'react-native-image-progress';
 import Icon from 'react-native-vector-icons/AntDesign';
 
 export default function EventInfoScreen({ route, navigation }: any) {
-  console.log('test')
+  // TODO: add space bar + filter
   const { eventID, month, day, location, avail, imgUrl, name } = route.params;
   const [vendorList, setVendorList] = useState({});
   const [vendorInfo, setVendorInfo] = useState({});
@@ -48,6 +48,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
 
   const VendorItem = ({ eventID, id }: any) => {
     const name = vendorInfo[id as keyof typeof vendorInfo]['name' as keyof typeof vendorInfo];
+    const instagram = vendorInfo[id as keyof typeof vendorInfo]['instagram' as keyof typeof vendorInfo];
 
     const [imgUrl1, setImgUrl1] = useState<string | undefined>(undefined);
     const ref1 = ref_storage(storage, eventID + id + '_1.png');
@@ -84,12 +85,17 @@ export default function EventInfoScreen({ route, navigation }: any) {
 
     return (
       <View style={styles.eventDetailsContainer}>
-        <View style = {{flexDirection:'row', width: 340, borderRadius:20, backgroundColor:'red'}}>
+        <View style = {{flexDirection:'row', width: 300, borderRadius:20, backgroundColor: 'transparent', flex: 1, maxHeight: 30, marginTop: 20, paddingHorizontal: 5, justifyContent: 'space-between' }}>
           <Text style={styles.vendorName}>{name}</Text>
           <Icon
           name='instagram'
           color='#575FCC'
-          style={{justifyContent:'flex-end', flex:1, alignSelf:'flex-end', backgroundColor:'blue' }}
+          size={20}
+          onPress={() => Linking.openURL('https://instagram.com/' + instagram)
+            .catch(err => {
+                console.error("Failed opening page because: ", err)
+                alert('Failed to open page')
+            })}
         />
         </View>
         <View style={styles.eventImageContainer}>
@@ -127,7 +133,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
           horizontal={false}
         >
           {Object.keys(vendorList).map((vendorKey) => (
-            <View key={vendorKey} style={{backgroundColor:'#FFF8F3'}}>
+            <View key={vendorKey} style={{backgroundColor:'#FFfF8F3'}}>
                 <VendorItem eventID={eventID} id={vendorKey} />
             </View>
           ))}
@@ -172,14 +178,14 @@ const styles = StyleSheet.create({
   },
   eventDetailsContainer: {
     width: 350,
-    height: 200,
+    height: 170,
     backgroundColor: 'white',
     borderRadius: 20,
     flexDirection: 'column',
     alignItems: 'center',
     marginVertical: 10,
     borderWidth: 2,
-    borderColor: '#C4C4C4'
+    borderColor: '#C4C4C4',    
   },
   contentContainerStyle: { 
 },
@@ -191,21 +197,19 @@ const styles = StyleSheet.create({
     height: 85,
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 30,
+    marginTop: 10,
+    backgroundColor: 'white',
   },
   vendorName: {
     fontSize: 16,
     color: '#2A3242',
-    marginTop: 25,
     fontWeight: '500',
-    marginLeft: 30,
-    justifyContent: 'flex-start'
+    alignSelf: 'flex-start'
   },
   vendorImage: {
     width: 85,
     height: 85,
     marginHorizontal: 10,
     borderRadius: 20,
-    backgroundColor: 'red'
   },
 });

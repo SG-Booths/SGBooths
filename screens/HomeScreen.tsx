@@ -57,7 +57,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       });
 
     return (
-      <View>
+      <View style={{marginBottom: 15}}>
         <Pressable
           onPress={() =>
             navigation.navigate('EventInfoScreen', {
@@ -204,7 +204,6 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  button: {},
   container: {
     flex: 1,
   },
@@ -222,7 +221,7 @@ const styles = StyleSheet.create({
   },
   monthHeader: {
     alignSelf: 'flex-start',
-    marginVertical: 15,
+    marginBottom: 15,
     fontSize: 36,
     color: '#FABF48',
     fontWeight: '500',

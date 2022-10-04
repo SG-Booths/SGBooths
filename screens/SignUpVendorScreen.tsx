@@ -9,6 +9,7 @@ import { push, ref, set } from 'firebase/database';
 
 const auth = getAuth();
 
+// TODO: set instagram handle
 const SignUpVendorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   const [value, setValue] = React.useState({
     email: '',
