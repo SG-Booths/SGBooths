@@ -12,25 +12,25 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   const auth = getAuth();
   const [vendorsFollowing, setVendorsFollowing]: any = useState({});
 
+  // TODO: pull to refresh
   useEffect(() => {
-    return onValue(ref(db, '/users/' + user?.uid + '/vendorsFollowing' ), (querySnapShot) => {
-        let data = querySnapShot.val() || {};
-        let vendorsFollowing = { ...data };
-        setVendorsFollowing(vendorsFollowing);
+    return onValue(ref(db, '/users/' + user?.uid + '/vendorsFollowing'), (querySnapShot) => {
+      let data = querySnapShot.val() || {};
+      let vendorsFollowing = { ...data };
+      setVendorsFollowing(vendorsFollowing);
 
-        console.log(JSON.stringify(data))
-      })
+      console.log(JSON.stringify(data));
+    });
   }, []);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Following
-      </Text>
+      <Text style={styles.title}>Following</Text>
       <Text>{JSON.stringify(vendorsFollowing)}</Text>
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

@@ -1,13 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, ScrollView, SafeAreaView, Pressable, Button, TextInput } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  ScrollView,
+  SafeAreaView,
+  Pressable,
+  Button,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
 import { getAuth, signOut } from 'firebase/auth';
 import { db, storage } from '../config/firebase';
-import { ref, onValue } from 'firebase/database';
+import { ref, onValue, remove, push, set, update } from 'firebase/database';
 import { ref as ref_storage, getDownloadURL } from 'firebase/storage';
 import { eachMonthOfInterval, addMonths, getMonth, getYear } from 'date-fns';
 import { StackScreenProps } from '@react-navigation/stack';
 import Image from 'react-native-image-progress';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   const { user } = useAuthentication();
@@ -15,11 +26,13 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 
   const [events, setEvents] = useState({});
   const [filteredEvents, setFilteredEvents] = useState([]);
-  const [eventArray, setEventArray]: any = useState({});
+  const [eventArray, setEventArray]: any = useState([]);
 
-  const [boothsFollowing, setBoothsFollowing]: any = useState({});
+  const boothsFollowing: any = useRef([]);
 
   const [search, setSearch] = useState('');
+
+  const [starredFilter, setStarredFilter] = useState(false);
 
   const eventKeys = Object.keys(filteredEvents);
 
@@ -44,6 +57,33 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     'december',
   ];
 
+  // toggles a card's starred status
+  const updateStarred = (eventItem: any) => {
+    if (boothsFollowing.current && boothsFollowing.current.length > 0) {
+      console.log('boothsFollowing exists');
+      if (boothsFollowing.current.includes(eventItem['key'])) {
+        remove(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/' + eventItem['key']));
+      } else {
+        update(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/'), {
+          [eventItem['key']]: '',
+        });
+        // set(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/' + [eventItem['key']]),
+        // {'sf': 0}
+        // )
+      }
+    } else {
+      console.log(boothsFollowing.current.length);
+      set(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/'), {
+        [eventItem['key']]: '',
+      });
+    }
+    // TODO: fix bug: when item is unstarred after star filter is already on
+    // if (!eventItem['starred'] && starredFilter) {
+    //   getStarred(starredFilter);
+    //   console.log(cardArray);
+    // }
+  };
+
   const EventItem = ({ eventItem, month }: any) => {
     const [imgUrl, setImgUrl] = useState<string | undefined>(undefined);
     const ref = ref_storage(storage, eventItem['key'] + '.png');
@@ -56,8 +96,10 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         console.log('error:' + error);
       });
 
+    console.log('following:', boothsFollowing.current);
+
     return (
-      <View style={{marginBottom: 15}}>
+      <View style={{ marginBottom: 15 }}>
         <Pressable
           onPress={() =>
             navigation.navigate('EventInfoScreen', {
@@ -72,6 +114,28 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           }
         >
           <View style={styles.eventImageContainer}>
+            {/* TODO: fix zIndex */}
+            <TouchableOpacity
+              style={{
+                backgroundColor: 'white',
+                borderRadius: 100,
+                height: 40,
+                width: 40,
+                alignItems: 'center',
+                justifyContent: 'center',
+                alignSelf: 'flex-end',
+                marginRight: 15,
+                marginTop: 15,
+                zIndex: 1,
+              }}
+              onPress={() => updateStarred(eventItem)}
+            >
+              <Icon
+                name={boothsFollowing.current.includes(eventItem['key']) ? 'bookmark' : 'bookmark-o'}
+                size={25}
+                color="#575FCC"
+              />
+            </TouchableOpacity>
             <Image
               source={{ uri: imgUrl }}
               imageStyle={{ borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
@@ -79,6 +143,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
                 flex: 1,
                 width: undefined,
                 height: undefined,
+                zIndex: 0,
               }}
             />
           </View>
@@ -102,16 +167,18 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       // uses state to set cardArray and filteredCards to the reverse of this data
       setEventArray(newArray);
       setFilteredEvents(newArray);
-
-      onValue(ref(db, '/users/' + user?.uid + '/boothsFollowing' ), (querySnapShot) => {
-        let data2 = querySnapShot.val() || {};
-        let boothsFollowing = { ...data2 };
-        setBoothsFollowing(boothsFollowing);
-      })
     });
   }, []);
 
-  
+  useEffect(() => {
+    console.log('current user id is ', auth.currentUser?.uid);
+    return onValue(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing'), (querySnapShot) => {
+      let data2 = querySnapShot.val() || {};
+      let boothsFollowingTemp = { ...data2 };
+      boothsFollowing.current = Object.keys(boothsFollowingTemp);
+      console.log('booths following are ', Object.keys(boothsFollowingTemp));
+    });
+  }, []);
 
   const searchEvents = (text: string) => {
     // sets the search term to the current search box input
@@ -122,28 +189,46 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     setFilteredEvents(
       eventArray.filter((obj: { name: string; location: string }) => {
         return (
-          obj.name.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace(/\s{2,}/g," ").toLowerCase().includes(text) ||
-          obj.location.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace(/\s{2,}/g," ").toLowerCase().includes(text)
+          obj.name
+            .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+            .replace(/\s{2,}/g, ' ')
+            .toLowerCase()
+            .includes(text) ||
+          obj.location
+            .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+            .replace(/\s{2,}/g, ' ')
+            .toLowerCase()
+            .includes(text)
         );
       })
     );
   };
   // TODO: delete booths after certain amount of time
   // TODO: when user goes from vendor to visitor account, delete their uid from people's vendorFollowing
+  // TODO: load more on scroll
 
   // gets all cards that match the starred filter (while still matching the search term)
   const getStarred = (newStarredFilter: boolean) => {
     // if starred is true, filters cardArray by starred and then applies the search
-    if (newStarredFilter) {
+    if (newStarredFilter && boothsFollowing && boothsFollowing.length > 0) {
       setFilteredEvents(
-        eventArray.filter((obj: { name: string; location: string, key: any }) => {
+        eventArray.filter((obj: { name: string; location: string; key: any }) => {
           return (
-            ((obj.name.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace(/\s{2,}/g," ").includes(search) ||
-              obj.location.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace(/\s{2,}/g," ").includes(search)) && boothsFollowing.includes(obj.key))
+            (obj.name
+              .toLowerCase()
+              .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+              .replace(/\s{2,}/g, ' ')
+              .includes(search) ||
+              obj.location
+                .toLowerCase()
+                .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+                .replace(/\s{2,}/g, ' ')
+                .includes(search)) &&
+            boothsFollowing.includes(obj.key)
           );
         })
       );
-    } 
+    }
     // if starred is false, ignores the starred filter and only applies the search
     else {
       setFilteredEvents(eventArray);
@@ -151,21 +236,41 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     }
   };
 
+  // applies the starred filter
+  const applyStarredFilter = () => {
+    // sets the new filter to the opposite of what it was previously
+    const newStarredFilter = !starredFilter;
+    setStarredFilter(newStarredFilter);
+
+    // filters cards based on starred
+    getStarred(newStarredFilter);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>events</Text>
-      <TextInput
-        style={styles.searchBar}
-        value={search}
-        placeholder="search by event name or location..."
-        underlineColorAndroid="transparent"
-        onChangeText={(text) => searchEvents(text)}
-        textAlign="left"
-        placeholderTextColor="#C4C4C4"
-        autoCapitalize="none"
-        autoComplete="off"
-        autoCorrect={false}
-      />
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
+        <TextInput
+          style={styles.searchBar}
+          value={search}
+          placeholder="search by event name or location..."
+          underlineColorAndroid="transparent"
+          onChangeText={(text) => searchEvents(text)}
+          textAlign="left"
+          placeholderTextColor="#C4C4C4"
+          autoCapitalize="none"
+          autoComplete="off"
+          autoCorrect={false}
+        />
+        <TouchableOpacity style={styles.savedButton} onPress={() => applyStarredFilter()}>
+          <Icon
+            name={starredFilter ? 'bookmark' : 'bookmark-o'}
+            size={20}
+            color="#FFFFFF"
+            style={{ alignSelf: 'center' }}
+          />
+        </TouchableOpacity>
+      </View>
       <ScrollView
         style={styles.eventList}
         contentContainerStyle={styles.contentContainerStyle}
@@ -173,18 +278,18 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       >
         {months.map((monthKey) => (
           <View key={monthKey.toString()}>
-            {
-              filteredEvents.some(function (item) {
-                return item['date']['month'] === getMonth(monthKey)}) && 
+            {filteredEvents.some(function (item) {
+              return item['date']['month'] === getMonth(monthKey);
+            }) && (
               <Text style={styles.monthHeader}>
-              {monthNames[getMonth(monthKey)]} '{getYear(monthKey) % 100}
-            </Text>
-            }
+                {monthNames[getMonth(monthKey)]} '{getYear(monthKey) % 100}
+              </Text>
+            )}
             <View>
-              {eventKeys.length > 0 && (
+              {eventKeys.length > 0 &&
                 eventKeys.map((eventKey) =>
-                filteredEvents[eventKey as keyof typeof events]['date']['month'] == getMonth(monthKey) &&
-                filteredEvents[eventKey as keyof typeof events]['date']['year'] == getYear(monthKey) ? (
+                  filteredEvents[eventKey as keyof typeof events]['date']['month'] == getMonth(monthKey) &&
+                  filteredEvents[eventKey as keyof typeof events]['date']['year'] == getYear(monthKey) ? (
                     <EventItem
                       key={eventKey}
                       id={eventKey}
@@ -192,8 +297,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
                       month={getMonth(monthKey) + 1}
                     />
                   ) : null
-                )
-              )}
+                )}
             </View>
           </View>
         ))}
@@ -206,6 +310,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#FFF8F3',
   },
   eventList: {
     flex: 1,
@@ -259,12 +364,20 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     height: 40,
-    width: 350,
+    width: 300,
     borderRadius: 20,
     marginLeft: 30,
     backgroundColor: 'white',
     marginTop: 20,
     paddingLeft: 20,
+  },
+  savedButton: {
+    borderRadius: 30,
+    backgroundColor: '#FFCB44',
+    width: 40,
+    height: 40,
+    marginLeft: 20,
+    justifyContent: 'center',
   },
 });
 

@@ -21,7 +21,7 @@ const SignInScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   };
 
   async function signIn() {
-    console.log(value.email, value.password)
+    console.log(value.email, value.password);
     if (value.email === '' || value.password === '') {
       setValue({
         ...value,
@@ -33,7 +33,7 @@ const SignInScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     try {
       await signInWithEmailAndPassword(auth, value.email, value.password);
     } catch (error: any) {
-      console.log(error)
+      console.log(error);
       setValue({
         ...value,
         error: error.message,
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     padding: 10,
     color: '#fff',
     backgroundColor: '#D54826FF',
-    marginBottom: 40
+    marginBottom: 40,
   },
   title: {
     alignSelf: 'center',
