@@ -8,6 +8,7 @@ import { Text, View } from '../components/Themed';
 import { ref as ref_storage, getDownloadURL } from 'firebase/storage';
 import Image from 'react-native-image-progress';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon2 from 'react-native-vector-icons/MaterialIcons';
 
 export default function EventInfoScreen({ route, navigation }: any) {
   const { user } = useAuthentication();
@@ -22,7 +23,10 @@ export default function EventInfoScreen({ route, navigation }: any) {
 
   const [starredFilter, setStarredFilter] = useState(false);
 
-  const vendorsFollowing: any = useRef([]);
+  const [vendorsFollowing, setVendorsFollowing]: any = useState([]);
+
+  const [boothing, setBoothing] = useState(false)
+  const [currentUser, setCurrentUser]: any = useState([])
 
   const monthNames = [
     'JANUARY',
@@ -43,6 +47,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
   const applyStarredFilter = () => {
     // sets the new filter to the opposite of what it was previously
     const newStarredFilter = !starredFilter;
+    console.log('new filter is ', newStarredFilter)
     setStarredFilter(newStarredFilter);
 
     // filters cards based on starred
@@ -57,12 +62,24 @@ export default function EventInfoScreen({ route, navigation }: any) {
       Object.keys(vendorList).map((vendorKey: any) =>
         onValue(ref_db(db, '/users/' + vendorKey), (querySnapShot) => {
           let data = querySnapShot.val() || {};
-          let info = { ...data, boothNumber: vendorList[vendorKey]['boothNumber'] };
+          let info = { ...data };
+          // let info = { ...data, boothNumber: vendorList[vendorKey]['boothNumber'] };
           let updatedValue = {};
           updatedValue = { [vendorKey]: info };
           setVendorList((vendorInfo) => ({ ...vendorInfo, ...updatedValue }));
-          setVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }));
-          setFilteredVendors((vendorInfo) => Object.values({ ...vendorInfo, ...updatedValue }));
+          setVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
+            return item.uid != auth.currentUser?.uid
+          }));
+          setFilteredVendors((vendorInfo) => Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
+            return item.uid != auth.currentUser?.uid
+          }));
+
+          // setVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }).sort((a: any, b: any) => {
+          //   return a.boothNumber - b.boothNumber
+          // }));
+          // setFilteredVendors((vendorInfo) => Object.values({ ...vendorInfo, ...updatedValue }).sort((a: any, b: any) => {
+          //   return a.boothNumber - b.boothNumber
+          // }));
         })
       );
     });
@@ -70,19 +87,26 @@ export default function EventInfoScreen({ route, navigation }: any) {
 
   useEffect(() => {
     console.log('use effect');
-    const orderedData = query(
-      ref_db(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing'),
-      orderByChild('boothNumber')
-    );
-    return onValue(orderedData, (querySnapShot) => {
+    // const orderedData = query(
+    //   ref_db(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing'),
+    //   orderByChild('boothNumber')
+    // );
+    return onValue(ref_db(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing'), (querySnapShot) => {
       let data2 = querySnapShot.val() || {};
       let vendorsFollowingTemp = { ...data2 };
-      vendorsFollowing.current = Object.keys(vendorsFollowingTemp);
+      setVendorsFollowing(Object.keys(vendorsFollowingTemp));
+    });
+  }, []);
+
+  useEffect(() => {
+    return onValue(ref_db(db, '/users/' + auth.currentUser?.uid), (querySnapShot) => {
+      let data3 = querySnapShot.val() || {};
+      let userData = { ...data3 };
+      setCurrentUser(userData);
     });
   }, []);
 
   const searchVendors = (text: string) => {
-    console.log('following: ', vendorsFollowing.current);
     console.log('filtered: ', filteredVendors);
 
     // sets the search term to the current search box input
@@ -91,21 +115,25 @@ export default function EventInfoScreen({ route, navigation }: any) {
     // applies the search: sets filteredCards to Cards in cardArray that contain the search term
     // since Card is an object, checks if any of the english, chinese, and pinyin properties include the search term
     setFilteredVendors(
-      vendorArray.filter((obj: { name: string; boothNumber: number }) => {
+      vendorArray.filter((obj: { name: string }) => {
         return (
           obj.name
             .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
             .replace(/\s{2,}/g, ' ')
             .toLowerCase()
-            .includes(text) ||
-          obj.boothNumber
-            .toString()
-            .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
-            .replace(/\s{2,}/g, ' ')
-            .toLowerCase()
             .includes(text)
+            // ||
+          // obj.boothNumber
+          //   .toString()
+          //   .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+          //   .replace(/\s{2,}/g, ' ')
+          //   .toLowerCase()
+          //   .includes(text)
         );
       })
+      // .sort((a: { boothNumber: number }, b: { boothNumber: number }) => {
+      //   return a.boothNumber - b.boothNumber
+      // })
     );
   };
   // TODO: delete booths after certain amount of time
@@ -116,20 +144,22 @@ export default function EventInfoScreen({ route, navigation }: any) {
     // if starred is true, filters cardArray by starred and then applies the search
     if (newStarredFilter) {
       setFilteredVendors(
-        vendorArray.filter((obj: { name: string; boothNumber: number; key: any }) => {
+        vendorArray.filter((obj: { name: string; uid: any }) => {
           return (
             obj.name
               .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
               .replace(/\s{2,}/g, ' ')
               .toLowerCase()
-              .includes(search) ||
-            (obj.boothNumber
-              .toString()
-              .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
-              .replace(/\s{2,}/g, ' ')
-              .toLowerCase()
-              .includes(search) &&
-              vendorsFollowing.current.includes(obj.key))
+              .includes(search)
+            //   ||
+            // obj.boothNumber
+            //   .toString()
+            //   .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+            //   .replace(/\s{2,}/g, ' ')
+            //   .toLowerCase()
+            //   .includes(search)
+            &&
+              vendorsFollowing.includes(obj.uid)
           );
         })
       );
@@ -143,22 +173,25 @@ export default function EventInfoScreen({ route, navigation }: any) {
 
   // toggles a card's starred status
   const updateStarred = (uid: string) => {
-    if (vendorsFollowing.current && vendorsFollowing.current.length > 0) {
-      if (vendorsFollowing.current.includes(uid)) {
+    if (vendorsFollowing && vendorsFollowing.length > 0) {
+      if (vendorsFollowing.includes(uid)) {
         remove(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/' + uid));
+        getStarred(starredFilter);
       } else {
         update(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/'), {
-          uid: '',
+          [uid]: '',
         });
-        // set(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/' + [eventItem['key']]),
+        getStarred(starredFilter)
+        // set(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/' + [eventItem['key']]),
         // {'sf': 0}
         // )
       }
     } else {
-      console.log(vendorsFollowing.current.length);
-      set(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/'), {
-        uid: '',
+      console.log(vendorsFollowing.length);
+      set(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/'), {
+        [uid]: '',
       });
+      getStarred(starredFilter);
     }
     // TODO: fix bug: when item is unstarred after star filter is already on
     // if (!eventItem['starred'] && starredFilter) {
@@ -167,10 +200,19 @@ export default function EventInfoScreen({ route, navigation }: any) {
     // }
   };
 
-  const VendorItem = ({ eventID, id }: any) => {
-    const name = filteredVendors[id as keyof typeof filteredVendors]['name' as keyof typeof filteredVendors];
-    const instagram = filteredVendors[id as keyof typeof filteredVendors]['instagram' as keyof typeof filteredVendors];
-    const uid = filteredVendors[id as keyof typeof filteredVendors]['uid' as keyof typeof filteredVendors];
+  const VendorItem = ({ eventID, id, self }: any) => {
+    let name: string, instagram: string, uid: string | any;
+    if (!self) {
+      name = filteredVendors[id as keyof typeof filteredVendors]['name' as keyof typeof filteredVendors];
+      instagram = filteredVendors[id as keyof typeof filteredVendors]['instagram' as keyof typeof filteredVendors];
+      uid = filteredVendors[id as keyof typeof filteredVendors]['uid' as keyof typeof filteredVendors];
+      // boothNumber = filteredVendors[id as keyof typeof filteredVendors]['boothNumber' as keyof typeof filteredVendors];
+    }
+    else {
+      name = currentUser.name
+      instagram = currentUser.instagram
+      uid = auth.currentUser?.uid
+    }
 
     const [imgUrl1, setImgUrl1] = useState<string | undefined>(undefined);
     const ref1 = ref_storage(storage, eventID + uid + '_1.png');
@@ -205,52 +247,114 @@ export default function EventInfoScreen({ route, navigation }: any) {
         console.log('error:' + error);
       });
 
-    return (
-      <View style={styles.eventDetailsContainer}>
-        <View
-          style={{
-            flexDirection: 'row',
-            width: 300,
-            borderRadius: 20,
-            backgroundColor: 'transparent',
-            flex: 1,
-            maxHeight: 30,
-            marginTop: 20,
-            paddingHorizontal: 5,
-            justifyContent: 'space-between',
-            alignContent: 'center',
-          }}
-        >
-          <Text style={styles.vendorName}>{name}</Text>
-          <View style={{ backgroundColor: 'transparent', flexDirection: 'row' }}>
-            <Icon
-              name="instagram"
-              color="#575FCC"
-              size={25}
-              style={{ marginRight: 20 }}
-              onPress={() =>
-                Linking.openURL('https://instagram.com/' + instagram).catch((err) => {
-                  console.error('Failed opening page because: ', err);
-                  alert('Failed to open page');
-                })
-              }
-            />
-            <Icon
-              name={vendorsFollowing.current.includes(uid) ? 'bookmark' : 'bookmark-o'}
-              size={25}
-              color="#575FCC"
-              onPress={() => updateStarred(uid)}
-            />
+      if (!self) {
+        return (
+          <View style={styles.eventDetailsContainer}>
+            <View
+              style={{
+                flexDirection: 'row',
+                width: 300,
+                borderRadius: 20,
+                backgroundColor: 'transparent',
+                flex: 1,
+                maxHeight: 30,
+                marginTop: 20,
+                paddingHorizontal: 5,
+                justifyContent: 'space-between',
+                alignContent: 'center',
+              }}
+            >
+              <Text style={styles.vendorName}>{name}</Text>
+              <View style={{ backgroundColor: 'transparent', flexDirection: 'row' }}>
+                {instagram && 
+                  <Icon
+                  name="instagram"
+                  color="#575FCC"
+                  size={25}
+                  style={{ marginRight: 20 }}
+                  onPress={() =>
+                    Linking.openURL('https://instagram.com/' + instagram).catch((err) => {
+                      console.error('Failed opening page because: ', err);
+                      alert('Failed to open page');
+                    })
+                  }
+                />
+                }
+                <Icon
+                  name={vendorsFollowing.includes(uid) ? 'bookmark' : 'bookmark-o'}
+                  size={25}
+                  color="#575FCC"
+                  onPress={() => updateStarred(uid)}
+                />
+              </View>
+            </View>
+            <View style={styles.eventImageContainer}>
+              <Image source={{ uri: imgUrl1 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
+              <Image source={{ uri: imgUrl2 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
+              <Image source={{ uri: imgUrl3 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
+            </View>
           </View>
-        </View>
-        <View style={styles.eventImageContainer}>
-          <Image source={{ uri: imgUrl1 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
-          <Image source={{ uri: imgUrl2 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
-          <Image source={{ uri: imgUrl3 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
-        </View>
-      </View>
-    );
+        );
+      }
+      else {
+        return (
+          <View style={{
+            width: 355,
+            height: 170,
+            backgroundColor: 'white',
+            flexDirection: 'column',
+            alignItems: 'center',
+            borderBottomLeftRadius: 20,
+            borderBottomRightRadius: 20,
+            borderBottomColor: '#8FD8B5'
+          }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                width: 300,
+                borderRadius: 20,
+                backgroundColor: 'transparent',
+                flex: 1,
+                maxHeight: 30,
+                marginTop: 20,
+                paddingHorizontal: 5,
+                justifyContent: 'space-between',
+                alignContent: 'center',
+              }}
+            >
+              <Text style={styles.vendorName}>{name}</Text>
+              <Icon2
+                  name="edit"
+                  color="#575FCC"
+                  size={25}
+                  onPress={() =>
+                    console.log('edit')
+                    // TODO: navigate to settings
+                  }
+                />
+            </View>
+            <View style={styles.eventImageContainer}>
+              <Image source={{ uri: imgUrl1 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
+              <Image source={{ uri: imgUrl2 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
+              <Image source={{ uri: imgUrl3 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
+            </View>
+          </View>
+        )
+      }
+    
   };
+
+  const boothAtEvent = () => {
+    setBoothing(true);
+    update(ref(db, '/events/' + eventID + '/' + 'vendors/' + auth.currentUser?.uid), {
+      boothNumber: 0,
+    });
+  }
+
+  const removeBoothFromEvent = () => {
+    setBoothing(false);
+    remove(ref(db, '/events/' + eventID + '/' + 'vendors/' + auth.currentUser?.uid));
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: '#FFF8F3' }}>
@@ -264,17 +368,25 @@ export default function EventInfoScreen({ route, navigation }: any) {
           }}
         />
       </View>
+      <ScrollView
+          style={styles.eventList}
+          contentContainerStyle={styles.contentContainerStyle}
+          directionalLockEnabled={true}
+          horizontal={false}
+        >
       <View style={styles.container}>
         <Text style={styles.date}>
           {monthNames[month]} {day}
         </Text>
         <Text style={styles.name}>{name}</Text>
         <Text style={styles.location}>{location}</Text>
+        {/* TODO: only show if current user is a creator */}
+        
         <View style={{ flexDirection: 'row', backgroundColor: 'transparent', alignContent: 'flex-end' }}>
           <TextInput
             style={styles.searchBar}
             value={search}
-            placeholder="search by event name or location..."
+            placeholder="search by creator..."
             underlineColorAndroid="transparent"
             onChangeText={(text) => searchVendors(text)}
             textAlign="left"
@@ -292,19 +404,30 @@ export default function EventInfoScreen({ route, navigation }: any) {
             />
           </TouchableOpacity>
         </View>
-        <ScrollView
-          style={styles.eventList}
-          contentContainerStyle={styles.contentContainerStyle}
-          directionalLockEnabled={true}
-          horizontal={false}
-        >
+        {
+          boothing ?
+          <View style={{borderRadius: 20, borderWidth: 2, borderColor: 'transparent', backgroundColor: 'transparent', height: 240, marginVertical: 20}}>
+            <View style={{borderTopLeftRadius: 20, borderTopRightRadius: 20, borderWidth: 2, borderColor: 'transparent', backgroundColor: '#8FD8B5', marginTop: -2, height: 70, alignItems: 'center'}}>
+              <TouchableOpacity style={styles.boothing} onPress={() => removeBoothFromEvent()}>
+              <Text style={{fontWeight:'800', color: '#8FD8B5'}}>BOOTHING</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={{borderBottomLeftRadius: 20, borderBottomRightRadius: 20, borderWidth: 2, borderColor: '#8FD8B5', backgroundColor: 'white', marginTop: -2, height: 180, alignItems: 'center'}}>
+              <VendorItem eventID={eventID} id={auth.currentUser?.uid} self={true}/>
+            </View>
+          </View>
+          :
+          <TouchableOpacity style={styles.notBoothing} onPress={() => boothAtEvent()}>
+            <Text style={{fontWeight:'800', color: '#8FD8B5'}}>NOT BOOTHING</Text>
+          </TouchableOpacity>
+        }
           {Object.keys(filteredVendors).map((vendorKey: any) => (
             <View key={vendorKey} style={{ backgroundColor: '#FFfF8F3' }}>
-              <VendorItem eventID={eventID} id={vendorKey} />
+              <VendorItem eventID={eventID} id={vendorKey} self={false}/>
             </View>
           ))}
+                </View>
         </ScrollView>
-      </View>
     </View>
   );
 }
@@ -393,5 +516,27 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     justifyContent: 'center',
     alignSelf: 'flex-end',
+  },
+  notBoothing: {
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#8FD8B5',
+    width: 360,
+    height: 45,
+    marginVertical: 20,
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  boothing: {
+    borderRadius: 20,
+    borderWidth: 2,
+    width: 320,
+    height: 45,
+    marginTop: 10,
+    backgroundColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderColor: 'transparent'
   },
 });

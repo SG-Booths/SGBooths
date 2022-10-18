@@ -28,7 +28,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [eventArray, setEventArray]: any = useState([]);
 
-  const boothsFollowing: any = useRef([]);
+  const [boothsFollowing, setBoothsFollowing]: any = useState([]);
 
   const [search, setSearch] = useState('');
 
@@ -59,9 +59,9 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 
   // toggles a card's starred status
   const updateStarred = (eventItem: any) => {
-    if (boothsFollowing.current && boothsFollowing.current.length > 0) {
+    if (boothsFollowing && boothsFollowing.length > 0) {
       console.log('boothsFollowing exists');
-      if (boothsFollowing.current.includes(eventItem['key'])) {
+      if (boothsFollowing.includes(eventItem['key'])) {
         remove(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/' + eventItem['key']));
       } else {
         update(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/'), {
@@ -72,7 +72,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         // )
       }
     } else {
-      console.log(boothsFollowing.current.length);
+      console.log(boothsFollowing.length);
       set(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/'), {
         [eventItem['key']]: '',
       });
@@ -96,7 +96,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         console.log('error:' + error);
       });
 
-    console.log('following:', boothsFollowing.current);
+    console.log('following:', boothsFollowing);
 
     return (
       <View style={{ marginBottom: 15 }}>
@@ -131,7 +131,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
               onPress={() => updateStarred(eventItem)}
             >
               <Icon
-                name={boothsFollowing.current.includes(eventItem['key']) ? 'bookmark' : 'bookmark-o'}
+                name={boothsFollowing.includes(eventItem['key']) ? 'bookmark' : 'bookmark-o'}
                 size={25}
                 color="#575FCC"
               />
@@ -175,7 +175,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     return onValue(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing'), (querySnapShot) => {
       let data2 = querySnapShot.val() || {};
       let boothsFollowingTemp = { ...data2 };
-      boothsFollowing.current = Object.keys(boothsFollowingTemp);
+      setBoothsFollowing(Object.keys(boothsFollowingTemp));
       console.log('booths following are ', Object.keys(boothsFollowingTemp));
     });
   }, []);
