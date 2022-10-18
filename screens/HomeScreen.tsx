@@ -19,6 +19,7 @@ import { eachMonthOfInterval, addMonths, getMonth, getYear } from 'date-fns';
 import { StackScreenProps } from '@react-navigation/stack';
 import Image from 'react-native-image-progress';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon2 from 'react-native-vector-icons/Ionicons';
 
 const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   const { user } = useAuthentication();
@@ -246,7 +247,15 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>events</Text>
+      <View style={{flexDirection: 'row', backgroundColor: 'transparent', justifyContent: 'space-between', width: 390,     marginTop: 30,}}>
+        <Text style={styles.title}>events</Text>
+        <Icon2
+            name='person-circle-outline'
+            size={35}
+            color="#2A3242"
+            style={{ alignSelf: 'center' }}
+          />
+      </View>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
         <TextInput
           style={styles.searchBar}
@@ -315,9 +324,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   title: {
-    alignSelf: 'flex-start',
     marginLeft: 30,
-    marginTop: 30,
     fontSize: 48,
     color: '#575FCC',
     fontWeight: '500',
