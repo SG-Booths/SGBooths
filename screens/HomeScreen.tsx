@@ -96,8 +96,6 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         console.log('error:' + error);
       });
 
-    console.log('following:', boothsFollowing);
-
     return (
       <View style={{ marginBottom: 15 }}>
         <Pressable

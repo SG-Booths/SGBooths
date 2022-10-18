@@ -28,6 +28,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
   const [boothing, setBoothing] = useState(false)
   const [currentUser, setCurrentUser]: any = useState([])
 
+
   const monthNames = [
     'JANUARY',
     'FEBRUARY',
@@ -55,9 +56,13 @@ export default function EventInfoScreen({ route, navigation }: any) {
   };
 
   useEffect(() => {
-    return onValue(ref_db(db, '/events/' + eventID + '/' + 'vendors'), (querySnapShot) => {
+     onValue(ref_db(db, '/events/' + eventID + '/' + 'vendors'), (querySnapShot) => {
       let data = querySnapShot.val() || {};
       let vendorList = { ...data };
+
+      setVendorList({});
+      setVendorArray([]);
+      setFilteredVendors([]);
 
       Object.keys(vendorList).map((vendorKey: any) =>
         onValue(ref_db(db, '/users/' + vendorKey), (querySnapShot) => {
@@ -71,6 +76,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
             return item.uid != auth.currentUser?.uid
           }));
           setFilteredVendors((vendorInfo) => Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
+            console.log((item))
             return item.uid != auth.currentUser?.uid
           }));
 
@@ -114,6 +120,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
 
     // applies the search: sets filteredCards to Cards in cardArray that contain the search term
     // since Card is an object, checks if any of the english, chinese, and pinyin properties include the search term
+    if (text.replace(/ /g, '')) {
     setFilteredVendors(
       vendorArray.filter((obj: { name: string }) => {
         return (
@@ -134,11 +141,12 @@ export default function EventInfoScreen({ route, navigation }: any) {
       // .sort((a: { boothNumber: number }, b: { boothNumber: number }) => {
       //   return a.boothNumber - b.boothNumber
       // })
-    );
+    );    }
   };
   // TODO: delete booths after certain amount of time
   // TODO: when user goes from vendor to visitor account, delete their uid from people's vendorFollowing
 
+  // TODO: back button
   // gets all cards that match the starred filter (while still matching the search term)
   const getStarred = (newStarredFilter: boolean) => {
     // if starred is true, filters cardArray by starred and then applies the search
@@ -380,9 +388,8 @@ export default function EventInfoScreen({ route, navigation }: any) {
         </Text>
         <Text style={styles.name}>{name}</Text>
         <Text style={styles.location}>{location}</Text>
-        {/* TODO: only show if current user is a creator */}
         
-        <View style={{ flexDirection: 'row', backgroundColor: 'transparent', alignContent: 'flex-end' }}>
+        <View style={{ flexDirection: 'row', backgroundColor: 'transparent', alignContent: 'flex-end', marginBottom: 10 }}>
           <TextInput
             style={styles.searchBar}
             value={search}
@@ -405,7 +412,8 @@ export default function EventInfoScreen({ route, navigation }: any) {
           </TouchableOpacity>
         </View>
         {
-          boothing ?
+          currentUser.type === 'vendor' &&
+          [boothing ?
           <View style={{borderRadius: 20, borderWidth: 2, borderColor: 'transparent', backgroundColor: 'transparent', height: 240, marginVertical: 20}}>
             <View style={{borderTopLeftRadius: 20, borderTopRightRadius: 20, borderWidth: 2, borderColor: 'transparent', backgroundColor: '#8FD8B5', marginTop: -2, height: 70, alignItems: 'center'}}>
               <TouchableOpacity style={styles.boothing} onPress={() => removeBoothFromEvent()}>
@@ -419,7 +427,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
           :
           <TouchableOpacity style={styles.notBoothing} onPress={() => boothAtEvent()}>
             <Text style={{fontWeight:'800', color: '#8FD8B5'}}>NOT BOOTHING</Text>
-          </TouchableOpacity>
+          </TouchableOpacity>]
         }
           {Object.keys(filteredVendors).map((vendorKey: any) => (
             <View key={vendorKey} style={{ backgroundColor: '#FFfF8F3' }}>
