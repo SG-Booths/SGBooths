@@ -19,20 +19,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   const [search, setSearch] = useState('');
   const [events, setEvents] = useState({});
 
-  const monthNames = [
-    'jan',
-    'feb',
-    'mar',
-    'apr',
-    'may',
-    'jun',
-    'jul',
-    'aug',
-    'sep',
-    'oct',
-    'nov',
-    'dec',
-  ];
+  const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
   useEffect(() => {
     return onValue(ref(db, '/events'), (querySnapShot) => {
@@ -90,16 +77,16 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 
     getDownloadURL(ref)
       .then((url) => {
-        return url
+        return url;
       })
       .catch((error) => {
         console.log('error:' + error);
-        return error
+        return error;
       });
-  }
+  };
 
   const VendorItem = ({ vendor }: any) => {
-    console.log(vendor.upcomingBooths)
+    console.log(vendor.upcomingBooths);
     return (
       <View style={styles.eventDetailsContainer}>
         <View
@@ -117,10 +104,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           <Text style={styles.vendorName}>{vendor.name}</Text>
           <View style={{ backgroundColor: 'transparent', flexDirection: 'row' }}>
             {vendor.instagram && (
-              <Icon
-                name="instagram"
-                color="white"
-                size={25}
+              <TouchableOpacity
                 style={{ marginRight: 20 }}
                 onPress={() =>
                   Linking.openURL('https://instagram.com/' + vendor.instagram).catch((err) => {
@@ -128,43 +112,68 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
                     alert('Failed to open page');
                   })
                 }
-              />
+              >
+                <Icon name="instagram" color="white" size={25} />
+              </TouchableOpacity>
             )}
-            <Icon
-              name="bookmark"
-              size={25}
-              color="white"
+            <TouchableOpacity
               onPress={() => remove(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/' + vendor.uid))}
-            />
+            >
+              <Icon name="bookmark" size={25} color="white" />
+            </TouchableOpacity>
           </View>
         </View>
-        <View style={{backgroundColor: 'white', width: 360, marginTop: 15, borderBottomLeftRadius: 20, borderBottomRightRadius: 20, height: 110, borderWidth: 2, borderColor: '#C4C4C4'}}>
+        <View
+          style={{
+            backgroundColor: 'white',
+            width: 360,
+            marginTop: 15,
+            borderBottomLeftRadius: 20,
+            borderBottomRightRadius: 20,
+            height: 110,
+            borderWidth: 2,
+            borderColor: '#C4C4C4',
+          }}
+        >
           <Text style={{ color: '#2A3242', alignSelf: 'flex-start', marginLeft: 15, fontWeight: '700', marginTop: 15 }}>
             NEXT BOOTHS
           </Text>
           {vendor.upcomingBooths ? (
             [
               Object.keys(vendor.upcomingBooths).map((boothKey: any) => (
-                <TouchableOpacity style={{flexDirection: 'row', backgroundColor: 'transparent', alignItems: 'center', justifyContent: 'space-between', width: 340}} onPress={() => navigation.navigate('EventInfoScreen', {
-                  imgUrl: getImgUrl(events[boothKey as keyof typeof events]['key']),
-                  eventID: events[boothKey as keyof typeof events]['key'],
-                  month: events[boothKey as keyof typeof events]['date']['month'],
-                  day: events[boothKey as keyof typeof events]['date']['day'],
-                  location: events[boothKey as keyof typeof events]['location'],
-                  avail: events[boothKey as keyof typeof events]['avail'],
-                  name: events[boothKey as keyof typeof events]['name'],
-                })}>
-                  <Text style={{color: '#2A3242', marginLeft: 15, marginTop: 10}}>{monthNames[events[boothKey as keyof typeof events]['date']['month']]} {events[boothKey as keyof typeof events]['date']['day']} @ {events[boothKey as keyof typeof events]['name']}</Text>
-                  <Icon2
-                    name='keyboard-arrow-right'
-                    size={20}
-                    color="#2A3242"
-                  />
+                <TouchableOpacity
+                  style={{
+                    flexDirection: 'row',
+                    backgroundColor: 'transparent',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    width: 340,
+                  }}
+                  onPress={() =>
+                    navigation.navigate('EventInfoScreen', {
+                      imgUrl: getImgUrl(events[boothKey as keyof typeof events]['key']),
+                      eventID: events[boothKey as keyof typeof events]['key'],
+                      month: events[boothKey as keyof typeof events]['date']['month'],
+                      day: events[boothKey as keyof typeof events]['date']['day'],
+                      location: events[boothKey as keyof typeof events]['location'],
+                      avail: events[boothKey as keyof typeof events]['avail'],
+                      name: events[boothKey as keyof typeof events]['name'],
+                    })
+                  }
+                >
+                  <Text style={{ color: '#2A3242', marginLeft: 15, marginTop: 10 }}>
+                    {monthNames[events[boothKey as keyof typeof events]['date']['month']]}{' '}
+                    {events[boothKey as keyof typeof events]['date']['day']} @{' '}
+                    {events[boothKey as keyof typeof events]['name']}
+                  </Text>
+                  <Icon2 name="keyboard-arrow-right" size={20} color="#2A3242" />
                 </TouchableOpacity>
               )),
             ]
           ) : (
-            <Text style={{ color: '#FABF48', marginTop: 40, fontWeight: '600', marginLeft: 15 }}>no upcoming booths...</Text>
+            <Text style={{ color: '#FABF48', marginTop: 40, fontWeight: '600', marginLeft: 15 }}>
+              no upcoming booths...
+            </Text>
           )}
         </View>
       </View>
@@ -235,7 +244,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 2,
     borderRightWidth: 2,
     borderTopWidth: 2,
-    borderColor: '#C4C4C4'
+    borderColor: '#C4C4C4',
   },
   vendorName: {
     fontSize: 16,

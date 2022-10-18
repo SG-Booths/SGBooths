@@ -25,6 +25,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
 
   const [vendorsFollowing, setVendorsFollowing]: any = useState([]);
 
+  // TODO: set to correct value based on firebase
   const [boothing, setBoothing] = useState(false);
   const [currentUser, setCurrentUser]: any = useState([]);
 
@@ -275,25 +276,20 @@ export default function EventInfoScreen({ route, navigation }: any) {
             <Text style={styles.vendorName}>{name}</Text>
             <View style={{ backgroundColor: 'transparent', flexDirection: 'row' }}>
               {instagram && (
-                <Icon
-                  name="instagram"
-                  color="#575FCC"
-                  size={25}
-                  style={{ marginRight: 20 }}
+                <TouchableOpacity
                   onPress={() =>
                     Linking.openURL('https://instagram.com/' + instagram).catch((err) => {
                       console.error('Failed opening page because: ', err);
                       alert('Failed to open page');
                     })
                   }
-                />
+                >
+                  <Icon name="instagram" color="#575FCC" size={25} style={{ marginRight: 20 }} />
+                </TouchableOpacity>
               )}
-              <Icon
-                name={vendorsFollowing.includes(uid) ? 'bookmark' : 'bookmark-o'}
-                size={25}
-                color="#575FCC"
-                onPress={() => updateStarred(uid)}
-              />
+              <TouchableOpacity onPress={() => updateStarred(uid)}>
+                <Icon name={vendorsFollowing.includes(uid) ? 'bookmark' : 'bookmark-o'} size={25} color="#575FCC" />
+              </TouchableOpacity>
             </View>
           </View>
           <View style={styles.eventImageContainer}>
@@ -332,15 +328,9 @@ export default function EventInfoScreen({ route, navigation }: any) {
             }}
           >
             <Text style={styles.vendorName}>{name}</Text>
-            <Icon2
-              name="edit"
-              color="#575FCC"
-              size={25}
-              onPress={
-                () => console.log('edit')
-                // TODO: navigate to settings
-              }
-            />
+            <TouchableOpacity onPress={() => navigation.navigate('SettingsScreen')}>
+              <Icon2 name="edit" color="#575FCC" size={25} />
+            </TouchableOpacity>
           </View>
           <View style={styles.eventImageContainer}>
             <Image source={{ uri: imgUrl1 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />

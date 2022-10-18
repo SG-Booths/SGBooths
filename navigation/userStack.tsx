@@ -6,6 +6,7 @@ import { FontAwesome, MaterialIcons, Entypo } from '@expo/vector-icons';
 import { Pressable } from 'react-native';
 import { RootTabParamList, RootTabScreenProps } from '../types';
 import NotFoundScreen from '../screens/NotFoundScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
 import HomeScreen from '../screens/HomeScreen';
@@ -41,7 +42,7 @@ function BottomTabNavigator() {
         component={HomeScreen}
         options={({ navigation }: RootTabScreenProps<'Home'>) => ({
           title: 'Home',
-          tabBarIcon: ({ color }) => <TabBarIcon2 name="home" width={25} color={color} />
+          tabBarIcon: ({ color }) => <TabBarIcon2 name="home" width={25} color={color} />,
         })}
       />
       <BottomTab.Screen
@@ -61,6 +62,7 @@ export default function UserStack() {
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false }} />
+        <Stack.Screen name="SettingsScreen" component={SettingsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="EventInfoScreen" component={EventInfoScreen} options={{ headerShown: false }} />
         <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
       </Stack.Navigator>

@@ -247,14 +247,19 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={{flexDirection: 'row', backgroundColor: 'transparent', justifyContent: 'space-between', width: 390,     marginTop: 30,}}>
+      <View
+        style={{
+          flexDirection: 'row',
+          backgroundColor: 'transparent',
+          justifyContent: 'space-between',
+          width: 390,
+          marginTop: 30,
+        }}
+      >
         <Text style={styles.title}>events</Text>
-        <Icon2
-            name='person-circle-outline'
-            size={35}
-            color="#2A3242"
-            style={{ alignSelf: 'center' }}
-          />
+        <TouchableOpacity style={{ alignSelf: 'center' }} onPress={() => navigation.navigate('SettingsScreen')}>
+          <Icon2 name="person-circle-outline" size={35} color="#2A3242" />
+        </TouchableOpacity>
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
         <TextInput
@@ -309,7 +314,6 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           </View>
         ))}
       </ScrollView>
-      <Button title="Sign Out" onPress={() => signOut(auth)} />
     </SafeAreaView>
   );
 };
