@@ -6,7 +6,7 @@ import {
   ScrollView,
   SafeAreaView,
   Pressable,
-  Button,
+  ImageBackground,
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
@@ -137,12 +137,22 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
               avail: eventItem['avail'],
               name: eventItem['name'],
               year: eventItem['date']['year'],
+              following: boothsFollowing.includes(eventItem['key'])
             })
           }
         >
           <View style={styles.eventImageContainer}>
-            {/* TODO: fix zIndex */}
-            <TouchableOpacity
+            <ImageBackground
+              source={{ uri: imgUrl }}
+              imageStyle={{ borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
+              style={{
+                flex: 1,
+                width: undefined,
+                height: undefined,
+                zIndex: 0,
+              }}
+            >
+              <TouchableOpacity
               style={{
                 backgroundColor: 'white',
                 borderRadius: 100,
@@ -163,16 +173,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
                 color="#575FCC"
               />
             </TouchableOpacity>
-            <Image
-              source={{ uri: imgUrl }}
-              imageStyle={{ borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
-              style={{
-                flex: 1,
-                width: undefined,
-                height: undefined,
-                zIndex: 0,
-              }}
-            />
+              </ImageBackground>
           </View>
           <View style={styles.eventDetailsContainer}>
             <Text style={styles.eventDate}>{eventItem['date']['day']}</Text>

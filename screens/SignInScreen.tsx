@@ -1,9 +1,9 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Alert } from 'react-native';
 import { Image, TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Input, Button } from 'react-native-elements';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { StackScreenProps } from '@react-navigation/stack';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
@@ -18,6 +18,16 @@ const SignInScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 
   const onFooterLinkPress = () => {
     navigation.navigate('SignUpVendorScreen');
+  };
+
+  const handlePasswordReset = (email: string) => {
+    sendPasswordResetEmail(auth, email)
+      .then(function (user) {
+        Alert.alert('Check your email for the password reset link!', 'If not in your inbox it may be in spam.');
+      })
+      .catch(function (e) {
+        console.log(e);
+      });
   };
 
   async function signIn() {
@@ -77,6 +87,12 @@ const SignInScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
               sign up
             </Text>
           </Text>
+          <Text
+            style={{ fontSize: 16, color: '#FABF48', marginTop: 30, fontWeight: '600', fontStyle: 'italic' }}
+            onPress={() => handlePasswordReset(value.email)}
+          >
+            reset password
+          </Text>
         </View>
       </KeyboardAwareScrollView>
     </SafeAreaView>
@@ -128,7 +144,7 @@ const styles = StyleSheet.create({
   footerView: {
     flex: 1,
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 30,
   },
   footerText: {
     fontSize: 16,

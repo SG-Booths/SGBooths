@@ -1,8 +1,8 @@
-import { StyleSheet, ScrollView, Linking, TextInput, TouchableOpacity } from 'react-native';
-import React, { useState, useEffect, useRef } from 'react';
+import { StyleSheet, Linking, TextInput, TouchableOpacity, SafeAreaView, ImageBackground, FlatList } from 'react-native';
+import React, { useState, useEffect } from 'react';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
-import { getAuth, signOut } from 'firebase/auth';
-import { ref as ref_db, onValue, query, orderByChild, set, ref, remove, update } from 'firebase/database';
+import { getAuth } from 'firebase/auth';
+import { ref as ref_db, onValue, set, ref, remove, update } from 'firebase/database';
 import { db, storage } from '../config/firebase';
 import { Text, View } from '../components/Themed';
 import { ref as ref_storage, getDownloadURL } from 'firebase/storage';
@@ -13,7 +13,8 @@ import Icon2 from 'react-native-vector-icons/MaterialIcons';
 export default function EventInfoScreen({ route, navigation }: any) {
   const { user } = useAuthentication();
   const auth = getAuth();
-  const { eventID, month, day, location, year, imgUrl, name } = route.params;
+  const { eventID, month, day, location, year, imgUrl, name, following } = route.params;
+  const [boothFollowed, setBoothFollowed] = useState(following)
   const [vendorList, setVendorList] = useState({});
 
   const [search, setSearch] = useState('');
@@ -357,23 +358,75 @@ export default function EventInfoScreen({ route, navigation }: any) {
   return (
     <View style={{ flex: 1, backgroundColor: '#FFF8F3' }}>
       <View style={styles.image}>
-        <Image
+        <ImageBackground
           source={{ uri: imgUrl }}
           style={{
             flex: 1,
             width: undefined,
             height: undefined,
           }}
-        />
+        >
+          <SafeAreaView style={{flexDirection: 'row', justifyContent: 'space-between', backgroundColor: 'transparent'}}>
+            <TouchableOpacity
+            style={{
+              backgroundColor: '#FFF8F3',
+              borderRadius: 100,
+              height: 40,
+              width: 40,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginLeft: 15,
+            }}
+            onPress={() => navigation.goBack()}>
+              <Icon2 name="keyboard-arrow-left" size={30} color="#2A3242" />
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={{
+                  backgroundColor: '#575FCC',
+                  borderRadius: 100,
+                  height: 40,
+                  width: 40,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: 15,
+                }}
+                onPress={() => 
+                  {
+                    if (boothFollowed) {
+                      remove(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/' + eventID));
+                      setBoothFollowed(false)
+                    }
+                else {
+                  update(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/'), {
+                    [eventID]: '',
+                  })
+                  setBoothFollowed(true)
+                }
+              }}
+              >
+                <Icon
+                  name={boothFollowed ? 'bookmark' : 'bookmark-o'}
+                  size={25}
+                  color="white"
+                />
+              </TouchableOpacity>
+          </SafeAreaView>
+        </ImageBackground>
       </View>
-      <ScrollView
-        style={styles.eventList}
-        contentContainerStyle={styles.contentContainerStyle}
-        directionalLockEnabled={true}
-        horizontal={false}
-      >
+
         <View style={styles.container}>
-          <Text style={styles.date}>
+          <FlatList 
+            style={styles.eventList}
+            showsVerticalScrollIndicator={false}
+            data={Object.keys(filteredVendors)}
+            renderItem={({ item }) => <VendorItem eventID={eventID} id={item} self={false} />}
+            keyExtractor={(item) => eventID}
+            ListEmptyComponent={() => (
+              <Text>no creators yet!</Text>
+            )}
+            ListHeaderComponent={() => (
+              <View style={{backgroundColor: 'transparent'}}>
+                <Text style={styles.date}>
             {monthNames[month]} {day}
           </Text>
           <Text style={styles.name}>{name}</Text>
@@ -452,11 +505,10 @@ export default function EventInfoScreen({ route, navigation }: any) {
               </TouchableOpacity>
             ),
           ]}
-          {Object.keys(filteredVendors).map((vendorKey) => (
-            <VendorItem key={eventID} eventID={eventID} id={vendorKey} self={false} />
-          ))}
+              </View>
+          )}
+          />
         </View>
-      </ScrollView>
     </View>
   );
 }
@@ -466,7 +518,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'flex-start',
     justifyContent: 'flex-start',
-    marginTop: 40,
+    marginTop: 10,
     marginLeft: 30,
     backgroundColor: '#FFF8F3',
   },

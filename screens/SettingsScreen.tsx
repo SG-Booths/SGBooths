@@ -118,6 +118,7 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
     }
   };
 
+  // TODO: delete shop from events and from following lists
   const deleteShop = () => {
     update(ref(db, '/users/' + auth.currentUser?.uid), {
       type: 'visitor',
@@ -243,7 +244,7 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
           alignItems: 'center',
         }}
       >
-        <TouchableOpacity onPress={navigation.goBack}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="keyboard-arrow-left" size={50} color="#575FCC" style={{ marginTop: 5 }} />
         </TouchableOpacity>
         <Text style={styles.title}>profile</Text>

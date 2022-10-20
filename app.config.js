@@ -9,12 +9,6 @@ export default {
     icon: './assets/images/icon.png',
     scheme: 'myapp',
     userInterfaceStyle: 'automatic',
-    plugins: [
-      "expo-image-picker",
-      {
-        "photosPermission": "The app accesses your photos to let you share them with your friends."
-      }
-      ],
     splash: {
       image: './assets/images/splash.png',
       resizeMode: 'contain',

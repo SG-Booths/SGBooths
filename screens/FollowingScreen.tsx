@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  FlatList
 } from 'react-native';
 import { Text, View } from '../components/Themed';
 import { StackScreenProps } from '@react-navigation/stack';
@@ -240,22 +241,19 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           autoCorrect={false}
         />
         {refreshing ? <ActivityIndicator /> : null}
-        <ScrollView
+        <FlatList
+          showsVerticalScrollIndicator={false}
           style={{ height: 580 }}
+          data={Object.keys(filteredVendorArray)}
+          keyExtractor={(item) => item}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadNewData} />}
-        >
-          {filteredVendorArray ? (
-            [
-              Object.keys(filteredVendorArray).map((vendorKey: any) => (
-                <View key={vendorKey} style={{ backgroundColor: '#FFfF8F3', marginTop: 20 }}>
-                  <VendorItem vendor={filteredVendorArray[vendorKey]} />
-                </View>
-              )),
-            ]
-          ) : (
-            <Text style={{ color: '#FABF48', marginTop: 40, fontWeight: '600' }}>time to follow some creators!</Text>
-          )}
-        </ScrollView>
+          renderItem={({ item }) => <View style={{ backgroundColor: '#FFfF8F3', marginTop: 20 }}>
+          <VendorItem vendor={filteredVendorArray[item]} />
+        </View>}
+        ListEmptyComponent={() => (
+          <Text style={{marginTop: 30, color: '#2A3242'}}>time to follow some creators!</Text>
+        )}
+        />
       </View>
     </SafeAreaView>
   );
