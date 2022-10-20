@@ -13,8 +13,7 @@ import Icon2 from 'react-native-vector-icons/MaterialIcons';
 export default function EventInfoScreen({ route, navigation }: any) {
   const { user } = useAuthentication();
   const auth = getAuth();
-  // TODO: add space bar + filter
-  const { eventID, month, day, location, avail, imgUrl, name } = route.params;
+  const { eventID, month, day, location, year, imgUrl, name } = route.params;
   const [vendorList, setVendorList] = useState({});
 
   const [search, setSearch] = useState('');
@@ -56,7 +55,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
   };
 
   useEffect(() => {
-    onValue(ref_db(db, '/events/' + eventID + '/' + 'vendors'), (querySnapShot) => {
+    onValue(ref_db(db, '/events/' + eventID + '/vendors'), (querySnapShot) => {
       let data = querySnapShot.val() || {};
       let vendorList = { ...data };
 
@@ -69,21 +68,25 @@ export default function EventInfoScreen({ route, navigation }: any) {
           let data = querySnapShot.val() || {};
           let info = { ...data };
           // let info = { ...data, boothNumber: vendorList[vendorKey]['boothNumber'] };
-          let updatedValue = {};
-          updatedValue = { [vendorKey]: info };
-          setVendorList((vendorInfo) => ({ ...vendorInfo, ...updatedValue }));
-          setVendorArray((vendorInfo: any) =>
-            Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
-              return item.uid != auth.currentUser?.uid;
-            })
-          );
-          setFilteredVendors((vendorInfo) =>
-            Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
-              console.log(item);
-              return item.uid != auth.currentUser?.uid;
-            })
-          );
 
+          if (info.type === 'visitor') {
+            remove(ref(db, '/events/' + eventID + '/vendors/' + vendorKey))
+          }
+          else {
+            let updatedValue = { [vendorKey]: info };
+            setVendorList((vendorInfo) => ({ ...vendorInfo, ...updatedValue }));
+            setVendorArray((vendorInfo: any) =>
+              Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
+                return item.uid != auth.currentUser?.uid;
+              })
+            );
+            setFilteredVendors((vendorInfo) =>
+              Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
+                console.log('new list: ', {...vendorInfo, ...updatedValue});
+                return item.uid != auth.currentUser?.uid;
+              })
+            );
+          }
           // setVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }).sort((a: any, b: any) => {
           //   return a.boothNumber - b.boothNumber
           // }));
@@ -96,7 +99,6 @@ export default function EventInfoScreen({ route, navigation }: any) {
   }, []);
 
   useEffect(() => {
-    console.log('use effect');
     // const orderedData = query(
     //   ref_db(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing'),
     //   orderByChild('boothNumber')
@@ -117,8 +119,6 @@ export default function EventInfoScreen({ route, navigation }: any) {
   }, []);
 
   const searchVendors = (text: string) => {
-    console.log('filtered: ', filteredVendors);
-
     // sets the search term to the current search box input
     setSearch(text);
 
@@ -147,7 +147,6 @@ export default function EventInfoScreen({ route, navigation }: any) {
     }
   };
   // TODO: delete booths after certain amount of time
-  // TODO: when user goes from vendor to visitor account, delete their uid from people's vendorFollowing
 
   // TODO: back button
   // gets all cards that match the starred filter (while still matching the search term)
@@ -192,9 +191,6 @@ export default function EventInfoScreen({ route, navigation }: any) {
           [uid]: '',
         });
         getStarred(starredFilter);
-        // set(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/' + [eventItem['key']]),
-        // {'sf': 0}
-        // )
       }
     } else {
       console.log(vendorsFollowing.length);
@@ -344,14 +340,19 @@ export default function EventInfoScreen({ route, navigation }: any) {
 
   const boothAtEvent = () => {
     setBoothing(true);
-    update(ref(db, '/events/' + eventID + '/' + 'vendors/' + auth.currentUser?.uid), {
+    update(ref(db, '/events/' + eventID + '/vendors/' + auth.currentUser?.uid), {
       boothNumber: 0,
+    });
+    update(ref(db, '/users/' + auth.currentUser?.uid + '/upcomingBooths/'), {
+      eventID: eventID,
+      [eventID]: '' + (day) + (month + 1) + (year),
     });
   };
 
   const removeBoothFromEvent = () => {
     setBoothing(false);
-    remove(ref(db, '/events/' + eventID + '/' + 'vendors/' + auth.currentUser?.uid));
+    remove(ref(db, '/events/' + eventID + '/vendors/' + auth.currentUser?.uid));
+    remove(ref(db, '/users/' + auth.currentUser?.uid + '/upcomingBooths/' + eventID));
   };
 
   return (
@@ -408,7 +409,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
               <View
                 style={{
                   borderRadius: 20,
-                  borderWidth: 2,
+                  borderWidth: 1,
                   borderColor: 'transparent',
                   backgroundColor: 'transparent',
                   height: 240,
@@ -419,7 +420,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
                   style={{
                     borderTopLeftRadius: 20,
                     borderTopRightRadius: 20,
-                    borderWidth: 2,
+                    borderWidth: 1,
                     borderColor: 'transparent',
                     backgroundColor: '#8FD8B5',
                     marginTop: -2,
@@ -435,7 +436,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
                   style={{
                     borderBottomLeftRadius: 20,
                     borderBottomRightRadius: 20,
-                    borderWidth: 2,
+                    borderWidth: 1,
                     borderColor: '#8FD8B5',
                     backgroundColor: 'white',
                     marginTop: -2,
@@ -452,10 +453,8 @@ export default function EventInfoScreen({ route, navigation }: any) {
               </TouchableOpacity>
             ),
           ]}
-          {Object.keys(filteredVendors).map((vendorKey: any) => (
-            <View key={vendorKey} style={{ backgroundColor: '#FFfF8F3' }}>
-              <VendorItem eventID={eventID} id={vendorKey} self={false} />
-            </View>
+          {Object.keys(filteredVendors).map((vendorKey) => (
+            <VendorItem key={eventID} eventID={eventID} id={vendorKey} self={false} />
           ))}
         </View>
       </ScrollView>
@@ -504,12 +503,13 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     marginVertical: 10,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: '#C4C4C4',
   },
   contentContainerStyle: {},
   eventList: {
     marginTop: 20,
+    marginBottom: 40
   },
   eventImageContainer: {
     width: 85,
@@ -538,6 +538,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     marginTop: 20,
     paddingLeft: 20,
+    borderWidth: 1,
+    borderColor: '#C4C4C4'
   },
   savedButton: {
     borderRadius: 30,
@@ -550,7 +552,7 @@ const styles = StyleSheet.create({
   },
   notBoothing: {
     borderRadius: 20,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: '#8FD8B5',
     width: 360,
     height: 45,
@@ -561,7 +563,7 @@ const styles = StyleSheet.create({
   },
   boothing: {
     borderRadius: 20,
-    borderWidth: 2,
+    borderWidth: 1,
     width: 320,
     height: 45,
     marginTop: 10,

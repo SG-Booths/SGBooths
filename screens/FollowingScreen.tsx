@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, SafeAreaView, ScrollView, TextInput, Linking, TouchableOpacity } from 'react-native';
+import { StyleSheet, SafeAreaView, ScrollView, TextInput, Linking, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { Text, View } from '../components/Themed';
 import { StackScreenProps } from '@react-navigation/stack';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
@@ -13,28 +13,24 @@ import { ref as ref_storage, getDownloadURL } from 'firebase/storage';
 const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   const { user } = useAuthentication();
   const auth = getAuth();
-  const [vendorsFollowing, setVendorsFollowing]: any = useState({});
   const [vendorArray, setVendorArray]: any = useState([]);
   const [filteredVendorArray, setFilteredVendorArray]: any = useState([]);
   const [search, setSearch] = useState('');
   const [events, setEvents] = useState({});
+  const [refreshing, setRefreshing] = useState(true);
 
   const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
-  useEffect(() => {
-    return onValue(ref(db, '/events'), (querySnapShot) => {
+  const loadNewData = () => {
+    onValue(ref(db, '/events'), (querySnapShot) => {
       let data = querySnapShot.val() || {};
       let eventItems = { ...data };
       setEvents(eventItems);
     });
-  }, []);
 
-  // TODO: pull to refresh
-  useEffect(() => {
-    return onValue(ref(db, '/users/' + user?.uid + '/vendorsFollowing'), (querySnapShot) => {
+    onValue(ref(db, '/users/' + user?.uid + '/vendorsFollowing'), (querySnapShot) => {
       let data = querySnapShot.val() || {};
       let vendorsFollowing = { ...data };
-      setVendorsFollowing([]);
       setVendorArray([]);
       setFilteredVendorArray([]);
 
@@ -45,11 +41,47 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 
           let updatedValue = {};
           updatedValue = { [vendorKey]: info };
-          setVendorsFollowing((vendorInfo: any) => ({ ...vendorInfo, ...updatedValue }));
           setVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }));
           setFilteredVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }));
         })
       );
+      setRefreshing(false);
+    });
+  }
+
+  useEffect(() => {
+    return onValue(ref(db, '/events'), (querySnapShot) => {
+      let data = querySnapShot.val() || {};
+      let eventItems = { ...data };
+      setEvents(eventItems);
+      setRefreshing(false);
+    });
+  }, []);
+
+  useEffect(() => {
+    return onValue(ref(db, '/users/' + user?.uid + '/vendorsFollowing'), (querySnapShot) => {
+      let data = querySnapShot.val() || {};
+      let vendorsFollowing = { ...data };
+      setVendorArray([]);
+      setFilteredVendorArray([]);
+
+      Object.keys(vendorsFollowing).map((vendorKey: any) =>
+        onValue(ref_db(db, '/users/' + vendorKey), (querySnapShot) => {
+          let data = querySnapShot.val() || {};
+          let info = { ...data };
+
+          console.log('type:', info.type)
+          if (info.type === 'visitor') {
+            remove(ref(db, '/users/' + user?.uid + '/vendorsFollowing/' + vendorKey))
+          }
+          else {
+            let updatedValue = { [vendorKey]: info };
+            setVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }));
+            setFilteredVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }));
+          }
+        })
+      );
+      setRefreshing(false);
     });
   }, []);
 
@@ -86,7 +118,6 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   };
 
   const VendorItem = ({ vendor }: any) => {
-    console.log(vendor.upcomingBooths);
     return (
       <View style={styles.eventDetailsContainer}>
         <View
@@ -126,12 +157,12 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         <View
           style={{
             backgroundColor: 'white',
-            width: 360,
+            width: 350,
             marginTop: 15,
             borderBottomLeftRadius: 20,
             borderBottomRightRadius: 20,
             height: 110,
-            borderWidth: 2,
+            borderWidth: 1,
             borderColor: '#C4C4C4',
           }}
         >
@@ -140,7 +171,9 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           </Text>
           {vendor.upcomingBooths ? (
             [
-              Object.keys(vendor.upcomingBooths).map((boothKey: any) => (
+              Object.values(vendor.upcomingBooths).sort((a: any, b: any) => {
+                return b.date - a.date
+              }).slice(0, 2).map((boothKey: any) => (
                 <TouchableOpacity
                   style={{
                     flexDirection: 'row',
@@ -151,27 +184,27 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
                   }}
                   onPress={() =>
                     navigation.navigate('EventInfoScreen', {
-                      imgUrl: getImgUrl(events[boothKey as keyof typeof events]['key']),
-                      eventID: events[boothKey as keyof typeof events]['key'],
-                      month: events[boothKey as keyof typeof events]['date']['month'],
-                      day: events[boothKey as keyof typeof events]['date']['day'],
-                      location: events[boothKey as keyof typeof events]['location'],
-                      avail: events[boothKey as keyof typeof events]['avail'],
-                      name: events[boothKey as keyof typeof events]['name'],
+                      imgUrl: getImgUrl(events[boothKey.eventID as keyof typeof events]['key']),
+                      eventID: events[boothKey.eventID as keyof typeof events]['key'],
+                      month: events[boothKey.eventID as keyof typeof events]['date']['month'],
+                      day: events[boothKey.eventID as keyof typeof events]['date']['day'],
+                      location: events[boothKey.eventID as keyof typeof events]['location'],
+                      avail: events[boothKey.eventID as keyof typeof events]['avail'],
+                      name: events[boothKey.eventID as keyof typeof events]['name'],
                     })
                   }
                 >
                   <Text style={{ color: '#2A3242', marginLeft: 15, marginTop: 10 }}>
-                    {monthNames[events[boothKey as keyof typeof events]['date']['month']]}{' '}
-                    {events[boothKey as keyof typeof events]['date']['day']} @{' '}
-                    {events[boothKey as keyof typeof events]['name']}
+                    {monthNames[events[boothKey.eventID as keyof typeof events]['date']['month']]}{' '}
+                    {events[boothKey.eventID as keyof typeof events]['date']['day']} @{' '}
+                    {events[boothKey.eventID as keyof typeof events]['name']}
                   </Text>
                   <Icon2 name="keyboard-arrow-right" size={20} color="#2A3242" />
                 </TouchableOpacity>
               )),
             ]
           ) : (
-            <Text style={{ color: '#FABF48', marginTop: 40, fontWeight: '600', marginLeft: 15 }}>
+            <Text style={{ color: '#2A3242', marginTop: 10, fontWeight: '400', marginLeft: 15 }}>
               no upcoming booths...
             </Text>
           )}
@@ -195,8 +228,14 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           autoComplete="off"
           autoCorrect={false}
         />
-        <ScrollView>
-          {filteredVendorArray.length > 0 ? (
+        {refreshing ? <ActivityIndicator /> : null}
+        <ScrollView
+        style={{height: 580}}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={loadNewData} />
+        }
+        >
+          {filteredVendorArray ? (
             [
               Object.keys(filteredVendorArray).map((vendorKey: any) => (
                 <View key={vendorKey} style={{ backgroundColor: '#FFfF8F3', marginTop: 20 }}>
@@ -232,18 +271,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     marginTop: 20,
     paddingLeft: 20,
+    borderWidth: 1,
+    borderColor: '#C4C4C4'
   },
   eventDetailsContainer: {
-    width: 360,
+    width: 350,
     height: 170,
     backgroundColor: '#575FCC',
     borderRadius: 20,
     flexDirection: 'column',
     alignItems: 'center',
     marginVertical: 10,
-    borderLeftWidth: 2,
-    borderRightWidth: 2,
-    borderTopWidth: 2,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderTopWidth: 1,
     borderColor: '#C4C4C4',
   },
   vendorName: {

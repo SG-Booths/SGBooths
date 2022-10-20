@@ -9,6 +9,8 @@ import {
   Button,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl
 } from 'react-native';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
 import { getAuth, signOut } from 'firebase/auth';
@@ -37,6 +39,8 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 
   const eventKeys = Object.keys(filteredEvents);
 
+  const [refreshing, setRefreshing] = useState(true);
+
   const today = new Date();
   const months = eachMonthOfInterval({
     start: today,
@@ -57,6 +61,28 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     'november',
     'december',
   ];
+
+  const loadNewData = () => {
+    onValue(ref(db, '/events'), (querySnapShot) => {
+      let data = querySnapShot.val() || {};
+      let eventItems = { ...data };
+      setEvents(eventItems);
+
+      let newArray: any = Object.values(eventItems).reverse();
+
+      // uses state to set cardArray and filteredCards to the reverse of this data
+      setEventArray(newArray);
+      setFilteredEvents(newArray);
+    });
+
+    onValue(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing'), (querySnapShot) => {
+      let data2 = querySnapShot.val() || {};
+      let boothsFollowingTemp = { ...data2 };
+      setBoothsFollowing(Object.keys(boothsFollowingTemp));
+      console.log('booths following are ', Object.keys(boothsFollowingTemp));
+    });
+    setRefreshing(false)
+  }
 
   // toggles a card's starred status
   const updateStarred = (eventItem: any) => {
@@ -85,6 +111,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     // }
   };
 
+// TODO: delete event if today's date is later
   const EventItem = ({ eventItem, month }: any) => {
     const [imgUrl, setImgUrl] = useState<string | undefined>(undefined);
     const ref = ref_storage(storage, eventItem['key'] + '.png');
@@ -98,7 +125,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       });
 
     return (
-      <View style={{ marginBottom: 15 }}>
+      <View style={{ marginBottom: 15, borderWidth: 1, borderRadius: 20, borderColor: '#C4C4C4'}}>
         <Pressable
           onPress={() =>
             navigation.navigate('EventInfoScreen', {
@@ -109,6 +136,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
               location: eventItem['location'],
               avail: eventItem['avail'],
               name: eventItem['name'],
+              year: eventItem['date']['year'],
             })
           }
         >
@@ -166,7 +194,9 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       // uses state to set cardArray and filteredCards to the reverse of this data
       setEventArray(newArray);
       setFilteredEvents(newArray);
+      setRefreshing(false)
     });
+    
   }, []);
 
   useEffect(() => {
@@ -176,6 +206,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       let boothsFollowingTemp = { ...data2 };
       setBoothsFollowing(Object.keys(boothsFollowingTemp));
       console.log('booths following are ', Object.keys(boothsFollowingTemp));
+      setRefreshing(false)
     });
   }, []);
 
@@ -283,10 +314,14 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           />
         </TouchableOpacity>
       </View>
+      {refreshing ? <ActivityIndicator /> : null}
       <ScrollView
         style={styles.eventList}
         contentContainerStyle={styles.contentContainerStyle}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={loadNewData} />
+        }
       >
         {months.map((monthKey) => (
           <View key={monthKey.toString()}>
@@ -379,6 +414,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     marginTop: 20,
     paddingLeft: 20,
+    borderWidth: 1,
+    borderColor: '#C4C4C4'
   },
   savedButton: {
     borderRadius: 30,

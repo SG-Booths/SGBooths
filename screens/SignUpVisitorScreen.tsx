@@ -66,7 +66,7 @@ const SignUpVisitorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) =>
             <Text style={{ color: 'white', fontSize: 16 }}>visitor</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.vendorButton} onPress={() => navigation.navigate('SignUpVendorScreen')}>
-            <Text style={{ color: '#FABF48', fontSize: 16 }}>vendor</Text>
+            <Text style={{ color: '#FABF48', fontSize: 16 }}>creator</Text>
           </TouchableOpacity>
         </View>
         <TextInput
@@ -148,6 +148,8 @@ const styles = StyleSheet.create({
     marginLeft: 30,
     marginRight: 30,
     paddingLeft: 16,
+    borderWidth: 1,
+    borderColor: '#C4C4C4'
   },
   button: {
     backgroundColor: '#2A3242',
@@ -175,7 +177,7 @@ const styles = StyleSheet.create({
   },
   vendorButton: {
     borderColor: '#FABF48',
-    borderWidth: 2,
+    borderWidth: 1,
     marginLeft: 30,
     marginRight: 30,
     marginTop: 20,
