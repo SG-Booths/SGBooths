@@ -39,9 +39,17 @@ const SignUpVisitorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) =>
       return;
     }
 
+    if (value.name === '') {
+      setValue({
+        ...value,
+        error: 'Name is mandatory.',
+      });
+      return;
+    }
+
     try {
       await createUserWithEmailAndPassword(auth, value.email, value.password);
-      updateProfile(auth.currentUser!, {
+      await updateProfile(auth.currentUser!, {
         displayName: value.name,
       });
       set(ref(db, '/users/' + auth.currentUser?.uid), {
@@ -61,7 +69,7 @@ const SignUpVisitorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) =>
     <SafeAreaView style={styles.container}>
       <KeyboardAwareScrollView style={{ flex: 1, width: '100%' }} keyboardShouldPersistTaps="always">
         <Text style={styles.title}>sign up</Text>
-        <View style={{ flex: 1, flexDirection: 'row', alignSelf: 'center', margin: 30 }}>
+        <View style={{ flex: 1, flexDirection: 'row', alignSelf: 'center', marginBottom: 30 }}>
           <TouchableOpacity style={styles.visitorButton}>
             <Text style={{ color: 'white', fontSize: 16 }}>visitor</Text>
           </TouchableOpacity>
@@ -69,6 +77,7 @@ const SignUpVisitorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) =>
             <Text style={{ color: '#FABF48', fontSize: 16 }}>creator</Text>
           </TouchableOpacity>
         </View>
+        {value.error && <Text style={styles.error}>{value.error}</Text>}
         <TextInput
           style={styles.input}
           placeholder="name"
@@ -149,7 +158,7 @@ const styles = StyleSheet.create({
     marginRight: 30,
     paddingLeft: 16,
     borderWidth: 1,
-    borderColor: '#C4C4C4'
+    borderColor: '#C4C4C4',
   },
   button: {
     backgroundColor: '#2A3242',
@@ -212,10 +221,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   error: {
-    marginTop: 10,
-    padding: 10,
-    color: '#fff',
-    backgroundColor: '#D54826FF',
+    color: '#D54826FF',
+    marginLeft: 30,
+    marginBottom: 20,
   },
 });
 

@@ -70,9 +70,8 @@ export default function EventInfoScreen({ route, navigation }: any) {
           // let info = { ...data, boothNumber: vendorList[vendorKey]['boothNumber'] };
 
           if (info.type === 'visitor') {
-            remove(ref(db, '/events/' + eventID + '/vendors/' + vendorKey))
-          }
-          else {
+            remove(ref(db, '/events/' + eventID + '/vendors/' + vendorKey));
+          } else {
             let updatedValue = { [vendorKey]: info };
             setVendorList((vendorInfo) => ({ ...vendorInfo, ...updatedValue }));
             setVendorArray((vendorInfo: any) =>
@@ -82,7 +81,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
             );
             setFilteredVendors((vendorInfo) =>
               Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
-                console.log('new list: ', {...vendorInfo, ...updatedValue});
+                console.log('new list: ', { ...vendorInfo, ...updatedValue });
                 return item.uid != auth.currentUser?.uid;
               })
             );
@@ -220,13 +219,13 @@ export default function EventInfoScreen({ route, navigation }: any) {
     }
 
     const [imgUrl1, setImgUrl1] = useState<string | undefined>(undefined);
-    const ref1 = ref_storage(storage, eventID + uid + '_1.png');
+    const ref1 = ref_storage(storage, uid + '_1.png');
 
     const [imgUrl2, setImgUrl2] = useState<string | undefined>(undefined);
-    const ref2 = ref_storage(storage, eventID + uid + '_2.png');
+    const ref2 = ref_storage(storage, uid + '_2.png');
 
     const [imgUrl3, setImgUrl3] = useState<string | undefined>(undefined);
-    const ref3 = ref_storage(storage, eventID + uid + '_3.png');
+    const ref3 = ref_storage(storage, uid + '_3.png');
 
     getDownloadURL(ref1)
       .then((url) => {
@@ -345,7 +344,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
     });
     update(ref(db, '/users/' + auth.currentUser?.uid + '/upcomingBooths/'), {
       eventID: eventID,
-      [eventID]: '' + (day) + (month + 1) + (year),
+      [eventID]: '' + day + (month + 1) + year,
     });
   };
 
@@ -509,7 +508,7 @@ const styles = StyleSheet.create({
   contentContainerStyle: {},
   eventList: {
     marginTop: 20,
-    marginBottom: 40
+    marginBottom: 40,
   },
   eventImageContainer: {
     width: 85,
@@ -539,7 +538,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingLeft: 20,
     borderWidth: 1,
-    borderColor: '#C4C4C4'
+    borderColor: '#C4C4C4',
   },
   savedButton: {
     borderRadius: 30,

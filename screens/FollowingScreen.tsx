@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, SafeAreaView, ScrollView, TextInput, Linking, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import {
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  TextInput,
+  Linking,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
 import { Text, View } from '../components/Themed';
 import { StackScreenProps } from '@react-navigation/stack';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
@@ -47,7 +56,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       );
       setRefreshing(false);
     });
-  }
+  };
 
   useEffect(() => {
     return onValue(ref(db, '/events'), (querySnapShot) => {
@@ -70,11 +79,10 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           let data = querySnapShot.val() || {};
           let info = { ...data };
 
-          console.log('type:', info.type)
+          console.log('type:', info.type);
           if (info.type === 'visitor') {
-            remove(ref(db, '/users/' + user?.uid + '/vendorsFollowing/' + vendorKey))
-          }
-          else {
+            remove(ref(db, '/users/' + user?.uid + '/vendorsFollowing/' + vendorKey));
+          } else {
             let updatedValue = { [vendorKey]: info };
             setVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }));
             setFilteredVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }));
@@ -171,37 +179,40 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           </Text>
           {vendor.upcomingBooths ? (
             [
-              Object.values(vendor.upcomingBooths).sort((a: any, b: any) => {
-                return b.date - a.date
-              }).slice(0, 2).map((boothKey: any) => (
-                <TouchableOpacity
-                  style={{
-                    flexDirection: 'row',
-                    backgroundColor: 'transparent',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    width: 340,
-                  }}
-                  onPress={() =>
-                    navigation.navigate('EventInfoScreen', {
-                      imgUrl: getImgUrl(events[boothKey.eventID as keyof typeof events]['key']),
-                      eventID: events[boothKey.eventID as keyof typeof events]['key'],
-                      month: events[boothKey.eventID as keyof typeof events]['date']['month'],
-                      day: events[boothKey.eventID as keyof typeof events]['date']['day'],
-                      location: events[boothKey.eventID as keyof typeof events]['location'],
-                      avail: events[boothKey.eventID as keyof typeof events]['avail'],
-                      name: events[boothKey.eventID as keyof typeof events]['name'],
-                    })
-                  }
-                >
-                  <Text style={{ color: '#2A3242', marginLeft: 15, marginTop: 10 }}>
-                    {monthNames[events[boothKey.eventID as keyof typeof events]['date']['month']]}{' '}
-                    {events[boothKey.eventID as keyof typeof events]['date']['day']} @{' '}
-                    {events[boothKey.eventID as keyof typeof events]['name']}
-                  </Text>
-                  <Icon2 name="keyboard-arrow-right" size={20} color="#2A3242" />
-                </TouchableOpacity>
-              )),
+              Object.values(vendor.upcomingBooths)
+                .sort((a: any, b: any) => {
+                  return b.date - a.date;
+                })
+                .slice(0, 2)
+                .map((boothKey: any) => (
+                  <TouchableOpacity
+                    style={{
+                      flexDirection: 'row',
+                      backgroundColor: 'transparent',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      width: 340,
+                    }}
+                    onPress={() =>
+                      navigation.navigate('EventInfoScreen', {
+                        imgUrl: getImgUrl(events[boothKey.eventID as keyof typeof events]['key']),
+                        eventID: events[boothKey.eventID as keyof typeof events]['key'],
+                        month: events[boothKey.eventID as keyof typeof events]['date']['month'],
+                        day: events[boothKey.eventID as keyof typeof events]['date']['day'],
+                        location: events[boothKey.eventID as keyof typeof events]['location'],
+                        avail: events[boothKey.eventID as keyof typeof events]['avail'],
+                        name: events[boothKey.eventID as keyof typeof events]['name'],
+                      })
+                    }
+                  >
+                    <Text style={{ color: '#2A3242', marginLeft: 15, marginTop: 10 }}>
+                      {monthNames[events[boothKey.eventID as keyof typeof events]['date']['month']]}{' '}
+                      {events[boothKey.eventID as keyof typeof events]['date']['day']} @{' '}
+                      {events[boothKey.eventID as keyof typeof events]['name']}
+                    </Text>
+                    <Icon2 name="keyboard-arrow-right" size={20} color="#2A3242" />
+                  </TouchableOpacity>
+                )),
             ]
           ) : (
             <Text style={{ color: '#2A3242', marginTop: 10, fontWeight: '400', marginLeft: 15 }}>
@@ -230,10 +241,8 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         />
         {refreshing ? <ActivityIndicator /> : null}
         <ScrollView
-        style={{height: 580}}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={loadNewData} />
-        }
+          style={{ height: 580 }}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadNewData} />}
         >
           {filteredVendorArray ? (
             [
@@ -272,7 +281,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingLeft: 20,
     borderWidth: 1,
-    borderColor: '#C4C4C4'
+    borderColor: '#C4C4C4',
   },
   eventDetailsContainer: {
     width: 350,

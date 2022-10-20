@@ -8,7 +8,7 @@ import { StackScreenProps } from '@react-navigation/stack';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const auth = getAuth();
-
+// TODO: reset pw
 const SignInScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   const [value, setValue] = React.useState({
     email: '',
@@ -90,13 +90,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 200, // TODO: fix spacing
   },
-  error: {
-    marginTop: 10,
-    padding: 10,
-    color: '#fff',
-    backgroundColor: '#D54826FF',
-    marginBottom: 40,
-  },
   title: {
     alignSelf: 'center',
     margin: 30,
@@ -145,6 +138,11 @@ const styles = StyleSheet.create({
     color: '#2A3242',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  error: {
+    color: '#D54826FF',
+    marginLeft: 30,
+    marginBottom: 20,
   },
 });
 

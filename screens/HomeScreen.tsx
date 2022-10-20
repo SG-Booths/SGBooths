@@ -10,7 +10,7 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  RefreshControl
+  RefreshControl,
 } from 'react-native';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
 import { getAuth, signOut } from 'firebase/auth';
@@ -81,8 +81,8 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       setBoothsFollowing(Object.keys(boothsFollowingTemp));
       console.log('booths following are ', Object.keys(boothsFollowingTemp));
     });
-    setRefreshing(false)
-  }
+    setRefreshing(false);
+  };
 
   // toggles a card's starred status
   const updateStarred = (eventItem: any) => {
@@ -111,7 +111,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     // }
   };
 
-// TODO: delete event if today's date is later
+  // TODO: delete event if today's date is later
   const EventItem = ({ eventItem, month }: any) => {
     const [imgUrl, setImgUrl] = useState<string | undefined>(undefined);
     const ref = ref_storage(storage, eventItem['key'] + '.png');
@@ -125,7 +125,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       });
 
     return (
-      <View style={{ marginBottom: 15, borderWidth: 1, borderRadius: 20, borderColor: '#C4C4C4'}}>
+      <View style={{ marginBottom: 15, borderWidth: 1, borderRadius: 20, borderColor: '#C4C4C4' }}>
         <Pressable
           onPress={() =>
             navigation.navigate('EventInfoScreen', {
@@ -194,9 +194,8 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       // uses state to set cardArray and filteredCards to the reverse of this data
       setEventArray(newArray);
       setFilteredEvents(newArray);
-      setRefreshing(false)
+      setRefreshing(false);
     });
-    
   }, []);
 
   useEffect(() => {
@@ -206,7 +205,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       let boothsFollowingTemp = { ...data2 };
       setBoothsFollowing(Object.keys(boothsFollowingTemp));
       console.log('booths following are ', Object.keys(boothsFollowingTemp));
-      setRefreshing(false)
+      setRefreshing(false);
     });
   }, []);
 
@@ -319,9 +318,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         style={styles.eventList}
         contentContainerStyle={styles.contentContainerStyle}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={loadNewData} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadNewData} />}
       >
         {months.map((monthKey) => (
           <View key={monthKey.toString()}>
@@ -415,7 +412,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingLeft: 20,
     borderWidth: 1,
-    borderColor: '#C4C4C4'
+    borderColor: '#C4C4C4',
   },
   savedButton: {
     borderRadius: 30,
