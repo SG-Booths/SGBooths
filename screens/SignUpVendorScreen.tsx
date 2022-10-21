@@ -1,14 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View, KeyboardAvoidingView } from 'react-native';
 import { StackScreenProps } from '@react-navigation/stack';
-import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
-import { db } from '../config/firebase';
-import { ref, set } from 'firebase/database';
 
-const auth = getAuth();
-
-// TODO: create screens for instagram handle and shop photos
 const SignUpVendorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   const [value, setValue] = React.useState({
     email: '',
@@ -46,23 +40,11 @@ const SignUpVendorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => 
       return;
     }
 
-    try {
-      await createUserWithEmailAndPassword(auth, value.email, value.password);
-      await updateProfile(auth.currentUser!, {
-        displayName: value.name,
-      });
-      set(ref(db, '/users/' + auth.currentUser?.uid), {
-        type: 'vendor',
-        name: value.name,
-        uid: auth.currentUser?.uid
-      });
-      navigation.navigate('SignIn');
-    } catch (error: any) {
-      setValue({
-        ...value,
-        error: error.message,
-      });
-    }
+    navigation.navigate('SetInstagramUsernameScreen', {
+      email: value.email,
+      password: value.password,
+      name: value.name
+    })
   }
 
   return (
@@ -86,6 +68,7 @@ const SignUpVendorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => 
           value={value.name}
           underlineColorAndroid="transparent"
           autoCapitalize="none"
+          autoCorrect={false}
         />
         <TextInput
           style={styles.input}
@@ -124,12 +107,12 @@ const SignUpVendorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => 
         <View style={styles.footerView}>
           <Text style={styles.footerText}>
             already have an account?{' '}
-            <TouchableOpacity onPress={onFooterLinkPress}>
+          </Text>
+          <TouchableOpacity onPress={onFooterLinkPress}>
               <Text style={styles.footerLink}>
                 log in
               </Text>
             </TouchableOpacity>
-          </Text>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -210,6 +193,7 @@ const styles = StyleSheet.create({
   footerView: {
     alignItems: 'center',
     marginTop: 20,
+    flexDirection: 'row'
   },
   footerText: {
     fontSize: 16,

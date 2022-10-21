@@ -2,17 +2,16 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { FontAwesome, MaterialIcons, Entypo } from '@expo/vector-icons';
-import { Pressable } from 'react-native';
+import { MaterialIcons, Entypo } from '@expo/vector-icons';
 import { RootTabParamList, RootTabScreenProps } from '../types';
 import NotFoundScreen from '../screens/NotFoundScreen';
 import SettingsScreen from '../screens/SettingsScreen';
-import Colors from '../constants/Colors';
-import useColorScheme from '../hooks/useColorScheme';
 import HomeScreen from '../screens/HomeScreen';
 import FollowingScreen from '../screens/FollowingScreen';
 import EventInfoScreen from '../screens/EventInfoScreen';
 import AddEventScreen from '../screens/AddEventScreen';
+import UpdateInstagramUsernameScreen from '../screens/UpdateInstagramUsernameScreen';
+import UpdateShopImagesScreen from '../screens/UpdateShopImagesScreen';
 
 const Stack = createStackNavigator();
 
@@ -23,8 +22,6 @@ const Stack = createStackNavigator();
 const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator() {
-  const colorScheme = useColorScheme();
-
   return (
     <BottomTab.Navigator
       initialRouteName="Home"
@@ -67,6 +64,8 @@ export default function UserStack() {
         <Stack.Screen name="EventInfoScreen" component={EventInfoScreen} options={{ headerShown: false }} />
         <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
         <Stack.Screen name="AddEvent" component={AddEventScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="UpdateInstagramUsernameScreen" component={UpdateInstagramUsernameScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="UpdateShopImagesScreen" component={UpdateShopImagesScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { StyleSheet, SafeAreaView, TouchableOpacity, Alert, TextInput } from 'react-native';
-import { getAuth, signOut, sendPasswordResetEmail, updateEmail, updateProfile } from 'firebase/auth';
+import { StyleSheet, SafeAreaView, TouchableOpacity, Alert, TextInput, ScrollView } from 'react-native';
+import { getAuth, signOut, sendPasswordResetEmail, updateEmail, updateProfile, deleteUser } from 'firebase/auth';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
 import { onValue, ref, update} from 'firebase/database';
 import { db, storage } from '../config/firebase';
@@ -26,13 +26,16 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
   const [userInfo, setUserInfo]: any = useState({});
 
   const [imgUrl1, setImgUrl1] = useState<string | undefined>(undefined);
-  const ref1 = ref_storage(storage, user?.uid + '_1.png');
+  let ref1: any;
+  if (userInfo.type === 'vendor') ref1 = ref_storage(storage, user?.uid + '_1.png');
 
   const [imgUrl2, setImgUrl2] = useState<string | undefined>(undefined);
-  const ref2 = ref_storage(storage, user?.uid + '_2.png');
+  let ref2: any;
+  if (userInfo.type === 'vendor') ref2 = ref_storage(storage, user?.uid + '_2.png');
 
   const [imgUrl3, setImgUrl3] = useState<string | undefined>(undefined);
-  const ref3 = ref_storage(storage, user?.uid + '_3.png');
+  let ref3: any;
+  if (userInfo.type === 'vendor') ref3 = ref_storage(storage, user?.uid + '_3.png');
 
   const getPermissionAsync = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -68,7 +71,8 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
   };
 
   useMemo(() => {
-    getDownloadURL(ref1)
+    if (userInfo.type === 'vendor') {
+      getDownloadURL(ref1)
     .then((url) => {
       setImgUrl1(url);
     })
@@ -91,7 +95,7 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
     .catch((error) => {
       console.log('error:' + error);
     });
-
+    }
   getPermissionAsync()
 }, [value])
 
@@ -118,9 +122,10 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
         { text: 'OK', onPress: () => deleteShop() },
       ]);
     } else {
-      update(ref(db, '/users/' + auth.currentUser?.uid), {
-        type: 'vendor',
-      });
+      navigation.navigate('UpdateInstagramUsernameScreen', {
+        email: value.email,
+        name: value.name,
+      })
     }
   };
 
@@ -259,6 +264,7 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
         </TouchableOpacity>
         <Text style={styles.title}>profile</Text>
       </View>
+      <ScrollView>
       {userInfo.type === 'vendor' ? (
         <View style={{ backgroundColor: 'transparent' }}>
           <View
@@ -314,15 +320,18 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
           />
           <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>Shop Photos</Text>
           <View style={styles.eventImageContainer}>
+            {imgUrl1 && 
             <TouchableOpacity onPress={() => _pickImage(1)}>
               <Image source={{ uri: imgUrl1 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
-            </TouchableOpacity>
+            </TouchableOpacity>}
+            {imgUrl2 && 
             <TouchableOpacity onPress={() => _pickImage(2)}>
               <Image source={{ uri: imgUrl2 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
-            </TouchableOpacity>
+            </TouchableOpacity>}
+            {imgUrl3 && 
             <TouchableOpacity onPress={() => _pickImage(3)}>
               <Image source={{ uri: imgUrl3 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
-            </TouchableOpacity>
+            </TouchableOpacity>}
           </View>
         </View>
       ) : (
@@ -350,12 +359,13 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
           />
           <View style={{marginVertical: 10, marginHorizontal: 30, backgroundColor: 'transparent', flexDirection: 'row', justifyContent: 'space-between'}}>
             <Text style={{ fontWeight: '700', color: '#2A3242' }}>Email</Text>
-            <Text
-              style={{ color: '#FABF48', fontWeight: '600', fontStyle: 'italic' }}
-              onPress={() => handlePasswordReset(value.email)}
-            >
-            Reset password
-          </Text>
+            <TouchableOpacity onPress={() => handlePasswordReset(value.email)}>
+              <Text
+                style={{ color: '#FABF48', fontWeight: '600', fontStyle: 'italic' }}
+              >
+              Reset password
+            </Text>
+          </TouchableOpacity>
           </View>
           <TextInput
             style={styles.input}
@@ -366,17 +376,11 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
             underlineColorAndroid="transparent"
             autoCapitalize="none"
           />
-          <Text
-            style={{ color: '#FABF48', marginLeft: 30, marginTop: 10, fontWeight: '600', fontStyle: 'italic' }}
-            onPress={() => handlePasswordReset(value.email)}
-          >
-            Reset password
-          </Text>
         </View>
       )}
       <View style={{              marginLeft: 30,
               marginRight: 30,
-              marginTop: 60,
+              marginTop: 50,
               backgroundColor: 'transparent',
               flexDirection: 'row',
               justifyContent: 'space-between'}}>
@@ -398,9 +402,27 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
             <Text style={styles.buttonTitle}>SIGN OUT</Text>
           </TouchableOpacity>
           </View>
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#D54826FF',
+              height: 48,
+              width: 200,
+              borderRadius: 20,
+              alignItems: 'center',
+              alignSelf: 'center',
+              justifyContent: 'center',
+              marginTop: 20
+            }}
+            onPress={() => deleteUser(auth.currentUser!)}
+          >
+            <Text style={styles.buttonTitle}>DELETE ACCOUNT</Text>
+          </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
   );
 };
+// TODO: create reauthentication modal (https://firebase.google.com/docs/auth/web/manage-users#re-authenticate_a_user)
+// for email change and delete account
 
 const styles = StyleSheet.create({
   container: {

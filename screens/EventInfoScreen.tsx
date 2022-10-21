@@ -79,7 +79,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
           let info = { ...data };
           // let info = { ...data, boothNumber: vendorList[vendorKey]['boothNumber'] };
 
-          if (info.type === 'visitor') {
+          if (info.type === 'visitor' || !info) {
             remove(ref(db, '/events/' + eventID + '/vendors/' + vendorKey));
           } else {
             let updatedValue = { [vendorKey]: info };

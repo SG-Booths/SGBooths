@@ -48,7 +48,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           let data = querySnapShot.val() || {};
           let info = { ...data };
 
-          if (info.type === 'visitor') {
+          if (info.type === 'visitor' || !info) {
             remove(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/' + vendorKey));
           }
           else {

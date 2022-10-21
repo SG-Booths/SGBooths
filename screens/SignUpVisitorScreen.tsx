@@ -47,13 +47,13 @@ const SignUpVisitorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) =>
     }
 
     try {
-      await createUserWithEmailAndPassword(auth, value.email, value.password);
+      await createUserWithEmailAndPassword(auth, value.email.trim(), value.password.trim());
       await updateProfile(auth.currentUser!, {
-        displayName: value.name,
+        displayName: value.name.trim(),
       });
       set(ref(db, '/users/' + auth.currentUser?.uid), {
         type: 'visitor',
-        name: value.name,
+        name: value.name.trim(),
         uid: auth.currentUser?.uid
       });
       navigation.navigate('SignIn');
@@ -86,6 +86,7 @@ const SignUpVisitorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) =>
           value={value.name}
           underlineColorAndroid="transparent"
           autoCapitalize="none"
+          autoCorrect={false}
         />
         <TextInput
           style={styles.input}
@@ -124,12 +125,12 @@ const SignUpVisitorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) =>
         <View style={styles.footerView}>
           <Text style={styles.footerText}>
             already have an account?{' '}
-            <TouchableOpacity onPress={onFooterLinkPress}>
+          </Text>
+          <TouchableOpacity onPress={onFooterLinkPress}>
               <Text style={styles.footerLink}>
                 log in
               </Text>
             </TouchableOpacity>
-          </Text>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -210,6 +211,7 @@ const styles = StyleSheet.create({
   footerView: {
     alignItems: 'center',
     marginTop: 20,
+    flexDirection: 'row'
   },
   footerText: {
     fontSize: 16,

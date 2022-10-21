@@ -83,12 +83,13 @@ const SignInScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         <View style={styles.footerView}>
           <Text style={styles.footerText}>
             don't have an account?{' '}
-            <TouchableOpacity onPress={onFooterLinkPress}>
+          </Text>
+          <TouchableOpacity onPress={onFooterLinkPress}>
               <Text style={styles.footerLink}>
                 sign up
               </Text>
             </TouchableOpacity>
-          </Text>
+            </View>
           <TouchableOpacity onPress={() => handlePasswordReset(value.email)}>
             <Text
               style={{ fontSize: 16, color: '#FABF48', marginTop: 30, fontWeight: '600', fontStyle: 'italic' }}
@@ -96,7 +97,6 @@ const SignInScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
               reset password
             </Text>
           </TouchableOpacity>
-        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -148,6 +148,7 @@ const styles = StyleSheet.create({
   footerView: {
     alignItems: 'center',
     marginTop: 30,
+    flexDirection: 'row'
   },
   footerText: {
     fontSize: 16,
