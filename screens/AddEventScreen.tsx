@@ -1,17 +1,13 @@
 import { StyleSheet, SafeAreaView, TextInput, TouchableOpacity } from 'react-native';
-import React, { useState, useEffect, useMemo } from 'react';
+import React from 'react';
 import { db, storage } from '../config/firebase';
-import { ref, onValue, remove, push, set, update } from 'firebase/database';
-import { getAuth, signOut } from 'firebase/auth';
-import { useAuthentication } from '../utils/hooks/useAuthentication';
+import { ref, push, set, update } from 'firebase/database';
 import { ref as ref_storage, getDownloadURL } from 'firebase/storage';
 
 import { Text, View } from '../components/Themed';
 import { RootStackScreenProps } from '../types';
 
 export default function AddEventScreen({ navigation }: RootStackScreenProps<'AddEvent'>) {
-    const { user } = useAuthentication();
-
     const [value, setValue] = React.useState({
         name: '',
         day: '',

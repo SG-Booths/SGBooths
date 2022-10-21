@@ -1,13 +1,9 @@
 import React from 'react';
 import { StyleSheet, Text, View, Alert, KeyboardAvoidingView, TextInput, TouchableOpacity, SafeAreaView} from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import { Input, Button } from 'react-native-elements';
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { StackScreenProps } from '@react-navigation/stack';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const auth = getAuth();
-// TODO: reset pw
 const SignInScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   const [value, setValue] = React.useState({
     email: '',

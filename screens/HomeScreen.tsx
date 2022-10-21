@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -13,14 +13,13 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
-import { getAuth, signOut } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { db, storage } from '../config/firebase';
-import { ref, onValue, remove, push, set, update } from 'firebase/database';
+import { ref, onValue, remove, set, update } from 'firebase/database';
 import { ref as ref_storage, getDownloadURL } from 'firebase/storage';
-import { eachMonthOfInterval, addMonths, getMonth, getYear, isPast, compareAsc, startOfDay, endOfDay } from 'date-fns';
+import { eachMonthOfInterval, addMonths, getMonth, getYear, isPast, compareAsc } from 'date-fns';
 import { zonedTimeToUtc } from 'date-fns-tz'
 import { StackScreenProps } from '@react-navigation/stack';
-import Image from 'react-native-image-progress';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/Ionicons';
 
@@ -80,7 +79,6 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       let data2 = querySnapShot.val() || {};
       let boothsFollowingTemp = { ...data2 };
       setBoothsFollowing(Object.keys(boothsFollowingTemp));
-      console.log('booths following are ', Object.keys(boothsFollowingTemp));
     });
     setRefreshing(false);
   };
@@ -88,9 +86,15 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   // toggles a card's starred status
   const updateStarred = (eventItem: any) => {
     if (boothsFollowing && boothsFollowing.length > 0) {
-      console.log('boothsFollowing exists');
-      if (boothsFollowing.includes(eventItem['key'])) {
+      if (boothsFollowing.includes(eventItem['key']) && starredFilter === true) {
         remove(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/' + eventItem['key']));
+          getStarred(starredFilter);
+          setBoothsFollowing(boothsFollowing.filter((obj: string) => {
+            return !(obj === eventItem['key'])}))
+          setFilteredEvents(filteredEvents.filter((obj: any) => {
+            return !(obj.key === eventItem['key'])}))
+          setEventArray(eventArray.filter((obj: any) => {
+            return !(obj.key === eventItem['key'])}))
       } else {
         update(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/'), {
           [eventItem['key']]: '',
@@ -105,11 +109,6 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         [eventItem['key']]: '',
       });
     }
-    // TODO: fix bug: when item is unstarred after star filter is already on
-    // if (!eventItem['starred'] && starredFilter) {
-    //   getStarred(starredFilter);
-    //   console.log(cardArray);
-    // }
   };
 
   const EventItem = ({ eventItem, month }: any) => {
@@ -246,7 +245,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   // gets all cards that match the starred filter (while still matching the search term)
   const getStarred = (newStarredFilter: boolean) => {
     // if starred is true, filters cardArray by starred and then applies the search
-    if (newStarredFilter && boothsFollowing && boothsFollowing.length > 0) {
+    if (newStarredFilter) {
       setFilteredEvents(
         eventArray.filter((obj: { name: string; location: string; key: any }) => {
           return (

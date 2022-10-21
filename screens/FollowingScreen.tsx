@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   SafeAreaView,
-  ScrollView,
   TextInput,
   Linking,
   TouchableOpacity,
@@ -13,7 +12,7 @@ import {
 import { Text, View } from '../components/Themed';
 import { StackScreenProps } from '@react-navigation/stack';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
-import { getAuth, signOut } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { db, storage } from '../config/firebase';
 import { ref as ref_db, onValue, ref, remove } from 'firebase/database';
 import Icon from 'react-native-vector-icons/FontAwesome';

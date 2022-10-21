@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { StyleSheet, SafeAreaView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { getAuth, signOut, sendPasswordResetEmail, updateEmail, updateProfile } from 'firebase/auth';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
-import { ref as ref_db, onValue, ref, update, remove} from 'firebase/database';
+import { onValue, ref, update} from 'firebase/database';
 import { db, storage } from '../config/firebase';
 import Image from 'react-native-image-progress';
 import { ref as ref_storage, getDownloadURL, deleteObject, uploadBytes } from 'firebase/storage';

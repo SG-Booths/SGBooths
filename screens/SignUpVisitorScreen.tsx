@@ -2,10 +2,9 @@ import React from 'react';
 import { StyleSheet, Text, View, KeyboardAvoidingView } from 'react-native';
 import { StackScreenProps } from '@react-navigation/stack';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
 import { db } from '../config/firebase';
-import { push, ref, set } from 'firebase/database';
+import { ref, set } from 'firebase/database';
 
 const auth = getAuth();
 

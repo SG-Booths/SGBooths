@@ -18,8 +18,8 @@ export default function EventInfoScreen({ route, navigation }: any) {
   const [vendorList, setVendorList] = useState({});
 
   const [search, setSearch] = useState('');
-  const [filteredVendors, setFilteredVendors] = useState({});
-  const [vendorArray, setVendorArray]: any = useState({});
+  const [filteredVendors, setFilteredVendors]: any = useState([]);
+  const [vendorArray, setVendorArray]: any = useState([]);
 
   const [starredFilter, setStarredFilter] = useState(false);
 
@@ -89,9 +89,8 @@ export default function EventInfoScreen({ route, navigation }: any) {
                 return item.uid != auth.currentUser?.uid;
               })
             );
-            setFilteredVendors((vendorInfo) =>
+            setFilteredVendors((vendorInfo: any) =>
               Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
-                console.log('new list: ', { ...vendorInfo, ...updatedValue });
                 return item.uid != auth.currentUser?.uid;
               })
             );
@@ -190,9 +189,15 @@ export default function EventInfoScreen({ route, navigation }: any) {
   // toggles a card's starred status
   const updateStarred = (uid: string) => {
     if (vendorsFollowing && vendorsFollowing.length > 0) {
-      if (vendorsFollowing.includes(uid)) {
+      if (vendorsFollowing.includes(uid) && starredFilter === true) {
         remove(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/' + uid));
         getStarred(starredFilter);
+        setVendorsFollowing(vendorsFollowing.filter((obj: string) => {
+          return !(obj === uid)}))
+        setFilteredVendors(filteredVendors.filter((obj: any) => {
+          return !(obj.uid === uid)}))
+        setVendorArray(vendorArray.filter((obj: any) => {
+          return !(obj.uid === uid)}))
       } else {
         update(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/'), {
           [uid]: '',
@@ -206,11 +211,6 @@ export default function EventInfoScreen({ route, navigation }: any) {
       });
       getStarred(starredFilter);
     }
-    // TODO: fix bug: when item is unstarred after star filter is already on
-    // if (!eventItem['starred'] && starredFilter) {
-    //   getStarred(starredFilter);
-    //   console.log(cardArray);
-    // }
   };
 
   const VendorItem = ({ eventID, id, self }: any) => {
