@@ -49,16 +49,21 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           let data = querySnapShot.val() || {};
           let info = { ...data };
 
-          let updatedValue = {};
-          updatedValue = { [vendorKey]: info };
-          setVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }));
-          setFilteredVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }));
+          if (info.type === 'visitor') {
+            remove(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/' + vendorKey));
+          }
+          else {
+            let updatedValue = { [vendorKey]: info };
+            setVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }));
+            setFilteredVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }));
+          }
         })
       );
       setRefreshing(false);
     });
   };
 
+  // TODO: fix loading issue
   useEffect(() => {
     return onValue(ref(db, '/events'), (querySnapShot) => {
       let data = querySnapShot.val() || {};
@@ -207,7 +212,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
                     }
                   >
                     <Text style={{ color: '#2A3242', marginLeft: 15, marginTop: 10 }}>
-                      {monthNames[events[boothKey.eventID as keyof typeof events]['date']['month']]}{' '}
+                      {monthNames[events[boothKey.eventID as keyof typeof events]['date']['month'] - 1]}{' '}
                       {events[boothKey.eventID as keyof typeof events]['date']['day']} @{' '}
                       {events[boothKey.eventID as keyof typeof events]['name']}
                     </Text>

@@ -1,5 +1,5 @@
 import { StyleSheet, Linking, TextInput, TouchableOpacity, SafeAreaView, ImageBackground, FlatList } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
 import { getAuth } from 'firebase/auth';
 import { ref as ref_db, onValue, set, ref, remove, update } from 'firebase/database';
@@ -25,7 +25,6 @@ export default function EventInfoScreen({ route, navigation }: any) {
 
   const [vendorsFollowing, setVendorsFollowing]: any = useState([]);
 
-  // TODO: set to correct value based on firebase
   const [boothing, setBoothing] = useState(false);
   const [currentUser, setCurrentUser]: any = useState([]);
 
@@ -55,9 +54,19 @@ export default function EventInfoScreen({ route, navigation }: any) {
     getStarred(newStarredFilter);
   };
 
+  useMemo(()=>{
+    if (Object.keys(vendorList).includes(user?.uid!)) {
+      setBoothing(true)
+      console.log('boothing')
+    }
+    else {
+      console.log(Object.keys(vendorList))
+    }
+}, [vendorList])
+
   useEffect(() => {
-    onValue(ref_db(db, '/events/' + eventID + '/vendors'), (querySnapShot) => {
-      let data = querySnapShot.val() || {};
+    return onValue(ref_db(db, '/events/' + eventID + '/vendors'), async (querySnapShot) => {
+      let data = await querySnapShot.val() || {};
       let vendorList = { ...data };
 
       setVendorList({});
@@ -146,9 +155,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
       );
     }
   };
-  // TODO: delete booths after certain amount of time
-
-  // TODO: back button
+  
   // gets all cards that match the starred filter (while still matching the search term)
   const getStarred = (newStarredFilter: boolean) => {
     // if starred is true, filters cardArray by starred and then applies the search
@@ -343,7 +350,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
     update(ref(db, '/events/' + eventID + '/vendors/' + auth.currentUser?.uid), {
       boothNumber: 0,
     });
-    update(ref(db, '/users/' + auth.currentUser?.uid + '/upcomingBooths/'), {
+    update(ref(db, '/users/' + auth.currentUser?.uid + '/upcomingBooths/' + eventID), {
       eventID: eventID,
       [eventID]: '' + day + (month + 1) + year,
     });
@@ -427,7 +434,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
             ListHeaderComponent={() => (
               <View style={{backgroundColor: 'transparent'}}>
                 <Text style={styles.date}>
-            {monthNames[month]} {day}
+            {monthNames[month-1]} {day}, {year}
           </Text>
           <Text style={styles.name}>{name}</Text>
           <Text style={styles.location}>{location}</Text>

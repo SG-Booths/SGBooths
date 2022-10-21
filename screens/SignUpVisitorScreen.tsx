@@ -55,6 +55,7 @@ const SignUpVisitorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) =>
       set(ref(db, '/users/' + auth.currentUser?.uid), {
         type: 'visitor',
         name: value.name,
+        uid: auth.currentUser?.uid
       });
       navigation.navigate('SignIn');
     } catch (error: any) {

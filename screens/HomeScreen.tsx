@@ -17,7 +17,8 @@ import { getAuth, signOut } from 'firebase/auth';
 import { db, storage } from '../config/firebase';
 import { ref, onValue, remove, push, set, update } from 'firebase/database';
 import { ref as ref_storage, getDownloadURL } from 'firebase/storage';
-import { eachMonthOfInterval, addMonths, getMonth, getYear } from 'date-fns';
+import { eachMonthOfInterval, addMonths, getMonth, getYear, isPast, compareAsc, startOfDay, endOfDay } from 'date-fns';
+import { zonedTimeToUtc } from 'date-fns-tz'
 import { StackScreenProps } from '@react-navigation/stack';
 import Image from 'react-native-image-progress';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -111,7 +112,6 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     // }
   };
 
-  // TODO: delete event if today's date is later
   const EventItem = ({ eventItem, month }: any) => {
     const [imgUrl, setImgUrl] = useState<string | undefined>(undefined);
     const ref = ref_storage(storage, eventItem['key'] + '.png');
@@ -190,7 +190,16 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       let eventItems = { ...data };
       setEvents(eventItems);
 
-      let newArray: any = Object.values(eventItems).reverse();
+      let newArray: any = Object.values(eventItems).sort((a: any, b: any) => {
+          return compareAsc(new Date(a.date.year, a.date.month, a.date.day), new Date(b.date.year, b.date.month, b.date.day))
+        })
+
+      for (let i = 0; i < newArray.length; i++) {
+        if (isPast(zonedTimeToUtc(new Date(newArray[i].date.year, newArray[i].date.month - 1, newArray[i].date.day), 'Asia/Singapore'))) {
+          remove(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/' + newArray[i].key));
+          remove(ref(db, '/events/' + newArray[i].key));
+        }
+      }
 
       // uses state to set cardArray and filteredCards to the reverse of this data
       setEventArray(newArray);
@@ -233,8 +242,6 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       })
     );
   };
-  // TODO: delete booths after certain amount of time
-  // TODO: when user goes from vendor to visitor account, delete their uid from people's vendorFollowing
   // TODO: load more on scroll
 
   // gets all cards that match the starred filter (while still matching the search term)
@@ -324,7 +331,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         {months.map((monthKey) => (
           <View key={monthKey.toString()}>
             {filteredEvents.some(function (item) {
-              return item['date']['month'] === getMonth(monthKey);
+              return item['date']['month'] - 1 === getMonth(monthKey);
             }) && (
               <Text style={styles.monthHeader}>
                 {monthNames[getMonth(monthKey)]} '{getYear(monthKey) % 100}
@@ -333,7 +340,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             <View>
               {eventKeys.length > 0 &&
                 eventKeys.map((eventKey) =>
-                  filteredEvents[eventKey as keyof typeof events]['date']['month'] == getMonth(monthKey) &&
+                  filteredEvents[eventKey as keyof typeof events]['date']['month'] - 1 == getMonth(monthKey) &&
                   filteredEvents[eventKey as keyof typeof events]['date']['year'] == getYear(monthKey) ? (
                     <EventItem
                       key={eventKey}
@@ -347,6 +354,8 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           </View>
         ))}
       </ScrollView>
+      {user?.uid === 'wtEK11lqiZex81waXY7CjFUNiMq2' &&
+      <Text onPress={() => navigation.navigate('AddEvent')}>add event</Text>}
     </SafeAreaView>
   );
 };

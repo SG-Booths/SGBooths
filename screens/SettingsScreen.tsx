@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { StyleSheet, SafeAreaView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { getAuth, signOut, sendPasswordResetEmail, updateEmail, updateProfile } from 'firebase/auth';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
-import { ref as ref_db, onValue, ref, update } from 'firebase/database';
+import { ref as ref_db, onValue, ref, update, remove} from 'firebase/database';
 import { db, storage } from '../config/firebase';
 import Image from 'react-native-image-progress';
 import { ref as ref_storage, getDownloadURL, deleteObject, uploadBytes } from 'firebase/storage';
@@ -20,6 +20,7 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
     email: '',
     error: '',
     name: '',
+    instagram: ''
   });
 
   const [userInfo, setUserInfo]: any = useState({});
@@ -66,38 +67,43 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
     }
   };
 
+  useMemo(() => {
+    getDownloadURL(ref1)
+    .then((url) => {
+      setImgUrl1(url);
+    })
+    .catch((error) => {
+      console.log('error:' + error);
+    });
+
+  getDownloadURL(ref2)
+    .then((url) => {
+      setImgUrl2(url);
+    })
+    .catch((error) => {
+      console.log('error:' + error);
+    });
+
+  getDownloadURL(ref3)
+    .then((url) => {
+      setImgUrl3(url);
+    })
+    .catch((error) => {
+      console.log('error:' + error);
+    });
+
+  getPermissionAsync()
+}, [value])
+
+  // TODO: fix loading issue
   useEffect(() => {
     return onValue(ref(db, '/users/' + user?.uid), (querySnapShot) => {
       let data = querySnapShot.val() || {};
       let userData = { ...data };
       setUserInfo(userData);
-      setValue({ ...value, name: userData.name, email: user?.email! });
+      // setValue({ ...value, name: userData.name, email: user?.email! });
 
-      getDownloadURL(ref1)
-        .then((url) => {
-          setImgUrl1(url);
-        })
-        .catch((error) => {
-          console.log('error:' + error);
-        });
-
-      getDownloadURL(ref2)
-        .then((url) => {
-          setImgUrl2(url);
-        })
-        .catch((error) => {
-          console.log('error:' + error);
-        });
-
-      getDownloadURL(ref3)
-        .then((url) => {
-          setImgUrl3(url);
-        })
-        .catch((error) => {
-          console.log('error:' + error);
-        });
-
-      getPermissionAsync()
+      setValue({ ...value, name: userInfo.name, email: user?.email!, instagram: userInfo.instagram });
     });
   }, []);
 
@@ -118,10 +124,11 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
     }
   };
 
-  // TODO: delete shop from events and from following lists
+  // TODO: when changing to creator, set instagram username and shop photos
   const deleteShop = () => {
     update(ref(db, '/users/' + auth.currentUser?.uid), {
       type: 'visitor',
+      instagram: ''
     });
 
     deleteObject(ref1).then(() => {
@@ -142,8 +149,6 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
       console.log(error)
     });
   };
-
-  console.log('name is', value.name);
 
   const handlePasswordReset = (email: string) => {
     sendPasswordResetEmail(auth, email)
@@ -189,6 +194,11 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
         error: error.message,
       });
     }
+
+    update(ref(db, '/users/' + user?.uid), {
+      instagram: value.instagram,
+      name: value.name
+    });
 
     const metadata = {
       contentType: 'image/png',
@@ -272,7 +282,26 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
             underlineColorAndroid="transparent"
             autoCapitalize="none"
           />
-          <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>Email</Text>
+          <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>Instagram</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="instagram username (without @)"
+            placeholderTextColor="#C4C4C4"
+            onChangeText={(text) => setValue({ ...value, instagram: text })}
+            value={value.instagram}
+            underlineColorAndroid="transparent"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          <View style={{marginVertical: 10, marginHorizontal: 30, backgroundColor: 'transparent', flexDirection: 'row', justifyContent: 'space-between'}}>
+            <Text style={{ fontWeight: '700', color: '#2A3242' }}>Email</Text>
+            <Text
+              style={{ color: '#FABF48', fontWeight: '600', fontStyle: 'italic' }}
+              onPress={() => handlePasswordReset(value.email)}
+            >
+            Reset password
+          </Text>
+          </View>
           <TextInput
             style={styles.input}
             placeholder="email"
@@ -294,29 +323,6 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
               <Image source={{ uri: imgUrl3 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
             </TouchableOpacity>
           </View>
-          <Text
-            style={{ color: '#FABF48', marginLeft: 30, marginTop: 50, fontWeight: '600', fontStyle: 'italic' }}
-            onPress={() => handlePasswordReset(value.email)}
-          >
-            Reset password
-          </Text>
-          <TouchableOpacity
-            style={{
-              backgroundColor: '#575FCC',
-              marginLeft: 30,
-              marginRight: 30,
-              marginTop: 20,
-              height: 48,
-              width: 140,
-              borderRadius: 20,
-              alignItems: 'center',
-              alignSelf: 'center',
-              justifyContent: 'center',
-            }}
-            onPress={() => updateAccount()}
-          >
-            <Text style={styles.buttonTitle}>SAVE</Text>
-          </TouchableOpacity>
         </View>
       ) : (
         <View style={{ backgroundColor: 'transparent' }}>
@@ -341,7 +347,15 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
             underlineColorAndroid="transparent"
             autoCapitalize="none"
           />
-          <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>Email</Text>
+          <View style={{marginVertical: 10, marginHorizontal: 30, backgroundColor: 'transparent', flexDirection: 'row', justifyContent: 'space-between'}}>
+            <Text style={{ fontWeight: '700', color: '#2A3242' }}>Email</Text>
+            <Text
+              style={{ color: '#FABF48', fontWeight: '600', fontStyle: 'italic' }}
+              onPress={() => handlePasswordReset(value.email)}
+            >
+            Reset password
+          </Text>
+          </View>
           <TextInput
             style={styles.input}
             placeholder="email"
@@ -357,14 +371,19 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
           >
             Reset password
           </Text>
+        </View>
+      )}
+      <View style={{              marginLeft: 30,
+              marginRight: 30,
+              marginTop: 60,
+              backgroundColor: 'transparent',
+              flexDirection: 'row',
+              justifyContent: 'space-between'}}>
           <TouchableOpacity
             style={{
               backgroundColor: '#575FCC',
-              marginLeft: 30,
-              marginRight: 30,
-              marginTop: 20,
               height: 48,
-              width: 140,
+              width: 160,
               borderRadius: 20,
               alignItems: 'center',
               alignSelf: 'center',
@@ -374,11 +393,10 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
           >
             <Text style={styles.buttonTitle}>SAVE</Text>
           </TouchableOpacity>
-        </View>
-      )}
-      <TouchableOpacity style={styles.button} onPress={() => signOut(auth)}>
-        <Text style={styles.buttonTitle}>SIGN OUT</Text>
-      </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, {marginHorizontal: 0, marginTop: 0, width: 160}]} onPress={() => signOut(auth)}>
+            <Text style={styles.buttonTitle}>SIGN OUT</Text>
+          </TouchableOpacity>
+          </View>
     </SafeAreaView>
   );
 };
@@ -459,8 +477,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: '#2A3242',
-    marginLeft: 30,
-    marginRight: 30,
+    marginHorizontal: 30,
     marginTop: 20,
     height: 48,
     width: 140,

@@ -12,6 +12,7 @@ import useColorScheme from '../hooks/useColorScheme';
 import HomeScreen from '../screens/HomeScreen';
 import FollowingScreen from '../screens/FollowingScreen';
 import EventInfoScreen from '../screens/EventInfoScreen';
+import AddEventScreen from '../screens/AddEventScreen';
 
 const Stack = createStackNavigator();
 
@@ -65,6 +66,7 @@ export default function UserStack() {
         <Stack.Screen name="SettingsScreen" component={SettingsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="EventInfoScreen" component={EventInfoScreen} options={{ headerShown: false }} />
         <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
+        <Stack.Screen name="AddEvent" component={AddEventScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -9,7 +9,7 @@ import { push, ref, set } from 'firebase/database';
 
 const auth = getAuth();
 
-// TODO: set instagram handle
+// TODO: create screens for instagram handle and shop photos
 const SignUpVendorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   const [value, setValue] = React.useState({
     email: '',
@@ -55,6 +55,7 @@ const SignUpVendorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => 
       set(ref(db, '/users/' + auth.currentUser?.uid), {
         type: 'vendor',
         name: value.name,
+        uid: auth.currentUser?.uid
       });
       navigation.navigate('SignIn');
     } catch (error: any) {
