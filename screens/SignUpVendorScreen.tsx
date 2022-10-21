@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, KeyboardAvoidingView } from 'react-native';
 import { StackScreenProps } from '@react-navigation/stack';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -68,9 +68,9 @@ const SignUpVendorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => 
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAwareScrollView style={{ flex: 1, width: '100%' }} keyboardShouldPersistTaps="always">
+      <KeyboardAvoidingView style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
         <Text style={styles.title}>sign up</Text>
-        <View style={{ flex: 1, flexDirection: 'row', alignSelf: 'center', marginBottom: 30 }}>
+        <View style={{ flex: 1, flexDirection: 'row', alignSelf: 'center', marginTop: 40, marginBottom: 60 }}>
           <TouchableOpacity style={styles.visitorButton} onPress={() => navigation.navigate('SignUpVisitorScreen')}>
             <Text style={{ color: '#8FD8B5', fontSize: 16 }}>visitor</Text>
           </TouchableOpacity>
@@ -125,12 +125,14 @@ const SignUpVendorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => 
         <View style={styles.footerView}>
           <Text style={styles.footerText}>
             already have an account?{' '}
-            <Text onPress={onFooterLinkPress} style={styles.footerLink}>
-              log in
-            </Text>
+            <TouchableOpacity onPress={onFooterLinkPress}>
+              <Text style={styles.footerLink}>
+                log in
+              </Text>
+            </TouchableOpacity>
           </Text>
         </View>
-      </KeyboardAwareScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -138,9 +140,7 @@ const SignUpVendorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 150, // TODO: fix spacing
+    justifyContent: 'center'
   },
   title: {
     alignSelf: 'center',
@@ -149,6 +149,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   input: {
+    width: 320,
     height: 48,
     borderRadius: 20,
     overflow: 'hidden',
@@ -208,7 +209,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   footerView: {
-    flex: 1,
     alignItems: 'center',
     marginTop: 20,
   },

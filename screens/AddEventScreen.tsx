@@ -1,4 +1,4 @@
-import { StyleSheet, SafeAreaView, TextInput } from 'react-native';
+import { StyleSheet, SafeAreaView, TextInput, TouchableOpacity } from 'react-native';
 import React, { useState, useEffect, useMemo } from 'react';
 import { db, storage } from '../config/firebase';
 import { ref, onValue, remove, push, set, update } from 'firebase/database';
@@ -117,7 +117,9 @@ export default function AddEventScreen({ navigation }: RootStackScreenProps<'Add
         autoCorrect={false}
         multiline={true}
           />
-          <Text style={{color: 'black'}} onPress={() => addEvent()}>add event</Text>
+          <TouchableOpacity onPress={() => addEvent()}>
+            <Text style={{color: 'black'}}>add event</Text>
+          </TouchableOpacity>
     </SafeAreaView>
   );
 }

@@ -242,7 +242,6 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       })
     );
   };
-  // TODO: load more on scroll
 
   // gets all cards that match the starred filter (while still matching the search term)
   const getStarred = (newStarredFilter: boolean) => {
@@ -353,9 +352,11 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             </View>
           </View>
         ))}
+        {user?.uid === 'wtEK11lqiZex81waXY7CjFUNiMq2' &&
+          <TouchableOpacity onPress={() => navigation.navigate('AddEvent')} style={{alignItems: 'center'}}>
+            <Text>add event</Text>
+          </TouchableOpacity>}
       </ScrollView>
-      {user?.uid === 'wtEK11lqiZex81waXY7CjFUNiMq2' &&
-      <Text onPress={() => navigation.navigate('AddEvent')}>add event</Text>}
     </SafeAreaView>
   );
 };

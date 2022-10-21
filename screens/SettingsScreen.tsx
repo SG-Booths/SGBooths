@@ -295,12 +295,13 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
           />
           <View style={{marginVertical: 10, marginHorizontal: 30, backgroundColor: 'transparent', flexDirection: 'row', justifyContent: 'space-between'}}>
             <Text style={{ fontWeight: '700', color: '#2A3242' }}>Email</Text>
-            <Text
-              style={{ color: '#FABF48', fontWeight: '600', fontStyle: 'italic' }}
-              onPress={() => handlePasswordReset(value.email)}
-            >
-            Reset password
-          </Text>
+            <TouchableOpacity onPress={() => handlePasswordReset(value.email)}>
+              <Text
+                style={{ color: '#FABF48', fontWeight: '600', fontStyle: 'italic' }}
+              >
+              Reset password
+            </Text>
+          </TouchableOpacity>
           </View>
           <TextInput
             style={styles.input}
