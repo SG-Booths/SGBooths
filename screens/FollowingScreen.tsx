@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
-  FlatList
+  FlatList,
 } from 'react-native';
 import { Text, View } from '../components/Themed';
 import { StackScreenProps } from '@react-navigation/stack';
@@ -50,8 +50,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 
           if (info.type === 'visitor' || !info) {
             remove(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/' + vendorKey));
-          }
-          else {
+          } else {
             let updatedValue = { [vendorKey]: info };
             setVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }));
             setFilteredVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }));
@@ -91,7 +90,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         let eventItems = { ...data };
         setEvents(eventItems);
         setRefreshing(false);
-    });
+      });
     });
   }, []);
 
@@ -250,12 +249,14 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           data={Object.keys(filteredVendorArray)}
           keyExtractor={(item) => item}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadNewData} />}
-          renderItem={({ item }) => <View style={{ backgroundColor: '#FFfF8F3', marginTop: 20 }}>
-          <VendorItem vendor={filteredVendorArray[item]} />
-        </View>}
-        ListEmptyComponent={() => (
-          <Text style={{marginTop: 30, color: '#2A3242'}}>time to follow some creators!</Text>
-        )}
+          renderItem={({ item }) => (
+            <View style={{ backgroundColor: '#FFfF8F3', marginTop: 20 }}>
+              <VendorItem vendor={filteredVendorArray[item]} />
+            </View>
+          )}
+          ListEmptyComponent={() => (
+            <Text style={{ marginTop: 30, color: '#2A3242' }}>time to follow some creators!</Text>
+          )}
         />
       </View>
     </SafeAreaView>

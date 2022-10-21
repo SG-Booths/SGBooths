@@ -18,7 +18,7 @@ import { db, storage } from '../config/firebase';
 import { ref, onValue, remove, set, update } from 'firebase/database';
 import { ref as ref_storage, getDownloadURL } from 'firebase/storage';
 import { eachMonthOfInterval, addMonths, getMonth, getYear, isPast, compareAsc } from 'date-fns';
-import { zonedTimeToUtc } from 'date-fns-tz'
+import { zonedTimeToUtc } from 'date-fns-tz';
 import { StackScreenProps } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/Ionicons';
@@ -51,7 +51,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     email: '',
     name: '',
     instagram: '',
-    type: ''
+    type: '',
   });
 
   const monthNames = [
@@ -95,11 +95,17 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     if (boothsFollowing && boothsFollowing.length > 0) {
       if (boothsFollowing.includes(eventItem['key']) && starredFilter === true) {
         remove(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/' + eventItem['key']));
-          getStarred(starredFilter);
-          setBoothsFollowing(boothsFollowing.filter((obj: string) => {
-            return !(obj === eventItem['key'])}))
-          setFilteredEvents(filteredEvents.filter((obj: any) => {
-            return !(obj.key === eventItem['key'])}))
+        getStarred(starredFilter);
+        setBoothsFollowing(
+          boothsFollowing.filter((obj: string) => {
+            return !(obj === eventItem['key']);
+          })
+        );
+        setFilteredEvents(
+          filteredEvents.filter((obj: any) => {
+            return !(obj.key === eventItem['key']);
+          })
+        );
       } else {
         update(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/'), {
           [eventItem['key']]: '',
@@ -141,7 +147,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
               avail: eventItem['avail'],
               name: eventItem['name'],
               year: eventItem['date']['year'],
-              following: boothsFollowing.includes(eventItem['key'])
+              following: boothsFollowing.includes(eventItem['key']),
             })
           }
         >
@@ -157,27 +163,27 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
               }}
             >
               <TouchableOpacity
-              style={{
-                backgroundColor: 'white',
-                borderRadius: 100,
-                height: 40,
-                width: 40,
-                alignItems: 'center',
-                justifyContent: 'center',
-                alignSelf: 'flex-end',
-                marginRight: 15,
-                marginTop: 15,
-                zIndex: 1,
-              }}
-              onPress={() => updateStarred(eventItem)}
-            >
-              <Icon
-                name={boothsFollowing.includes(eventItem['key']) ? 'bookmark' : 'bookmark-o'}
-                size={25}
-                color="#575FCC"
-              />
-            </TouchableOpacity>
-              </ImageBackground>
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: 100,
+                  height: 40,
+                  width: 40,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  alignSelf: 'flex-end',
+                  marginRight: 15,
+                  marginTop: 15,
+                  zIndex: 1,
+                }}
+                onPress={() => updateStarred(eventItem)}
+              >
+                <Icon
+                  name={boothsFollowing.includes(eventItem['key']) ? 'bookmark' : 'bookmark-o'}
+                  size={25}
+                  color="#575FCC"
+                />
+              </TouchableOpacity>
+            </ImageBackground>
           </View>
           <View style={styles.eventDetailsContainer}>
             <Text style={styles.eventDate}>{eventItem['date']['day']}</Text>
@@ -195,11 +201,21 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       setEvents(eventItems);
 
       let newArray: any = Object.values(eventItems).sort((a: any, b: any) => {
-          return compareAsc(new Date(a.date.year, a.date.month, a.date.day), new Date(b.date.year, b.date.month, b.date.day))
-        })
+        return compareAsc(
+          new Date(a.date.year, a.date.month, a.date.day),
+          new Date(b.date.year, b.date.month, b.date.day)
+        );
+      });
 
       for (let i = 0; i < newArray.length; i++) {
-        if (isPast(zonedTimeToUtc(new Date(newArray[i].date.year, newArray[i].date.month - 1, newArray[i].date.day), 'Asia/Singapore'))) {
+        if (
+          isPast(
+            zonedTimeToUtc(
+              new Date(newArray[i].date.year, newArray[i].date.month - 1, newArray[i].date.day),
+              'Asia/Singapore'
+            )
+          )
+        ) {
           remove(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/' + newArray[i].key));
           remove(ref(db, '/events/' + newArray[i].key));
         }
@@ -216,7 +232,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     console.log('current user id is ', auth.currentUser?.uid);
     return onValue(ref(db, '/users/' + auth.currentUser?.uid), (querySnapShot) => {
       let data2 = querySnapShot.val() || {};
-      let boothsFollowingTemp = { ...data2.boothsFollowing }
+      let boothsFollowingTemp = { ...data2.boothsFollowing };
       setBoothsFollowing(Object.keys(boothsFollowingTemp));
       console.log('booths following are ', Object.keys(boothsFollowingTemp));
       setRefreshing(false);
@@ -225,8 +241,8 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         name: data2.name,
         email: user?.email!,
         instagram: data2.instagram,
-        type: data2.type
-      })
+        type: data2.type,
+      });
     });
   }, []);
 
@@ -305,10 +321,15 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         }}
       >
         <Text style={styles.title}>events</Text>
-        <TouchableOpacity style={{ alignSelf: 'center' }} onPress={() => navigation.navigate('SettingsScreen', {
-          instagram: value.instagram,
-          type: value.type,
-        })}>
+        <TouchableOpacity
+          style={{ alignSelf: 'center' }}
+          onPress={() =>
+            navigation.navigate('SettingsScreen', {
+              instagram: value.instagram,
+              type: value.type,
+            })
+          }
+        >
           <Icon2 name="person-circle-outline" size={35} color="#2A3242" />
         </TouchableOpacity>
       </View>
@@ -366,10 +387,11 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             </View>
           </View>
         ))}
-        {user?.uid === 'wtEK11lqiZex81waXY7CjFUNiMq2' &&
-          <TouchableOpacity onPress={() => navigation.navigate('AddEvent')} style={{alignItems: 'center'}}>
+        {user?.uid === 'wtEK11lqiZex81waXY7CjFUNiMq2' && (
+          <TouchableOpacity onPress={() => navigation.navigate('AddEvent')} style={{ alignItems: 'center' }}>
             <Text>add event</Text>
-          </TouchableOpacity>}
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

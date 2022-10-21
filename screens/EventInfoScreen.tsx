@@ -1,4 +1,12 @@
-import { StyleSheet, Linking, TextInput, TouchableOpacity, SafeAreaView, ImageBackground, FlatList } from 'react-native';
+import {
+  StyleSheet,
+  Linking,
+  TextInput,
+  TouchableOpacity,
+  SafeAreaView,
+  ImageBackground,
+  FlatList,
+} from 'react-native';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
 import { getAuth } from 'firebase/auth';
@@ -14,7 +22,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
   const { user } = useAuthentication();
   const auth = getAuth();
   const { eventID, month, day, location, year, imgUrl, name, following } = route.params;
-  const [boothFollowed, setBoothFollowed] = useState(following)
+  const [boothFollowed, setBoothFollowed] = useState(following);
   const [vendorList, setVendorList] = useState({});
 
   const [search, setSearch] = useState('');
@@ -54,19 +62,18 @@ export default function EventInfoScreen({ route, navigation }: any) {
     getStarred(newStarredFilter);
   };
 
-  useMemo(()=>{
+  useMemo(() => {
     if (Object.keys(vendorList).includes(user?.uid!)) {
-      setBoothing(true)
-      console.log('boothing')
+      setBoothing(true);
+      console.log('boothing');
+    } else {
+      console.log(Object.keys(vendorList));
     }
-    else {
-      console.log(Object.keys(vendorList))
-    }
-}, [vendorList])
+  }, [vendorList]);
 
   useEffect(() => {
     return onValue(ref_db(db, '/events/' + eventID + '/vendors'), async (querySnapShot) => {
-      let data = await querySnapShot.val() || {};
+      let data = (await querySnapShot.val()) || {};
       let vendorList = { ...data };
 
       setVendorList({});
@@ -154,7 +161,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
       );
     }
   };
-  
+
   // gets all cards that match the starred filter (while still matching the search term)
   const getStarred = (newStarredFilter: boolean) => {
     // if starred is true, filters cardArray by starred and then applies the search
@@ -192,10 +199,16 @@ export default function EventInfoScreen({ route, navigation }: any) {
       if (vendorsFollowing.includes(uid) && starredFilter === true) {
         remove(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/' + uid));
         getStarred(starredFilter);
-        setVendorsFollowing(vendorsFollowing.filter((obj: string) => {
-          return !(obj === uid)}))
-        setFilteredVendors(filteredVendors.filter((obj: any) => {
-          return !(obj.uid === uid)}))
+        setVendorsFollowing(
+          vendorsFollowing.filter((obj: string) => {
+            return !(obj === uid);
+          })
+        );
+        setFilteredVendors(
+          filteredVendors.filter((obj: any) => {
+            return !(obj.uid === uid);
+          })
+        );
       } else {
         update(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/'), {
           [uid]: '',
@@ -371,149 +384,149 @@ export default function EventInfoScreen({ route, navigation }: any) {
             height: undefined,
           }}
         >
-          <SafeAreaView style={{flexDirection: 'row', justifyContent: 'space-between', backgroundColor: 'transparent'}}>
+          <SafeAreaView
+            style={{ flexDirection: 'row', justifyContent: 'space-between', backgroundColor: 'transparent' }}
+          >
             <TouchableOpacity
-            style={{
-              backgroundColor: '#FFF8F3',
-              borderRadius: 100,
-              height: 40,
-              width: 40,
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginLeft: 15,
-            }}
-            onPress={() => navigation.goBack()}>
+              style={{
+                backgroundColor: '#FFF8F3',
+                borderRadius: 100,
+                height: 40,
+                width: 40,
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginLeft: 15,
+              }}
+              onPress={() => navigation.goBack()}
+            >
               <Icon2 name="keyboard-arrow-left" size={30} color="#2A3242" />
             </TouchableOpacity>
             <TouchableOpacity
-                style={{
-                  backgroundColor: '#575FCC',
-                  borderRadius: 100,
-                  height: 40,
-                  width: 40,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginRight: 15,
-                }}
-                onPress={() => 
-                  {
-                    if (boothFollowed) {
-                      remove(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/' + eventID));
-                      setBoothFollowed(false)
-                    }
-                else {
+              style={{
+                backgroundColor: '#575FCC',
+                borderRadius: 100,
+                height: 40,
+                width: 40,
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginRight: 15,
+              }}
+              onPress={() => {
+                if (boothFollowed) {
+                  remove(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/' + eventID));
+                  setBoothFollowed(false);
+                } else {
                   update(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/'), {
                     [eventID]: '',
-                  })
-                  setBoothFollowed(true)
+                  });
+                  setBoothFollowed(true);
                 }
               }}
-              >
-                <Icon
-                  name={boothFollowed ? 'bookmark' : 'bookmark-o'}
-                  size={25}
-                  color="white"
-                />
-              </TouchableOpacity>
+            >
+              <Icon name={boothFollowed ? 'bookmark' : 'bookmark-o'} size={25} color="white" />
+            </TouchableOpacity>
           </SafeAreaView>
         </ImageBackground>
       </View>
 
-        <View style={styles.container}>
-          <FlatList 
-            style={styles.eventList}
-            showsVerticalScrollIndicator={false}
-            data={Object.keys(filteredVendors)}
-            renderItem={({ item }) => <VendorItem eventID={eventID} id={item} self={false} />}
-            keyExtractor={(item) => eventID}
-            ListEmptyComponent={() => (
-              <Text>no creators yet!</Text>
-            )}
-            ListHeaderComponent={() => (
-              <View style={{backgroundColor: 'transparent'}}>
-                <Text style={styles.date}>
-            {monthNames[month-1]} {day}, {year}
-          </Text>
-          <Text style={styles.name}>{name}</Text>
-          <Text style={styles.location}>{location}</Text>
+      <View style={styles.container}>
+        <FlatList
+          style={styles.eventList}
+          showsVerticalScrollIndicator={false}
+          data={Object.keys(filteredVendors)}
+          renderItem={({ item }) => <VendorItem eventID={eventID} id={item} self={false} />}
+          keyExtractor={(item) => eventID}
+          ListEmptyComponent={() => <Text>no creators yet!</Text>}
+          ListHeaderComponent={() => (
+            <View style={{ backgroundColor: 'transparent' }}>
+              <Text style={styles.date}>
+                {monthNames[month - 1]} {day}, {year}
+              </Text>
+              <Text style={styles.name}>{name}</Text>
+              <Text style={styles.location}>{location}</Text>
 
-          <View
-            style={{ flexDirection: 'row', backgroundColor: 'transparent', alignContent: 'flex-end', marginBottom: 10 }}
-          >
-            <TextInput
-              style={styles.searchBar}
-              value={search}
-              placeholder="search by creator..."
-              underlineColorAndroid="transparent"
-              onChangeText={(text) => searchVendors(text)}
-              textAlign="left"
-              placeholderTextColor="#C4C4C4"
-              autoCapitalize="none"
-              autoComplete="off"
-              autoCorrect={false}
-            />
-            <TouchableOpacity style={styles.savedButton} onPress={() => applyStarredFilter()}>
-              <Icon
-                name={starredFilter ? 'bookmark' : 'bookmark-o'}
-                size={20}
-                color="#FFFFFF"
-                style={{ alignSelf: 'center' }}
-              />
-            </TouchableOpacity>
-          </View>
-          {currentUser.type === 'vendor' && [
-            boothing ? (
               <View
                 style={{
-                  borderRadius: 20,
-                  borderWidth: 1,
-                  borderColor: 'transparent',
+                  flexDirection: 'row',
                   backgroundColor: 'transparent',
-                  height: 240,
-                  marginVertical: 20,
+                  alignContent: 'flex-end',
+                  marginBottom: 10,
                 }}
               >
-                <View
-                  style={{
-                    borderTopLeftRadius: 20,
-                    borderTopRightRadius: 20,
-                    borderWidth: 1,
-                    borderColor: 'transparent',
-                    backgroundColor: '#8FD8B5',
-                    marginTop: -2,
-                    height: 70,
-                    alignItems: 'center',
-                  }}
-                >
-                  <TouchableOpacity style={styles.boothing} onPress={() => removeBoothFromEvent()}>
-                    <Text style={{ fontWeight: '800', color: '#8FD8B5' }}>BOOTHING</Text>
+                <TextInput
+                  style={styles.searchBar}
+                  value={search}
+                  placeholder="search by creator..."
+                  underlineColorAndroid="transparent"
+                  onChangeText={(text) => searchVendors(text)}
+                  textAlign="left"
+                  placeholderTextColor="#C4C4C4"
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  autoCorrect={false}
+                />
+                <TouchableOpacity style={styles.savedButton} onPress={() => applyStarredFilter()}>
+                  <Icon
+                    name={starredFilter ? 'bookmark' : 'bookmark-o'}
+                    size={20}
+                    color="#FFFFFF"
+                    style={{ alignSelf: 'center' }}
+                  />
+                </TouchableOpacity>
+              </View>
+              {currentUser.type === 'vendor' && [
+                boothing ? (
+                  <View
+                    style={{
+                      borderRadius: 20,
+                      borderWidth: 1,
+                      borderColor: 'transparent',
+                      backgroundColor: 'transparent',
+                      height: 240,
+                      marginVertical: 20,
+                    }}
+                  >
+                    <View
+                      style={{
+                        borderTopLeftRadius: 20,
+                        borderTopRightRadius: 20,
+                        borderWidth: 1,
+                        borderColor: 'transparent',
+                        backgroundColor: '#8FD8B5',
+                        marginTop: -2,
+                        height: 70,
+                        alignItems: 'center',
+                      }}
+                    >
+                      <TouchableOpacity style={styles.boothing} onPress={() => removeBoothFromEvent()}>
+                        <Text style={{ fontWeight: '800', color: '#8FD8B5' }}>BOOTHING</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View
+                      style={{
+                        borderBottomLeftRadius: 20,
+                        borderBottomRightRadius: 20,
+                        borderWidth: 1,
+                        borderColor: '#8FD8B5',
+                        backgroundColor: 'white',
+                        marginTop: -2,
+                        height: 180,
+                        alignItems: 'center',
+                      }}
+                    >
+                      <VendorItem eventID={eventID} id={auth.currentUser?.uid} self={true} />
+                    </View>
+                  </View>
+                ) : (
+                  <TouchableOpacity style={styles.notBoothing} onPress={() => boothAtEvent()}>
+                    <Text style={{ fontWeight: '800', color: '#8FD8B5' }}>NOT BOOTHING</Text>
                   </TouchableOpacity>
-                </View>
-                <View
-                  style={{
-                    borderBottomLeftRadius: 20,
-                    borderBottomRightRadius: 20,
-                    borderWidth: 1,
-                    borderColor: '#8FD8B5',
-                    backgroundColor: 'white',
-                    marginTop: -2,
-                    height: 180,
-                    alignItems: 'center',
-                  }}
-                >
-                  <VendorItem eventID={eventID} id={auth.currentUser?.uid} self={true} />
-                </View>
-              </View>
-            ) : (
-              <TouchableOpacity style={styles.notBoothing} onPress={() => boothAtEvent()}>
-                <Text style={{ fontWeight: '800', color: '#8FD8B5' }}>NOT BOOTHING</Text>
-              </TouchableOpacity>
-            ),
-          ]}
-              </View>
+                ),
+              ]}
+            </View>
           )}
-          />
-        </View>
+        />
+      </View>
     </View>
   );
 }

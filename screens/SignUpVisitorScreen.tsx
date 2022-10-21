@@ -49,12 +49,12 @@ const SignUpVisitorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) =>
     try {
       await createUserWithEmailAndPassword(auth, value.email.trim(), value.password.trim());
       await updateProfile(auth.currentUser!, {
-      displayName: value.name.trim(),
+        displayName: value.name.trim(),
       });
       set(ref(db, '/users/' + auth.currentUser?.uid), {
         type: 'visitor',
         name: value.name.trim(),
-        uid: auth.currentUser?.uid
+        uid: auth.currentUser?.uid,
       });
       navigation.navigate('SignIn');
     } catch (error: any) {
@@ -123,14 +123,10 @@ const SignUpVisitorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) =>
           <Text style={styles.buttonTitle}>SIGN UP →</Text>
         </TouchableOpacity>
         <View style={styles.footerView}>
-          <Text style={styles.footerText}>
-            already have an account?{' '}
-          </Text>
+          <Text style={styles.footerText}>already have an account? </Text>
           <TouchableOpacity onPress={onFooterLinkPress}>
-              <Text style={styles.footerLink}>
-                log in
-              </Text>
-            </TouchableOpacity>
+            <Text style={styles.footerLink}>log in</Text>
+          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -140,7 +136,7 @@ const SignUpVisitorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) =>
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   title: {
     alignSelf: 'center',
@@ -211,7 +207,7 @@ const styles = StyleSheet.create({
   footerView: {
     alignItems: 'center',
     marginTop: 20,
-    flexDirection: 'row'
+    flexDirection: 'row',
   },
   footerText: {
     fontSize: 16,

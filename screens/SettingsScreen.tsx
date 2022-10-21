@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { StyleSheet, SafeAreaView, TouchableOpacity, Alert, TextInput, ScrollView } from 'react-native';
 import { getAuth, signOut, sendPasswordResetEmail, updateEmail, updateProfile, deleteUser } from 'firebase/auth';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
-import { onValue, ref, update} from 'firebase/database';
+import { onValue, ref, update } from 'firebase/database';
 import { db, storage } from '../config/firebase';
 import Image from 'react-native-image-progress';
 import { ref as ref_storage, getDownloadURL, deleteObject, uploadBytes } from 'firebase/storage';
@@ -16,18 +16,18 @@ export default function SettingsScreen({ route, navigation }: any) {
   const { user } = useAuthentication();
   const auth = getAuth();
 
-  const initialInstagram = route.params.instagram
-  console.log('initial instagram', initialInstagram)
+  const initialInstagram = route.params.instagram;
+  console.log('initial instagram', initialInstagram);
 
-  const initialType = route.params.type
-  console.log('initial type', initialType)
+  const initialType = route.params.type;
+  console.log('initial type', initialType);
 
   const [value, setValue] = React.useState({
     email: '',
     error: '',
     name: '',
     instagram: initialInstagram,
-    type: initialType
+    type: initialType,
   });
 
   const [imgUrl1, setImgUrl1] = useState<string | undefined>(undefined);
@@ -44,8 +44,8 @@ export default function SettingsScreen({ route, navigation }: any) {
 
   const getPermissionAsync = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      alert("...");
+    if (status !== 'granted') {
+      alert('...');
     }
   };
 
@@ -64,47 +64,53 @@ export default function SettingsScreen({ route, navigation }: any) {
     if (!result.cancelled) {
       switch (number) {
         case 1:
-          setImgUrl1(result.uri)
+          setImgUrl1(result.uri);
 
           const response1 = await fetch(result.uri);
           const blob1 = await response1.blob();
-      
-          deleteObject(ref1).then(() => {
-            uploadBytes(ref1, blob1, metadata).then((snapshot) => {
-              console.log('Uploaded image 1');
+
+          deleteObject(ref1)
+            .then(() => {
+              uploadBytes(ref1, blob1, metadata).then((snapshot) => {
+                console.log('Uploaded image 1');
+              });
+            })
+            .catch((error) => {
+              // Uh-oh, an error occurred!
+              console.log(error);
             });
-          }).catch((error) => {
-            // Uh-oh, an error occurred!
-            console.log(error)
-          });
           break;
         case 2:
-          setImgUrl2(result.uri)
+          setImgUrl2(result.uri);
           const response2 = await fetch(result.uri);
           const blob2 = await response2.blob();
-      
-          deleteObject(ref2).then(() => {
-            uploadBytes(ref2, blob2, metadata).then((snapshot) => {
-              console.log('Uploaded image 2');
+
+          deleteObject(ref2)
+            .then(() => {
+              uploadBytes(ref2, blob2, metadata).then((snapshot) => {
+                console.log('Uploaded image 2');
+              });
+            })
+            .catch((error) => {
+              // Uh-oh, an error occurred!
+              console.log(error);
             });
-          }).catch((error) => {
-            // Uh-oh, an error occurred!
-            console.log(error)
-          });
           break;
         case 3:
-          setImgUrl3(result.uri)
+          setImgUrl3(result.uri);
           const response3 = await fetch(result.uri);
           const blob3 = await response3.blob();
-      
-          deleteObject(ref3).then(() => {
-            uploadBytes(ref3, blob3, metadata).then((snapshot) => {
-              console.log('Uploaded image 2');
+
+          deleteObject(ref3)
+            .then(() => {
+              uploadBytes(ref3, blob3, metadata).then((snapshot) => {
+                console.log('Uploaded image 2');
+              });
+            })
+            .catch((error) => {
+              // Uh-oh, an error occurred!
+              console.log(error);
             });
-          }).catch((error) => {
-            // Uh-oh, an error occurred!
-            console.log(error)
-          });
           break;
         default:
           break;
@@ -115,35 +121,34 @@ export default function SettingsScreen({ route, navigation }: any) {
   useMemo(() => {
     if (value.type === 'vendor') {
       getDownloadURL(ref1)
-    .then((url) => {
-      setImgUrl1(url);
-    })
-    .catch((error) => {
-      console.log('error:' + error);
-    });
+        .then((url) => {
+          setImgUrl1(url);
+        })
+        .catch((error) => {
+          console.log('error:' + error);
+        });
 
-  getDownloadURL(ref2)
-    .then((url) => {
-      setImgUrl2(url);
-    })
-    .catch((error) => {
-      console.log('error:' + error);
-    });
+      getDownloadURL(ref2)
+        .then((url) => {
+          setImgUrl2(url);
+        })
+        .catch((error) => {
+          console.log('error:' + error);
+        });
 
-  getDownloadURL(ref3)
-    .then((url) => {
-      setImgUrl3(url);
-    })
-    .catch((error) => {
-      console.log('error:' + error);
-    });
+      getDownloadURL(ref3)
+        .then((url) => {
+          setImgUrl3(url);
+        })
+        .catch((error) => {
+          console.log('error:' + error);
+        });
     }
-  getPermissionAsync()
-}, [value])
+    getPermissionAsync();
+  }, [value]);
 
-  // TODO: fix loading issue
   useEffect(() => {
-    getData()
+    getData();
   }, []);
 
   const getData = async () => {
@@ -154,7 +159,7 @@ export default function SettingsScreen({ route, navigation }: any) {
 
       setValue({ ...value, name: userData.name, email: user?.email!, instagram: userData.instagram });
     });
-  }
+  };
 
   const switchAccount = (type: string) => {
     if (type === 'visitor') {
@@ -170,50 +175,55 @@ export default function SettingsScreen({ route, navigation }: any) {
       navigation.navigate('UpdateInstagramUsernameScreen', {
         email: value.email,
         name: value.name,
-      })
+      });
       setValue({
         name: value.name,
         instagram: route.params.name,
         type: 'vendor',
         email: value.email,
-        error: value.error
-      })
-      getData
+        error: value.error,
+      });
+      getData;
     }
   };
 
-  // TODO: when changing to creator, set instagram username and shop photos
   const deleteShop = () => {
     update(ref(db, '/users/' + auth.currentUser?.uid), {
       type: 'visitor',
-      instagram: ''
+      instagram: '',
     });
 
-    deleteObject(ref1).then(() => {
-      // File deleted successfully
-    }).catch((error) => {
-      console.log(error)
-    });
+    deleteObject(ref1)
+      .then(() => {
+        // File deleted successfully
+      })
+      .catch((error) => {
+        console.log(error);
+      });
 
-    deleteObject(ref2).then(() => {
-      // File deleted successfully
-    }).catch((error) => {
-      console.log(error)
-    });
+    deleteObject(ref2)
+      .then(() => {
+        // File deleted successfully
+      })
+      .catch((error) => {
+        console.log(error);
+      });
 
-    deleteObject(ref3).then(() => {
-      // File deleted successfully
-    }).catch((error) => {
-      console.log(error)
-    });
+    deleteObject(ref3)
+      .then(() => {
+        // File deleted successfully
+      })
+      .catch((error) => {
+        console.log(error);
+      });
     setValue({
       email: value.email,
       error: value.error,
       name: value.name,
       type: 'visitor',
-      instagram: ''
-    })
-    getData
+      instagram: '',
+    });
+    getData;
   };
 
   const handlePasswordReset = (email: string) => {
@@ -264,7 +274,7 @@ export default function SettingsScreen({ route, navigation }: any) {
         });
       }
       update(ref(db, '/users/' + user?.uid), {
-        name: value.name
+        name: value.name,
       });
     }
 
@@ -272,7 +282,7 @@ export default function SettingsScreen({ route, navigation }: any) {
       instagram: value.instagram,
     });
 
-    alert("Saved!")
+    alert('Saved!');
   }
 
   return (
@@ -292,130 +302,145 @@ export default function SettingsScreen({ route, navigation }: any) {
         <Text style={styles.title}>profile</Text>
       </View>
       <ScrollView>
-      {value.type === 'vendor' ? (
-        <View style={{ backgroundColor: 'transparent' }}>
-          <View
-            style={{ flexDirection: 'row', alignSelf: 'center', marginVertical: 20, backgroundColor: 'transparent' }}
-          >
-            <TouchableOpacity style={styles.visitorButton} onPress={() => switchAccount('visitor')}>
-              <Text style={{ color: '#8FD8B5', fontSize: 16 }}>visitor</Text>
-            </TouchableOpacity>
-            <View style={styles.vendorButtonPressed}>
-              <Text style={{ color: 'white', fontSize: 16 }}>creator</Text>
+        {value.type === 'vendor' ? (
+          <View style={{ backgroundColor: 'transparent' }}>
+            <View
+              style={{ flexDirection: 'row', alignSelf: 'center', marginVertical: 20, backgroundColor: 'transparent' }}
+            >
+              <TouchableOpacity style={styles.visitorButton} onPress={() => switchAccount('visitor')}>
+                <Text style={{ color: '#8FD8B5', fontSize: 16 }}>visitor</Text>
+              </TouchableOpacity>
+              <View style={styles.vendorButtonPressed}>
+                <Text style={{ color: 'white', fontSize: 16 }}>creator</Text>
+              </View>
+            </View>
+            {value.error && <Text style={styles.error}>{value.error}</Text>}
+            <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>Shop Name</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="shop name"
+              placeholderTextColor="#C4C4C4"
+              onChangeText={(text) => setValue({ ...value, name: text })}
+              value={value.name}
+              underlineColorAndroid="transparent"
+              autoCapitalize="none"
+              defaultValue={auth?.currentUser?.displayName!}
+            />
+            <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>Instagram</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="instagram username (without @)"
+              placeholderTextColor="#C4C4C4"
+              onChangeText={(text) => setValue({ ...value, instagram: text })}
+              value={value.instagram}
+              underlineColorAndroid="transparent"
+              autoCapitalize="none"
+              autoCorrect={false}
+              defaultValue={initialInstagram}
+            />
+            <View
+              style={{
+                marginVertical: 10,
+                marginHorizontal: 30,
+                backgroundColor: 'transparent',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+              }}
+            >
+              <Text style={{ fontWeight: '700', color: '#2A3242' }}>Email</Text>
+              <TouchableOpacity onPress={() => handlePasswordReset(value.email)}>
+                <Text style={{ color: '#FABF48', fontWeight: '600', fontStyle: 'italic' }}>Reset password</Text>
+              </TouchableOpacity>
+            </View>
+            <TextInput
+              style={styles.input}
+              placeholder="email"
+              placeholderTextColor="#C4C4C4"
+              onChangeText={(text) => setValue({ ...value, email: text })}
+              value={value.email}
+              underlineColorAndroid="transparent"
+              autoCapitalize="none"
+              defaultValue={auth?.currentUser?.email!}
+            />
+            <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>Shop Photos</Text>
+            <View style={styles.eventImageContainer}>
+              {imgUrl1 && (
+                <TouchableOpacity onPress={() => _pickImage(1)}>
+                  <Image source={{ uri: imgUrl1 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
+                </TouchableOpacity>
+              )}
+              {imgUrl2 && (
+                <TouchableOpacity onPress={() => _pickImage(2)}>
+                  <Image source={{ uri: imgUrl2 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
+                </TouchableOpacity>
+              )}
+              {imgUrl3 && (
+                <TouchableOpacity onPress={() => _pickImage(3)}>
+                  <Image source={{ uri: imgUrl3 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
-          {value.error && <Text style={styles.error}>{value.error}</Text>}
-          <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>Shop Name</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="shop name"
-            placeholderTextColor="#C4C4C4"
-            onChangeText={(text) => setValue({ ...value, name: text })}
-            value={value.name}
-            underlineColorAndroid="transparent"
-            autoCapitalize="none"
-            defaultValue={auth?.currentUser?.displayName!}
-          />
-          <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>Instagram</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="instagram username (without @)"
-            placeholderTextColor="#C4C4C4"
-            onChangeText={(text) => setValue({ ...value, instagram: text })}
-            value={value.instagram}
-            underlineColorAndroid="transparent"
-            autoCapitalize="none"
-            autoCorrect={false}
-            defaultValue={initialInstagram}
-          />
-          <View style={{marginVertical: 10, marginHorizontal: 30, backgroundColor: 'transparent', flexDirection: 'row', justifyContent: 'space-between'}}>
-            <Text style={{ fontWeight: '700', color: '#2A3242' }}>Email</Text>
-            <TouchableOpacity onPress={() => handlePasswordReset(value.email)}>
-              <Text
-                style={{ color: '#FABF48', fontWeight: '600', fontStyle: 'italic' }}
-              >
-              Reset password
-            </Text>
-          </TouchableOpacity>
-          </View>
-          <TextInput
-            style={styles.input}
-            placeholder="email"
-            placeholderTextColor="#C4C4C4"
-            onChangeText={(text) => setValue({ ...value, email: text })}
-            value={value.email}
-            underlineColorAndroid="transparent"
-            autoCapitalize="none"
-            defaultValue={auth?.currentUser?.email!}
-          />
-          <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>Shop Photos</Text>
-          <View style={styles.eventImageContainer}>
-            {imgUrl1 && 
-            <TouchableOpacity onPress={() => _pickImage(1)}>
-              <Image source={{ uri: imgUrl1 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
-            </TouchableOpacity>}
-            {imgUrl2 && 
-            <TouchableOpacity onPress={() => _pickImage(2)}>
-              <Image source={{ uri: imgUrl2 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
-            </TouchableOpacity>}
-            {imgUrl3 && 
-            <TouchableOpacity onPress={() => _pickImage(3)}>
-              <Image source={{ uri: imgUrl3 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
-            </TouchableOpacity>}
-          </View>
-        </View>
-      ) : (
-        <View style={{ backgroundColor: 'transparent' }}>
-          <View
-            style={{ flexDirection: 'row', alignSelf: 'center', marginVertical: 20, backgroundColor: 'transparent' }}
-          >
-            <View style={styles.visitorButtonPressed}>
-              <Text style={{ color: 'white', fontSize: 16 }}>visitor</Text>
+        ) : (
+          <View style={{ backgroundColor: 'transparent' }}>
+            <View
+              style={{ flexDirection: 'row', alignSelf: 'center', marginVertical: 20, backgroundColor: 'transparent' }}
+            >
+              <View style={styles.visitorButtonPressed}>
+                <Text style={{ color: 'white', fontSize: 16 }}>visitor</Text>
+              </View>
+              <TouchableOpacity style={styles.vendorButton} onPress={() => switchAccount('vendor')}>
+                <Text style={{ color: '#FABF48', fontSize: 16 }}>vendor</Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity style={styles.vendorButton} onPress={() => switchAccount('vendor')}>
-              <Text style={{ color: '#FABF48', fontSize: 16 }}>vendor</Text>
-            </TouchableOpacity>
+            {value.error && <Text style={styles.error}>{value.error}</Text>}
+            <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>Name</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="name"
+              placeholderTextColor="#C4C4C4"
+              onChangeText={(text) => setValue({ ...value, name: text })}
+              value={value.name}
+              underlineColorAndroid="transparent"
+              autoCapitalize="none"
+              defaultValue={auth?.currentUser?.displayName!}
+            />
+            <View
+              style={{
+                marginVertical: 10,
+                marginHorizontal: 30,
+                backgroundColor: 'transparent',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+              }}
+            >
+              <Text style={{ fontWeight: '700', color: '#2A3242' }}>Email</Text>
+              <TouchableOpacity onPress={() => handlePasswordReset(value.email)}>
+                <Text style={{ color: '#FABF48', fontWeight: '600', fontStyle: 'italic' }}>Reset password</Text>
+              </TouchableOpacity>
+            </View>
+            <TextInput
+              style={styles.input}
+              placeholder="email"
+              placeholderTextColor="#C4C4C4"
+              onChangeText={(text) => setValue({ ...value, email: text })}
+              value={value.email}
+              underlineColorAndroid="transparent"
+              autoCapitalize="none"
+              defaultValue={auth?.currentUser?.email!}
+            />
           </View>
-          {value.error && <Text style={styles.error}>{value.error}</Text>}
-          <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>Name</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="name"
-            placeholderTextColor="#C4C4C4"
-            onChangeText={(text) => setValue({ ...value, name: text })}
-            value={value.name}
-            underlineColorAndroid="transparent"
-            autoCapitalize="none"
-            defaultValue={auth?.currentUser?.displayName!}
-          />
-          <View style={{marginVertical: 10, marginHorizontal: 30, backgroundColor: 'transparent', flexDirection: 'row', justifyContent: 'space-between'}}>
-            <Text style={{ fontWeight: '700', color: '#2A3242' }}>Email</Text>
-            <TouchableOpacity onPress={() => handlePasswordReset(value.email)}>
-              <Text
-                style={{ color: '#FABF48', fontWeight: '600', fontStyle: 'italic' }}
-              >
-              Reset password
-            </Text>
-          </TouchableOpacity>
-          </View>
-          <TextInput
-            style={styles.input}
-            placeholder="email"
-            placeholderTextColor="#C4C4C4"
-            onChangeText={(text) => setValue({ ...value, email: text })}
-            value={value.email}
-            underlineColorAndroid="transparent"
-            autoCapitalize="none"
-            defaultValue={auth?.currentUser?.email!}
-          />
-        </View>
-      )}
-      <View style={{              marginLeft: 30,
-              marginRight: 30,
-              marginTop: 50,
-              backgroundColor: 'transparent',
-              flexDirection: 'row',
-              justifyContent: 'space-between'}}>
+        )}
+        <View
+          style={{
+            marginLeft: 30,
+            marginRight: 30,
+            marginTop: 50,
+            backgroundColor: 'transparent',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}
+        >
           <TouchableOpacity
             style={{
               backgroundColor: '#575FCC',
@@ -430,29 +455,32 @@ export default function SettingsScreen({ route, navigation }: any) {
           >
             <Text style={styles.buttonTitle}>SAVE</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, {marginHorizontal: 0, marginTop: 0, width: 160}]} onPress={() => signOut(auth)}>
+          <TouchableOpacity
+            style={[styles.button, { marginHorizontal: 0, marginTop: 0, width: 160 }]}
+            onPress={() => signOut(auth)}
+          >
             <Text style={styles.buttonTitle}>SIGN OUT</Text>
           </TouchableOpacity>
-          </View>
-          <TouchableOpacity
-            style={{
-              backgroundColor: '#D54826FF',
-              height: 48,
-              width: 200,
-              borderRadius: 20,
-              alignItems: 'center',
-              alignSelf: 'center',
-              justifyContent: 'center',
-              marginTop: 20
-            }}
-            onPress={() => deleteUser(auth.currentUser!)}
-          >
-            <Text style={styles.buttonTitle}>DELETE ACCOUNT</Text>
-          </TouchableOpacity>
+        </View>
+        <TouchableOpacity
+          style={{
+            backgroundColor: '#D54826FF',
+            height: 48,
+            width: 200,
+            borderRadius: 20,
+            alignItems: 'center',
+            alignSelf: 'center',
+            justifyContent: 'center',
+            marginTop: 20,
+          }}
+          onPress={() => deleteUser(auth.currentUser!)}
+        >
+          <Text style={styles.buttonTitle}>DELETE ACCOUNT</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
-};
+}
 // TODO: create reauthentication modal (https://firebase.google.com/docs/auth/web/manage-users#re-authenticate_a_user)
 // for email change and delete account
 

@@ -1,5 +1,14 @@
 import React from 'react';
-import { StyleSheet, Text, View, Alert, KeyboardAvoidingView, TextInput, TouchableOpacity, SafeAreaView} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Alert,
+  KeyboardAvoidingView,
+  TextInput,
+  TouchableOpacity,
+  SafeAreaView,
+} from 'react-native';
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { StackScreenProps } from '@react-navigation/stack';
 
@@ -18,15 +27,14 @@ const SignInScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   const handlePasswordReset = (email: string) => {
     if (email) {
       sendPasswordResetEmail(auth, email)
-      .then(function (user) {
-        Alert.alert('Check your email for the password reset link!', 'If not in your inbox it may be in spam.');
-      })
-      .catch(function (e) {
-        console.log(e);
-      });
-    }
-    else {
-      setValue({...value, error: 'Please enter a valid email.'})
+        .then(function (user) {
+          Alert.alert('Check your email for the password reset link!', 'If not in your inbox it may be in spam.');
+        })
+        .catch(function (e) {
+          console.log(e);
+        });
+    } else {
+      setValue({ ...value, error: 'Please enter a valid email.' });
     }
   };
 
@@ -81,22 +89,16 @@ const SignInScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           <Text style={styles.buttonTitle}>LOG IN →</Text>
         </TouchableOpacity>
         <View style={styles.footerView}>
-          <Text style={styles.footerText}>
-            don't have an account?{' '}
-          </Text>
+          <Text style={styles.footerText}>don't have an account? </Text>
           <TouchableOpacity onPress={onFooterLinkPress}>
-              <Text style={styles.footerLink}>
-                sign up
-              </Text>
-            </TouchableOpacity>
-            </View>
-          <TouchableOpacity onPress={() => handlePasswordReset(value.email)}>
-            <Text
-              style={{ fontSize: 16, color: '#FABF48', marginTop: 30, fontWeight: '600', fontStyle: 'italic' }}
-            >
-              reset password
-            </Text>
+            <Text style={styles.footerLink}>sign up</Text>
           </TouchableOpacity>
+        </View>
+        <TouchableOpacity onPress={() => handlePasswordReset(value.email)}>
+          <Text style={{ fontSize: 16, color: '#FABF48', marginTop: 30, fontWeight: '600', fontStyle: 'italic' }}>
+            reset password
+          </Text>
+        </TouchableOpacity>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -105,7 +107,7 @@ const SignInScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   title: {
     alignSelf: 'center',
@@ -126,7 +128,7 @@ const styles = StyleSheet.create({
     marginRight: 30,
     paddingLeft: 16,
     borderWidth: 1,
-    borderColor: '#C4C4C4'
+    borderColor: '#C4C4C4',
   },
   button: {
     backgroundColor: '#2A3242',
@@ -148,7 +150,7 @@ const styles = StyleSheet.create({
   footerView: {
     alignItems: 'center',
     marginTop: 30,
-    flexDirection: 'row'
+    flexDirection: 'row',
   },
   footerText: {
     fontSize: 16,

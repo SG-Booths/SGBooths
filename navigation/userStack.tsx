@@ -64,8 +64,16 @@ export default function UserStack() {
         <Stack.Screen name="EventInfoScreen" component={EventInfoScreen} options={{ headerShown: false }} />
         <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
         <Stack.Screen name="AddEvent" component={AddEventScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="UpdateInstagramUsernameScreen" component={UpdateInstagramUsernameScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="UpdateShopImagesScreen" component={UpdateShopImagesScreen} options={{ headerShown: false }} />
+        <Stack.Screen
+          name="UpdateInstagramUsernameScreen"
+          component={UpdateInstagramUsernameScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="UpdateShopImagesScreen"
+          component={UpdateShopImagesScreen}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
