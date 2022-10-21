@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { StyleSheet, SafeAreaView, TouchableOpacity, Alert, TextInput, ScrollView } from 'react-native';
 import { getAuth, signOut, sendPasswordResetEmail, updateEmail, updateProfile, deleteUser } from 'firebase/auth';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
@@ -12,30 +12,35 @@ import { Text, View } from '../components/Themed';
 import { RootStackScreenProps } from '../types';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => {
+export default function SettingsScreen({ route, navigation }: any) {
   const { user } = useAuthentication();
   const auth = getAuth();
+
+  const initialInstagram = route.params.instagram
+  console.log('initial instagram', initialInstagram)
+
+  const initialType = route.params.type
+  console.log('initial type', initialType)
 
   const [value, setValue] = React.useState({
     email: '',
     error: '',
     name: '',
-    instagram: ''
+    instagram: initialInstagram,
+    type: initialType
   });
-
-  const [userInfo, setUserInfo]: any = useState({});
 
   const [imgUrl1, setImgUrl1] = useState<string | undefined>(undefined);
   let ref1: any;
-  if (userInfo.type === 'vendor') ref1 = ref_storage(storage, user?.uid + '_1.png');
+  if (value.type === 'vendor') ref1 = ref_storage(storage, auth?.currentUser?.uid + '_1.png');
 
   const [imgUrl2, setImgUrl2] = useState<string | undefined>(undefined);
   let ref2: any;
-  if (userInfo.type === 'vendor') ref2 = ref_storage(storage, user?.uid + '_2.png');
+  if (value.type === 'vendor') ref2 = ref_storage(storage, auth?.currentUser?.uid + '_2.png');
 
   const [imgUrl3, setImgUrl3] = useState<string | undefined>(undefined);
   let ref3: any;
-  if (userInfo.type === 'vendor') ref3 = ref_storage(storage, user?.uid + '_3.png');
+  if (value.type === 'vendor') ref3 = ref_storage(storage, auth?.currentUser?.uid + '_3.png');
 
   const getPermissionAsync = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -52,17 +57,54 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
     });
 
     console.log(result);
+    const metadata = {
+      contentType: 'image/png',
+    };
 
     if (!result.cancelled) {
       switch (number) {
         case 1:
           setImgUrl1(result.uri)
+
+          const response1 = await fetch(result.uri);
+          const blob1 = await response1.blob();
+      
+          deleteObject(ref1).then(() => {
+            uploadBytes(ref1, blob1, metadata).then((snapshot) => {
+              console.log('Uploaded image 1');
+            });
+          }).catch((error) => {
+            // Uh-oh, an error occurred!
+            console.log(error)
+          });
           break;
         case 2:
           setImgUrl2(result.uri)
+          const response2 = await fetch(result.uri);
+          const blob2 = await response2.blob();
+      
+          deleteObject(ref2).then(() => {
+            uploadBytes(ref2, blob2, metadata).then((snapshot) => {
+              console.log('Uploaded image 2');
+            });
+          }).catch((error) => {
+            // Uh-oh, an error occurred!
+            console.log(error)
+          });
           break;
         case 3:
           setImgUrl3(result.uri)
+          const response3 = await fetch(result.uri);
+          const blob3 = await response3.blob();
+      
+          deleteObject(ref3).then(() => {
+            uploadBytes(ref3, blob3, metadata).then((snapshot) => {
+              console.log('Uploaded image 2');
+            });
+          }).catch((error) => {
+            // Uh-oh, an error occurred!
+            console.log(error)
+          });
           break;
         default:
           break;
@@ -71,7 +113,7 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
   };
 
   useMemo(() => {
-    if (userInfo.type === 'vendor') {
+    if (value.type === 'vendor') {
       getDownloadURL(ref1)
     .then((url) => {
       setImgUrl1(url);
@@ -101,15 +143,18 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
 
   // TODO: fix loading issue
   useEffect(() => {
-    return onValue(ref(db, '/users/' + user?.uid), (querySnapShot) => {
+    getData()
+  }, []);
+
+  const getData = async () => {
+    return await onValue(ref(db, '/users/' + user?.uid), (querySnapShot) => {
       let data = querySnapShot.val() || {};
       let userData = { ...data };
-      setUserInfo(userData);
       // setValue({ ...value, name: userData.name, email: user?.email! });
 
-      setValue({ ...value, name: userInfo.name, email: user?.email!, instagram: userInfo.instagram });
+      setValue({ ...value, name: userData.name, email: user?.email!, instagram: userData.instagram });
     });
-  }, []);
+  }
 
   const switchAccount = (type: string) => {
     if (type === 'visitor') {
@@ -126,6 +171,14 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
         email: value.email,
         name: value.name,
       })
+      setValue({
+        name: value.name,
+        instagram: route.params.name,
+        type: 'vendor',
+        email: value.email,
+        error: value.error
+      })
+      getData
     }
   };
 
@@ -153,6 +206,14 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
     }).catch((error) => {
       console.log(error)
     });
+    setValue({
+      email: value.email,
+      error: value.error,
+      name: value.name,
+      type: 'visitor',
+      instagram: ''
+    })
+    getData
   };
 
   const handlePasswordReset = (email: string) => {
@@ -182,69 +243,35 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
       return;
     }
 
-    try {
-      updateEmail(auth.currentUser!, value.email);
-    } catch (error: any) {
-      setValue({
-        ...value,
-        error: error.message,
-      });
+    if (value.email != auth.currentUser?.email) {
+      try {
+        updateEmail(auth.currentUser!, value.email);
+      } catch (error: any) {
+        setValue({
+          ...value,
+          error: error.message,
+        });
+      }
     }
 
-    try {
-      updateProfile(auth.currentUser!, { displayName: value.name });
-    } catch (error: any) {
-      setValue({
-        ...value,
-        error: error.message,
+    if (value.name != auth.currentUser?.displayName) {
+      try {
+        updateProfile(auth.currentUser!, { displayName: value.name });
+      } catch (error: any) {
+        setValue({
+          ...value,
+          error: error.message,
+        });
+      }
+      update(ref(db, '/users/' + user?.uid), {
+        name: value.name
       });
     }
 
     update(ref(db, '/users/' + user?.uid), {
       instagram: value.instagram,
-      name: value.name
     });
 
-    const metadata = {
-      contentType: 'image/png',
-    };
-
-    const response1 = await fetch(imgUrl1!);
-    const blob1 = await response1.blob();
-
-    deleteObject(ref1).then(() => {
-      uploadBytes(ref1, blob1, metadata).then((snapshot) => {
-        console.log('Uploaded image 1');
-      });
-    }).catch((error) => {
-      // Uh-oh, an error occurred!
-      console.log(error)
-    });
-
-    const response2 = await fetch(imgUrl2!);
-    const blob2 = await response2.blob();
-
-    deleteObject(ref2).then(() => {
-      uploadBytes(ref2, blob2, metadata).then((snapshot) => {
-        console.log('Uploaded image 2');
-      });
-    }).catch((error) => {
-      // Uh-oh, an error occurred!
-      console.log(error)
-    });
-
-    const response3 = await fetch(imgUrl3!);
-    const blob3 = await response3.blob();
-
-    deleteObject(ref3).then(() => {
-      uploadBytes(ref3, blob3, metadata).then((snapshot) => {
-        console.log('Uploaded image 3');
-      });
-    }).catch((error) => {
-      // Uh-oh, an error occurred!
-      console.log(error)
-    });
-    
     alert("Saved!")
   }
 
@@ -265,7 +292,7 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
         <Text style={styles.title}>profile</Text>
       </View>
       <ScrollView>
-      {userInfo.type === 'vendor' ? (
+      {value.type === 'vendor' ? (
         <View style={{ backgroundColor: 'transparent' }}>
           <View
             style={{ flexDirection: 'row', alignSelf: 'center', marginVertical: 20, backgroundColor: 'transparent' }}
@@ -273,9 +300,9 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
             <TouchableOpacity style={styles.visitorButton} onPress={() => switchAccount('visitor')}>
               <Text style={{ color: '#8FD8B5', fontSize: 16 }}>visitor</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.vendorButtonPressed}>
+            <View style={styles.vendorButtonPressed}>
               <Text style={{ color: 'white', fontSize: 16 }}>creator</Text>
-            </TouchableOpacity>
+            </View>
           </View>
           {value.error && <Text style={styles.error}>{value.error}</Text>}
           <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>Shop Name</Text>
@@ -287,6 +314,7 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
             value={value.name}
             underlineColorAndroid="transparent"
             autoCapitalize="none"
+            defaultValue={auth?.currentUser?.displayName!}
           />
           <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>Instagram</Text>
           <TextInput
@@ -298,6 +326,7 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
             underlineColorAndroid="transparent"
             autoCapitalize="none"
             autoCorrect={false}
+            defaultValue={initialInstagram}
           />
           <View style={{marginVertical: 10, marginHorizontal: 30, backgroundColor: 'transparent', flexDirection: 'row', justifyContent: 'space-between'}}>
             <Text style={{ fontWeight: '700', color: '#2A3242' }}>Email</Text>
@@ -317,6 +346,7 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
             value={value.email}
             underlineColorAndroid="transparent"
             autoCapitalize="none"
+            defaultValue={auth?.currentUser?.email!}
           />
           <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>Shop Photos</Text>
           <View style={styles.eventImageContainer}>
@@ -339,9 +369,9 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
           <View
             style={{ flexDirection: 'row', alignSelf: 'center', marginVertical: 20, backgroundColor: 'transparent' }}
           >
-            <TouchableOpacity style={styles.visitorButtonPressed}>
+            <View style={styles.visitorButtonPressed}>
               <Text style={{ color: 'white', fontSize: 16 }}>visitor</Text>
-            </TouchableOpacity>
+            </View>
             <TouchableOpacity style={styles.vendorButton} onPress={() => switchAccount('vendor')}>
               <Text style={{ color: '#FABF48', fontSize: 16 }}>vendor</Text>
             </TouchableOpacity>
@@ -356,6 +386,7 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
             value={value.name}
             underlineColorAndroid="transparent"
             autoCapitalize="none"
+            defaultValue={auth?.currentUser?.displayName!}
           />
           <View style={{marginVertical: 10, marginHorizontal: 30, backgroundColor: 'transparent', flexDirection: 'row', justifyContent: 'space-between'}}>
             <Text style={{ fontWeight: '700', color: '#2A3242' }}>Email</Text>
@@ -375,6 +406,7 @@ const SettingsScreen: React.FC<RootStackScreenProps<any>> = ({ navigation }) => 
             value={value.email}
             underlineColorAndroid="transparent"
             autoCapitalize="none"
+            defaultValue={auth?.currentUser?.email!}
           />
         </View>
       )}
@@ -536,4 +568,3 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
 });
-export default SettingsScreen;

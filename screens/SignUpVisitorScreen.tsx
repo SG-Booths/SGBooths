@@ -49,7 +49,7 @@ const SignUpVisitorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) =>
     try {
       await createUserWithEmailAndPassword(auth, value.email.trim(), value.password.trim());
       await updateProfile(auth.currentUser!, {
-        displayName: value.name.trim(),
+      displayName: value.name.trim(),
       });
       set(ref(db, '/users/' + auth.currentUser?.uid), {
         type: 'visitor',

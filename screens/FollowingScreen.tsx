@@ -64,15 +64,6 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 
   // TODO: fix loading issue
   useEffect(() => {
-    return onValue(ref(db, '/events'), (querySnapShot) => {
-      let data = querySnapShot.val() || {};
-      let eventItems = { ...data };
-      setEvents(eventItems);
-      setRefreshing(false);
-    });
-  }, []);
-
-  useEffect(() => {
     return onValue(ref(db, '/users/' + user?.uid + '/vendorsFollowing'), (querySnapShot) => {
       let data = querySnapShot.val() || {};
       let vendorsFollowing = { ...data };
@@ -94,7 +85,13 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           }
         })
       );
-      setRefreshing(false);
+
+      onValue(ref(db, '/events'), (querySnapShot1) => {
+        let data = querySnapShot1.val() || {};
+        let eventItems = { ...data };
+        setEvents(eventItems);
+        setRefreshing(false);
+    });
     });
   }, []);
 
@@ -191,6 +188,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
                 .slice(0, 2)
                 .map((boothKey: any) => (
                   <TouchableOpacity
+                    key={boothKey}
                     style={{
                       flexDirection: 'row',
                       backgroundColor: 'transparent',
@@ -228,6 +226,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       </View>
     );
   };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ marginLeft: 30, backgroundColor: 'transparent' }}>

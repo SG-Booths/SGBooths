@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, Text, View, ImageBackground } from 'react-native';
+import { StyleSheet, TouchableOpacity, Text, View, ImageBackground, ActivityIndicator } from 'react-native';
 import React, { useState, useEffect } from 'react'
 import { db, storage } from '../config/firebase';
 import { ref, update } from 'firebase/database';
@@ -13,16 +13,18 @@ const auth = getAuth();
 export default function UpdateShopImagesScreen({ route, navigation }: any) {
     const { user } = useAuthentication();
     const auth = getAuth();
-    const { instagram } = route.params;
+    const { name, email, instagram } = route.params;
     const [value, setValue] = React.useState({
         error: ''
       });
 
-    const [imgUrl1, setImgUrl1] = useState<string | undefined>(undefined);
+      const [uploading, setUploading] = useState(false);
 
-    const [imgUrl2, setImgUrl2] = useState<string | undefined>(undefined);
+    const [imgUrl1, setImgUrl1]: any = useState<string | undefined>(undefined);
 
-    const [imgUrl3, setImgUrl3] = useState<string | undefined>(undefined);
+    const [imgUrl2, setImgUrl2]: any = useState<string | undefined>(undefined);
+
+    const [imgUrl3, setImgUrl3]: any = useState<string | undefined>(undefined);
 
     useEffect(() => {
         getPermissionAsync()
@@ -41,19 +43,56 @@ export default function UpdateShopImagesScreen({ route, navigation }: any) {
           allowsEditing: true,
           aspect: [1, 1]
         });
+
+        const metadata = {
+          contentType: 'image/png',
+        };
     
         console.log(result);
     
         if (!result.cancelled) {
           switch (number) {
             case 1:
+              setUploading(true)
               setImgUrl1(result.uri)
+              const ref1 = ref_storage(storage, auth?.currentUser?.uid + '_1.png');
+              const response1 = await fetch(result.uri);
+              const blob1 = await response1.blob();
+              uploadBytesResumable(ref1, blob1, metadata).then(async (snapshot) => {
+                console.log('Uploaded image 1');
+                setUploading(false)
+              }).catch((error) => {
+                // Uh-oh, an error occurred!
+                console.log(error)
+              })
               break;
             case 2:
+              setUploading(true)
               setImgUrl2(result.uri)
+              const ref2 = ref_storage(storage, auth?.currentUser?.uid + '_2.png');
+              const response2 = await fetch(result.uri);
+              const blob2 = await response2.blob();
+              uploadBytesResumable(ref2, blob2, metadata).then(async (snapshot) => {
+                console.log('Uploaded image 2');
+              }).catch((error) => {
+                setUploading(false)
+                // Uh-oh, an error occurred!
+                console.log(error)
+              })
               break;
             case 3:
+              setUploading(true)
               setImgUrl3(result.uri)
+              const ref3 = ref_storage(storage, auth?.currentUser?.uid + '_3.png');
+              const response3 = await fetch(result.uri);
+              const blob3 = await response3.blob();
+              uploadBytesResumable(ref3, blob3, metadata).then((snapshot) => {
+                console.log('Uploaded image 3');
+                setUploading(false)
+              }).catch((error) => {
+                // Uh-oh, an error occurred!
+                console.log(error)
+              })
               break;
             default:
               break;
@@ -62,59 +101,29 @@ export default function UpdateShopImagesScreen({ route, navigation }: any) {
       };
 
     const signUp = async () => {
-      if (imgUrl1 && imgUrl2 && imgUrl3) {
       console.log('img1:', imgUrl1)
       console.log('img2:', imgUrl2)
       console.log('img3:', imgUrl3)
 
-      const metadata = {
-          contentType: 'image/png',
-        };
 
-        const ref1 = ref_storage(storage, user?.uid + '_1.png');
-        const response1 = await fetch(imgUrl1);
-        const blob1 = await response1.blob();
-        uploadBytesResumable(ref1, blob1, metadata).then(async (snapshot) => {
-          console.log('Uploaded image 1');
-
-          const ref2 = ref_storage(storage, user?.uid + '_2.png');
-          const response2 = await fetch(imgUrl2);
-          const blob2 = await response2.blob();
-          uploadBytesResumable(ref2, blob2, metadata).then(async (snapshot) => {
-            console.log('Uploaded image 2');
-
-            const ref3 = ref_storage(storage, user?.uid + '_3.png');
-            const response3 = await fetch(imgUrl3);
-            const blob3 = await response3.blob();
-            uploadBytesResumable(ref3, blob3, metadata).then((snapshot) => {
-              console.log('Uploaded image 3');
-
+    
               try {
                 update(ref(db, '/users/' + auth.currentUser?.uid), {
                   instagram: instagram.replace(/\s+/g, ''),
                   type: 'vendor'
                 });
-                navigation.navigate('SettingsScreen');
+                navigation.navigate('SettingsScreen', {
+                  name: name,
+                  email: email,
+                  instagram: instagram,
+                  type: 'vendor'
+                })
               } catch (error: any) {
                 setValue({
                   ...value,
                   error: error.message,
                 });
               }
-            }).catch((error) => {
-              // Uh-oh, an error occurred!
-              console.log(error)
-            })
-          }).catch((error) => {
-            // Uh-oh, an error occurred!
-            console.log(error)
-          })
-        }).catch((error) => {
-          // Uh-oh, an error occurred!
-          console.log(error)
-          return
-        })
-      }
     }
 
   return (
@@ -144,9 +153,10 @@ export default function UpdateShopImagesScreen({ route, navigation }: any) {
                 </ImageBackground>
             </TouchableOpacity>
           </View>
-      <TouchableOpacity style={imgUrl1 && imgUrl2 && imgUrl3 ? (styles.button) : (styles.altButton)} onPress={() => signUp()}>
+      <TouchableOpacity style={imgUrl1 && imgUrl2 && imgUrl3 ? (styles.button) : (styles.altButton)} onPress={ () => (imgUrl1 && imgUrl2 && imgUrl3 && !uploading) && signUp()}>
           <Text style={imgUrl1 && imgUrl2 && imgUrl3 ? (styles.buttonTitle) : (styles.altButtonTitle)}>NEXT →</Text>
         </TouchableOpacity>
+        {uploading && <ActivityIndicator style={{marginTop: 20}} animating={true}/>}
     </View>
   );
 }

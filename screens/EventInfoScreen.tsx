@@ -196,8 +196,6 @@ export default function EventInfoScreen({ route, navigation }: any) {
           return !(obj === uid)}))
         setFilteredVendors(filteredVendors.filter((obj: any) => {
           return !(obj.uid === uid)}))
-        setVendorArray(vendorArray.filter((obj: any) => {
-          return !(obj.uid === uid)}))
       } else {
         update(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/'), {
           [uid]: '',

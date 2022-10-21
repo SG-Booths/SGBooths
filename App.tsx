@@ -3,17 +3,14 @@ import React from 'react';
 import RootNavigation from './navigation';
 import { ThemeProvider } from 'react-native-elements';
 import './config/firebase';
-
-import { StatusBar } from 'expo-status-bar';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-
+import { StyleSheet, TouchableOpacity, Text, View, Image } from 'react-native';
+import Onboarding from 'react-native-onboarding-swiper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import useCachedResources from './hooks/useCachedResources';
 import useColorScheme from './hooks/useColorScheme';
-import Navigation from './navigation';
 
 export default function App() {
   const isLoadingComplete = useCachedResources();
-  const colorScheme = useColorScheme();
 
   if (!isLoadingComplete) {
     return null;

@@ -47,6 +47,13 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     end: addMonths(today, 6),
   });
 
+  const [value, setValue] = React.useState({
+    email: '',
+    name: '',
+    instagram: '',
+    type: ''
+  });
+
   const monthNames = [
     'january',
     'february',
@@ -92,8 +99,6 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           setBoothsFollowing(boothsFollowing.filter((obj: string) => {
             return !(obj === eventItem['key'])}))
           setFilteredEvents(filteredEvents.filter((obj: any) => {
-            return !(obj.key === eventItem['key'])}))
-          setEventArray(eventArray.filter((obj: any) => {
             return !(obj.key === eventItem['key'])}))
       } else {
         update(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/'), {
@@ -209,12 +214,19 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 
   useEffect(() => {
     console.log('current user id is ', auth.currentUser?.uid);
-    return onValue(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing'), (querySnapShot) => {
+    return onValue(ref(db, '/users/' + auth.currentUser?.uid), (querySnapShot) => {
       let data2 = querySnapShot.val() || {};
-      let boothsFollowingTemp = { ...data2 };
+      let boothsFollowingTemp = { ...data2.boothsFollowing }
       setBoothsFollowing(Object.keys(boothsFollowingTemp));
       console.log('booths following are ', Object.keys(boothsFollowingTemp));
       setRefreshing(false);
+
+      setValue({
+        name: data2.name,
+        email: user?.email!,
+        instagram: data2.instagram,
+        type: data2.type
+      })
     });
   }, []);
 
@@ -293,7 +305,10 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         }}
       >
         <Text style={styles.title}>events</Text>
-        <TouchableOpacity style={{ alignSelf: 'center' }} onPress={() => navigation.navigate('SettingsScreen')}>
+        <TouchableOpacity style={{ alignSelf: 'center' }} onPress={() => navigation.navigate('SettingsScreen', {
+          instagram: value.instagram,
+          type: value.type,
+        })}>
           <Icon2 name="person-circle-outline" size={35} color="#2A3242" />
         </TouchableOpacity>
       </View>
