@@ -215,6 +215,7 @@ export default function SettingsScreen({ route, navigation }: any) {
     }
 
     Alert.alert('Saved!');
+    Keyboard.dismiss()
   }
   return (
     <SafeAreaView style={styles.container}>
