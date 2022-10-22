@@ -1,5 +1,5 @@
 import { StyleSheet, TouchableOpacity, Text, View, ImageBackground, ActivityIndicator } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { db, storage } from '../config/firebase';
 import { ref, set } from 'firebase/database';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
@@ -20,10 +20,13 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
   const [uploading, setUploading] = useState(false);
 
   const [imgUrl1, setImgUrl1] = useState<string | undefined>(undefined);
+  let imgUrl1Final: any = useRef();
 
   const [imgUrl2, setImgUrl2] = useState<string | undefined>(undefined);
+  let imgUrl2Final: any = useRef();
 
   const [imgUrl3, setImgUrl3] = useState<string | undefined>(undefined);
+  let imgUrl3Final: any = useRef();
 
   useEffect(() => {
     getPermissionAsync();
@@ -52,52 +55,16 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
     if (!result.cancelled) {
       switch (number) {
         case 1:
-          setUploading(true);
           setImgUrl1(result.uri);
-          const ref1 = ref_storage(storage, auth?.currentUser?.uid + '_1.png');
-          const response1 = await fetch(result.uri);
-          const blob1 = await response1.blob();
-          uploadBytesResumable(ref1, blob1, metadata)
-            .then(async (snapshot) => {
-              console.log('Uploaded image 1');
-              setUploading(false);
-            })
-            .catch((error) => {
-              // Uh-oh, an error occurred!
-              console.log(error);
-            });
+          imgUrl1Final.current = result.uri;
           break;
         case 2:
-          setUploading(true);
           setImgUrl2(result.uri);
-          const ref2 = ref_storage(storage, auth?.currentUser?.uid + '_2.png');
-          const response2 = await fetch(result.uri);
-          const blob2 = await response2.blob();
-          uploadBytesResumable(ref2, blob2, metadata)
-            .then(async (snapshot) => {
-              console.log('Uploaded image 2');
-            })
-            .catch((error) => {
-              setUploading(false);
-              // Uh-oh, an error occurred!
-              console.log(error);
-            });
+          imgUrl2Final.current = result.uri;
           break;
         case 3:
-          setUploading(true);
           setImgUrl3(result.uri);
-          const ref3 = ref_storage(storage, auth?.currentUser?.uid + '_3.png');
-          const response3 = await fetch(result.uri);
-          const blob3 = await response3.blob();
-          uploadBytesResumable(ref3, blob3, metadata)
-            .then((snapshot) => {
-              console.log('Uploaded image 3');
-              setUploading(false);
-            })
-            .catch((error) => {
-              // Uh-oh, an error occurred!
-              console.log(error);
-            });
+          imgUrl3Final.current = result.uri;
           break;
         default:
           break;
@@ -106,25 +73,61 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
   };
 
   async function signUp() {
-    console.log('img1:', imgUrl1);
-    console.log('img2:', imgUrl2);
-    console.log('img3:', imgUrl3);
+    console.log('img1:', imgUrl1Final.current);
+    console.log('img2:', imgUrl2Final.current);
+    console.log('img3:', imgUrl3Final.current);
     try {
       await createUserWithEmailAndPassword(auth, email, password);
       const metadata = {
         contentType: 'image/png',
       };
+      setUploading(true);
+      const ref1 = ref_storage(storage, auth?.currentUser?.uid + '_1.png');
+      const response1 = await fetch(imgUrl1Final.current);
+      const blob1 = await response1.blob();
+      uploadBytesResumable(ref1, blob1, metadata)
+        .then(async (snapshot) => {
+          console.log('Uploaded image 1');
 
-      await updateProfile(auth.currentUser!, {
-        displayName: name.trim(),
-      });
-      set(ref(db, '/users/' + auth.currentUser?.uid), {
-        type: 'vendor',
-        name: name.trim(),
-        uid: auth.currentUser?.uid,
-        instagram: instagram.replace(/\s+/g, ''),
-      });
-      navigation.navigate('SignIn');
+          const ref2 = ref_storage(storage, auth?.currentUser?.uid + '_2.png');
+          const response2 = await fetch(imgUrl2Final.current);
+          const blob2 = await response2.blob();
+          uploadBytesResumable(ref2, blob2, metadata)
+            .then(async (snapshot) => {
+              console.log('Uploaded image 2');
+
+              const ref3 = ref_storage(storage, auth?.currentUser?.uid + '_3.png');
+              const response3 = await fetch(imgUrl3Final.current);
+              const blob3 = await response3.blob();
+              uploadBytesResumable(ref3, blob3, metadata)
+                .then(async (snapshot) => {
+                  console.log('Uploaded image 3');
+
+                  await updateProfile(auth.currentUser!, {
+                    displayName: name.trim(),
+                  });
+                  set(ref(db, '/users/' + auth.currentUser?.uid), {
+                    type: 'vendor',
+                    name: name.trim(),
+                    uid: auth.currentUser?.uid,
+                    instagram: instagram.replace(/\s+/g, ''),
+                  });
+                })
+                .catch((error) => {
+                  // Uh-oh, an error occurred!
+                  console.log(error);
+                });
+              setUploading(false);
+            })
+            .catch((error) => {
+              // Uh-oh, an error occurred!
+              console.log(error);
+            });
+        })
+        .catch((error) => {
+          // Uh-oh, an error occurred!
+          console.log(error);
+        });
     } catch (error: any) {
       setValue({
         ...value,

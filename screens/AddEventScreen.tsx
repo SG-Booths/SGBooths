@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: 'black',
+    color: '#2A3242',
   },
   input: {
     width: 300,

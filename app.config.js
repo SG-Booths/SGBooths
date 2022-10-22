@@ -12,7 +12,7 @@ export default {
     splash: {
       image: './assets/images/splash.png',
       resizeMode: 'contain',
-      backgroundColor: '#FFF8F3',
+      backgroundColor: '#5857CC',
     },
     updates: {
       fallbackToCacheTimeout: 0,

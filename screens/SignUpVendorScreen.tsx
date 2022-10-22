@@ -2,8 +2,10 @@ import React from 'react';
 import { StyleSheet, Text, View, KeyboardAvoidingView } from 'react-native';
 import { StackScreenProps } from '@react-navigation/stack';
 import { TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
 const SignUpVendorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
+  const auth = getAuth();
   const [value, setValue] = React.useState({
     email: '',
     password: '',
@@ -40,11 +42,33 @@ const SignUpVendorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => 
       return;
     }
 
-    navigation.navigate('SetInstagramUsernameScreen', {
-      email: value.email,
-      password: value.password,
-      name: value.name,
-    });
+    try {
+      await signInWithEmailAndPassword(auth, value.email, value.password);
+    } catch (error: any) {
+      console.log(error.message);
+      if (error.message.includes('wrong-password')) {
+        setValue({
+          ...value,
+          error: 'Email already in use',
+        });
+      } else if (error.message.includes('too-many-requests')) {
+        setValue({
+          ...value,
+          error: 'Please wait a while before trying again',
+        });
+      } else if (error.message.includes('user-not-found')) {
+        navigation.navigate('SetInstagramUsernameScreen', {
+          email: value.email,
+          password: value.password,
+          name: value.name,
+        });
+      } else {
+        setValue({
+          ...value,
+          error: error.message,
+        });
+      }
+    }
   }
 
   return (
@@ -156,7 +180,7 @@ const styles = StyleSheet.create({
     borderColor: '#8FD8B5',
     borderWidth: 1,
     marginLeft: 30,
-    marginRight: 30,
+    marginRight: 20,
     marginTop: 20,
     height: 48,
     width: 140,

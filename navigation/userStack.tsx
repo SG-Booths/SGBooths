@@ -12,6 +12,7 @@ import EventInfoScreen from '../screens/EventInfoScreen';
 import AddEventScreen from '../screens/AddEventScreen';
 import UpdateInstagramUsernameScreen from '../screens/UpdateInstagramUsernameScreen';
 import UpdateShopImagesScreen from '../screens/UpdateShopImagesScreen';
+import VerifyAccountScreen from '../screens/VerifyAccountScreen';
 
 const Stack = createStackNavigator();
 
@@ -73,6 +74,11 @@ export default function UserStack() {
           name="UpdateShopImagesScreen"
           component={UpdateShopImagesScreen}
           options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="VerifyAccountScreen"
+          component={VerifyAccountScreen}
+          options={{ headerShown: false, animationEnabled: true }}
         />
       </Stack.Navigator>
     </NavigationContainer>

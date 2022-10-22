@@ -1,6 +1,14 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { StyleSheet, SafeAreaView, TouchableOpacity, Alert, TextInput, ScrollView } from 'react-native';
-import { getAuth, signOut, sendPasswordResetEmail, updateEmail, updateProfile, deleteUser } from 'firebase/auth';
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  StyleSheet,
+  SafeAreaView,
+  TouchableOpacity,
+  Alert,
+  TextInput,
+  ScrollView,
+  ImageBackground,
+} from 'react-native';
+import { getAuth, signOut, sendPasswordResetEmail, updateProfile } from 'firebase/auth';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
 import { onValue, ref, update } from 'firebase/database';
 import { db, storage } from '../config/firebase';
@@ -9,8 +17,8 @@ import { ref as ref_storage, getDownloadURL, deleteObject, uploadBytes } from 'f
 import * as ImagePicker from 'expo-image-picker';
 
 import { Text, View } from '../components/Themed';
-import { RootStackScreenProps } from '../types';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import Icon2 from 'react-native-vector-icons/Entypo';
 
 export default function SettingsScreen({ route, navigation }: any) {
   const { user } = useAuthentication();
@@ -245,23 +253,17 @@ export default function SettingsScreen({ route, navigation }: any) {
       return;
     }
 
-    if (value.name === '') {
-      setValue({
-        ...value,
-        error: 'Name is mandatory.',
-      });
-      return;
-    }
+    // if (value.name === '') {
+    //   setValue({
+    //     ...value,
+    //     error: 'Name is mandatory.',
+    //   });
+    //   return;
+    // }
 
+    let changeEmail = false;
     if (value.email != auth.currentUser?.email) {
-      try {
-        updateEmail(auth.currentUser!, value.email);
-      } catch (error: any) {
-        setValue({
-          ...value,
-          error: error.message,
-        });
-      }
+      changeEmail = true;
     }
 
     if (value.name != auth.currentUser?.displayName) {
@@ -273,16 +275,27 @@ export default function SettingsScreen({ route, navigation }: any) {
           error: error.message,
         });
       }
-      update(ref(db, '/users/' + user?.uid), {
+      update(ref(db, '/users/' + auth.currentUser?.uid), {
         name: value.name,
       });
     }
 
-    update(ref(db, '/users/' + user?.uid), {
+    update(ref(db, '/users/' + auth.currentUser?.uid), {
       instagram: value.instagram,
     });
 
-    alert('Saved!');
+    Alert.alert('Saved!', '', [
+      {
+        text: 'OK',
+        onPress: () => {
+          changeEmail &&
+            navigation.navigate('VerifyAccountScreen', {
+              type: 'change email',
+              newEmail: value.email,
+            });
+        },
+      },
+    ]);
   }
 
   return (
@@ -348,7 +361,7 @@ export default function SettingsScreen({ route, navigation }: any) {
               }}
             >
               <Text style={{ fontWeight: '700', color: '#2A3242' }}>Email</Text>
-              <TouchableOpacity onPress={() => handlePasswordReset(value.email)}>
+              <TouchableOpacity onPress={() => handlePasswordReset(auth?.currentUser?.email!)}>
                 <Text style={{ color: '#FABF48', fontWeight: '600', fontStyle: 'italic' }}>Reset password</Text>
               </TouchableOpacity>
             </View>
@@ -361,24 +374,39 @@ export default function SettingsScreen({ route, navigation }: any) {
               underlineColorAndroid="transparent"
               autoCapitalize="none"
               defaultValue={auth?.currentUser?.email!}
+              keyboardType="email-address"
+              textContentType="emailAddress"
+              editable={false}
             />
             <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>Shop Photos</Text>
             <View style={styles.eventImageContainer}>
-              {imgUrl1 && (
-                <TouchableOpacity onPress={() => _pickImage(1)}>
-                  <Image source={{ uri: imgUrl1 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
-                </TouchableOpacity>
-              )}
-              {imgUrl2 && (
-                <TouchableOpacity onPress={() => _pickImage(2)}>
-                  <Image source={{ uri: imgUrl2 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
-                </TouchableOpacity>
-              )}
-              {imgUrl3 && (
-                <TouchableOpacity onPress={() => _pickImage(3)}>
-                  <Image source={{ uri: imgUrl3 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity onPress={() => _pickImage(1)}>
+                <ImageBackground
+                  source={{ uri: imgUrl1 }}
+                  style={[styles.vendorImage, imgUrl1 ? { borderWidth: 0 } : { borderWidth: 1 }]}
+                  imageStyle={{ borderRadius: 20 }}
+                >
+                  {!imgUrl1 && <Icon2 name="plus" color="#C4C4C4" size={40} />}
+                </ImageBackground>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => _pickImage(2)}>
+                <ImageBackground
+                  source={{ uri: imgUrl2 }}
+                  style={[styles.vendorImage, imgUrl2 ? { borderWidth: 0 } : { borderWidth: 1 }]}
+                  imageStyle={{ borderRadius: 20 }}
+                >
+                  {!imgUrl2 && <Icon2 name="plus" color="#C4C4C4" size={40} />}
+                </ImageBackground>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => _pickImage(3)}>
+                <ImageBackground
+                  source={{ uri: imgUrl3 }}
+                  style={[styles.vendorImage, imgUrl3 ? { borderWidth: 0 } : { borderWidth: 1 }]}
+                  imageStyle={{ borderRadius: 20 }}
+                >
+                  {!imgUrl3 && <Icon2 name="plus" color="#C4C4C4" size={40} />}
+                </ImageBackground>
+              </TouchableOpacity>
             </View>
           </View>
         ) : (
@@ -473,7 +501,11 @@ export default function SettingsScreen({ route, navigation }: any) {
             justifyContent: 'center',
             marginTop: 20,
           }}
-          onPress={() => deleteUser(auth.currentUser!)}
+          onPress={() =>
+            navigation.navigate('VerifyAccountScreen', {
+              type: 'delete account',
+            })
+          }
         >
           <Text style={styles.buttonTitle}>DELETE ACCOUNT</Text>
         </TouchableOpacity>
@@ -481,8 +513,6 @@ export default function SettingsScreen({ route, navigation }: any) {
     </SafeAreaView>
   );
 }
-// TODO: create reauthentication modal (https://firebase.google.com/docs/auth/web/manage-users#re-authenticate_a_user)
-// for email change and delete account
 
 const styles = StyleSheet.create({
   container: {
@@ -594,5 +624,10 @@ const styles = StyleSheet.create({
     height: 105,
     marginRight: 20,
     borderRadius: 20,
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#C4C4C4',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

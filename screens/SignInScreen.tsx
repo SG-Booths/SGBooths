@@ -51,11 +51,28 @@ const SignInScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     try {
       await signInWithEmailAndPassword(auth, value.email, value.password);
     } catch (error: any) {
-      console.log(error);
-      setValue({
-        ...value,
-        error: error.message,
-      });
+      console.log(error.message);
+      if (error.message.includes('wrong-password')) {
+        setValue({
+          ...value,
+          error: 'Wrong password',
+        });
+      } else if (error.message.includes('too-many-requests')) {
+        setValue({
+          ...value,
+          error: 'Please wait a while before trying again',
+        });
+      } else if (error.message.includes('user-not-found')) {
+        setValue({
+          ...value,
+          error: 'Account does not exist. Please make sure your email address is correct',
+        });
+      } else {
+        setValue({
+          ...value,
+          error: error.message,
+        });
+      }
     }
   }
 

@@ -17,6 +17,7 @@ export type RootStackParamList = {
   SetShopImagesScreen: undefined;
   UpdateInstagramUsernameScreen: undefined | any;
   UpdateShopImagesScreen: undefined;
+  VerifyAcountScreen: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<

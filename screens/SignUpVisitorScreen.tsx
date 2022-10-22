@@ -58,10 +58,17 @@ const SignUpVisitorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) =>
       });
       navigation.navigate('SignIn');
     } catch (error: any) {
-      setValue({
-        ...value,
-        error: error.message,
-      });
+      if (error.message.includes('email-already-in-use')) {
+        setValue({
+          ...value,
+          error: 'Email already in use',
+        });
+      } else {
+        setValue({
+          ...value,
+          error: error.message,
+        });
+      }
     }
   }
 
@@ -173,7 +180,7 @@ const styles = StyleSheet.create({
   visitorButton: {
     backgroundColor: '#8FD8B5',
     marginLeft: 30,
-    marginRight: 30,
+    marginRight: 20,
     marginTop: 20,
     height: 48,
     width: 140,
