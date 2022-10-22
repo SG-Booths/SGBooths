@@ -222,7 +222,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ marginLeft: 30, backgroundColor: 'transparent' }}>
-        <Text style={styles.title}>following</Text>
+        <Text style={styles.title}>creators</Text>
         <TextInput
           style={styles.searchBar}
           value={search}
@@ -249,7 +249,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           )}
           ListEmptyComponent={() => (
             <Text style={{ marginTop: 30, color: '#2A3242' }}>
-              pull to refresh if you don't see your favourite creators!
+              pull to refresh if you don't see your saved creators!
             </Text>
           )}
         />

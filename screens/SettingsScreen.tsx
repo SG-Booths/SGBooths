@@ -57,18 +57,37 @@ export default function SettingsScreen({ route, navigation }: any) {
   // };
 
   const _pickImage = async (number: number) => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [1, 1],
-    });
+    let result: any = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.1,
+        maxWidth: 500,
+        maxHeight: 500,
+      });
 
-    console.log(result);
+    console.log(result.fileSize)
+
+    let tooBig = false
+
+    if (result.fileSize > 3000000) {
+    tooBig = true
+      setValue({...value, 
+        error: 'Image is too large! Please pick another one.'
+      })
+    }
+    else if (result.fileSize < 3000000) {
+      tooBig = false
+      setValue({...value, 
+        error: ''
+      })
+    }
+
     const metadata = {
       contentType: 'image/png',
     };
 
-    if (!result.cancelled) {
+    if (!result.cancelled && !tooBig) {
       switch (number) {
         case 1:
           setImgUrl1(result.uri);
@@ -76,7 +95,9 @@ export default function SettingsScreen({ route, navigation }: any) {
           const response1 = await fetch(result.uri);
           const blob1 = await response1.blob();
 
-          deleteObject(ref1)
+          getDownloadURL(ref1)
+          .then(url => {
+            deleteObject(ref1)
             .then(() => {
               uploadBytes(ref1, blob1, metadata).then((snapshot) => {
                 console.log('Uploaded image 1');
@@ -86,13 +107,25 @@ export default function SettingsScreen({ route, navigation }: any) {
               // Uh-oh, an error occurred!
               console.log(error);
             });
+          })
+          .catch(error => {
+            if (error.code === 'storage/object-not-found') {
+              uploadBytes(ref1, blob1, metadata).then((snapshot) => {
+                console.log('Uploaded image 1');
+              });
+            } else {
+              console.log(error);
+            }
+          });
           break;
         case 2:
           setImgUrl2(result.uri);
           const response2 = await fetch(result.uri);
           const blob2 = await response2.blob();
 
-          deleteObject(ref2)
+          getDownloadURL(ref2)
+          .then(url => {
+            deleteObject(ref2)
             .then(() => {
               uploadBytes(ref2, blob2, metadata).then((snapshot) => {
                 console.log('Uploaded image 2');
@@ -102,22 +135,44 @@ export default function SettingsScreen({ route, navigation }: any) {
               // Uh-oh, an error occurred!
               console.log(error);
             });
+          })
+          .catch(error => {
+            if (error.code === 'storage/object-not-found') {
+              uploadBytes(ref2, blob2, metadata).then((snapshot) => {
+                console.log('Uploaded image 2');
+              });
+            } else {
+              console.log(error);
+            }
+          });
           break;
         case 3:
           setImgUrl3(result.uri);
           const response3 = await fetch(result.uri);
           const blob3 = await response3.blob();
 
-          deleteObject(ref3)
+          getDownloadURL(ref3)
+          .then(url => {
+            deleteObject(ref3)
             .then(() => {
               uploadBytes(ref3, blob3, metadata).then((snapshot) => {
-                console.log('Uploaded image 2');
+                console.log('Uploaded image 3');
               });
             })
             .catch((error) => {
               // Uh-oh, an error occurred!
               console.log(error);
             });
+          })
+          .catch(error => {
+            if (error.code === 'storage/object-not-found') {
+              uploadBytes(ref3, blob3, metadata).then((snapshot) => {
+                console.log('Uploaded image 3');
+              });
+            } else {
+              console.log(error);
+            }
+          });
           break;
         default:
           break;
@@ -518,8 +573,7 @@ const styles = StyleSheet.create({
   error: {
     color: '#D54826FF',
     marginLeft: 30,
-    marginTop: 10,
-    marginBottom: 20,
+    marginTop: 20,
   },
   eventImageContainer: {
     marginLeft: 30,

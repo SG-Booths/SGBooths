@@ -20,12 +20,15 @@ export default {
     assetBundlePatterns: ['**/*'],
     ios: {
       supportsTablet: true,
+      bundleIdentifier: "SGBooths",
     },
     android: {
       adaptiveIcon: {
         foregroundImage: './assets/images/adaptive-icon.png',
-        backgroundColor: '#ffffff',
+        backgroundColor: '#5857CC',
       },
+      package: 'com.StudioMOOK.SGBooths',
+      versionCode: 1
     },
     web: {
       favicon: './assets/images/favicon.png',
@@ -37,6 +40,10 @@ export default {
       firebaseStorageBucket: process.env.FIREBASE_STORAGE_BUCKET,
       firebaseMessagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
       firebaseAppId: process.env.FIREBASE_APP_ID,
+      eas: {
+        projectId: "2795faa8-7998-4589-b204-0d962797a5c3"
+      }
     },
+    plugins: "react-native-compressor"
   },
 };

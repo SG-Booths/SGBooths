@@ -86,18 +86,19 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         }
       }
     } else {
-      try {
-        await createUserWithEmailAndPassword(auth, value.email.trim(), value.password.trim());
-        await updateProfile(auth.currentUser!, {
-          displayName: value.name.trim(),
-        });
-        set(ref(db, '/users/' + auth.currentUser?.uid), {
-          type: 'visitor',
-          name: value.name.trim(),
-          uid: auth.currentUser?.uid,
-        });
-        navigation.navigate('SignIn');
-      } catch (error: any) {
+        await createUserWithEmailAndPassword(auth, value.email.trim(), value.password.trim()).then(async data => {  
+          console.log("UID:", data.user.uid);
+
+          await updateProfile(auth.currentUser!, {
+            displayName: value.name.trim(),
+          });
+          set(ref(db, '/users/' + data.user.uid), {
+            type: 'visitor',
+            name: value.name.trim(),
+            uid: data.user.uid,
+          });
+       })
+       .catch(error => {
         if (error.message.includes('email-already-in-use')) {
           setValue({
             ...value,
@@ -114,7 +115,7 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             error: error.message,
           });
         }
-      }
+       });
     }
   }
 
