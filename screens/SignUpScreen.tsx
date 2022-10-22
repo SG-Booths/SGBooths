@@ -1,14 +1,15 @@
-import React from 'react';
-import { StyleSheet, Text, View, KeyboardAvoidingView } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, KeyboardAvoidingView, Alert } from 'react-native';
 import { StackScreenProps } from '@react-navigation/stack';
-import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import DropDownPicker from 'react-native-dropdown-picker';
+import Icon from 'react-native-vector-icons/AntDesign';
 import { db } from '../config/firebase';
 import { ref, set } from 'firebase/database';
 
-const auth = getAuth();
-
-const SignUpVisitorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
+const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
+  const auth = getAuth();
   const [value, setValue] = React.useState({
     email: '',
     password: '',
@@ -16,6 +17,12 @@ const SignUpVisitorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) =>
     error: '',
     name: '',
   });
+  const [type, setType] = useState('');
+  const [open, setOpen] = useState(false);
+  const [items, setItems] = useState([
+    {label: 'visitor', value: 'visitor'},
+    {label: 'creator', value: 'vendor'}
+  ]);
 
   const onFooterLinkPress = () => {
     navigation.navigate('SignIn');
@@ -35,7 +42,6 @@ const SignUpVisitorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) =>
         ...value,
         error: 'Passwords must match.',
       });
-      return;
     }
 
     if (value.name === '') {
@@ -46,34 +52,71 @@ const SignUpVisitorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) =>
       return;
     }
 
-    try {
-      await createUserWithEmailAndPassword(auth, value.email.trim(), value.password.trim());
-      await updateProfile(auth.currentUser!, {
-        displayName: value.name.trim(),
-      });
-      set(ref(db, '/users/' + auth.currentUser?.uid), {
-        type: 'visitor',
-        name: value.name.trim(),
-        uid: auth.currentUser?.uid,
-      });
-      navigation.navigate('SignIn');
-    } catch (error: any) {
-      if (error.message.includes('email-already-in-use')) {
-        setValue({
-          ...value,
-          error: 'Email already in use',
-        });
-      } else if (error.message.includes('weak-passwrd')) {
-        setValue({
-          ...value,
-          error: 'Password must be at least 6 characters',
-        });
+    if (type === 'vendor') {
+      try {
+        await signInWithEmailAndPassword(auth, value.email, value.password);
+      } catch (error: any) {
+        console.log(error.message);
+        if (error.message.includes('wrong-password')) {
+          setValue({
+            ...value,
+            error: 'Email already in use',
+          });
+        } else if (error.message.includes('too-many-requests')) {
+          setValue({
+            ...value,
+            error: 'Please wait a while before trying again',
+          });
+        } 
+        else if (error.message.includes('weak-password')) {
+          setValue({
+            ...value,
+            error: 'Password must be at least 6 characters',
+          });
+        }
+        else if (error.message.includes('user-not-found')) {
+          navigation.navigate('SetInstagramUsernameScreen', {
+            email: value.email,
+            password: value.password,
+            name: value.name,
+          });
+        } else {
+          setValue({
+            ...value,
+            error: error.message,
+          });
+        }
       }
-      else {
-        setValue({
-          ...value,
-          error: error.message,
+    } else {
+      try {
+        await createUserWithEmailAndPassword(auth, value.email.trim(), value.password.trim());
+        await updateProfile(auth.currentUser!, {
+          displayName: value.name.trim(),
         });
+        set(ref(db, '/users/' + auth.currentUser?.uid), {
+          type: 'visitor',
+          name: value.name.trim(),
+          uid: auth.currentUser?.uid,
+        });
+        navigation.navigate('SignIn');
+      } catch (error: any) {
+        if (error.message.includes('email-already-in-use')) {
+          setValue({
+            ...value,
+            error: 'Email already in use',
+          });
+        } else if (error.message.includes('weak-passwrd')) {
+          setValue({
+            ...value,
+            error: 'Password must be at least 6 characters',
+          });
+        }
+        else {
+          setValue({
+            ...value,
+            error: error.message,
+          });
+        }
       }
     }
   }
@@ -82,23 +125,53 @@ const SignUpVisitorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) =>
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
         <Text style={styles.title}>sign up</Text>
-        <View style={{ flex: 1, flexDirection: 'row', alignSelf: 'center', marginTop: 40, marginBottom: 60 }}>
-          <TouchableOpacity style={styles.visitorButton}>
-            <Text style={{ color: 'white', fontSize: 16 }}>visitor</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.vendorButton} onPress={() => navigation.navigate('SignUpVendorScreen')}>
-            <Text style={{ color: '#FABF48', fontSize: 16 }}>creator</Text>
+        {value.error && <Text style={styles.error}>{value.error}</Text>}
+        <View style={{flexDirection: 'row', backgroundColor: 'transparent', justifyContent: 'space-between', marginHorizontal: 60, zIndex: 10, alignItems: 'center'}}>
+          <DropDownPicker
+            placeholder="account type"
+            placeholderStyle={{ color: '#C4C4C4' }}
+            dropDownContainerStyle={{
+              width: 270,
+              borderRadius: 20,
+              overflow: 'hidden',
+              backgroundColor: 'white',
+              marginTop: 20,
+              marginBottom: 10,
+              paddingLeft: 7,
+              borderWidth: 1,
+              borderColor: '#C4C4C4',
+            }}
+            style={{
+              width: 270,
+              height: 48,
+              borderRadius: 20,
+              overflow: 'hidden',
+              backgroundColor: 'white',
+              marginTop: 20,
+              marginBottom: 10,
+              paddingLeft: 16,
+              borderWidth: 1,
+              borderColor: '#C4C4C4',
+            }}
+            open={open}
+            value={type}
+            items={items}
+            setOpen={setOpen}
+            setValue={setType}
+            setItems={setItems}
+          />
+          <TouchableOpacity style={{ marginTop: 12 }} onPress={() => {Alert.alert('What do the account types mean?', 'While both account types are able to browse events and creators, only creators can add booths to events.')}}>
+            <Icon name="questioncircleo" color="#2A3242" size={30}/>
           </TouchableOpacity>
         </View>
-        {value.error && <Text style={styles.error}>{value.error}</Text>}
         <TextInput
           style={styles.input}
-          placeholder="name"
+          placeholder={type === 'vendor' ? "shop name" : "name"}
           placeholderTextColor="#C4C4C4"
           onChangeText={(text) => setValue({ ...value, name: text })}
           value={value.name}
           underlineColorAndroid="transparent"
-          autoCapitalize="words"
+          autoCapitalize="none"
           autoCorrect={false}
         />
         <TextInput
@@ -184,7 +257,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   visitorButton: {
-    backgroundColor: '#8FD8B5',
+    borderColor: '#8FD8B5',
+    borderWidth: 1,
     marginLeft: 30,
     marginRight: 20,
     marginTop: 20,
@@ -196,8 +270,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   vendorButton: {
-    borderColor: '#FABF48',
-    borderWidth: 1,
+    backgroundColor: '#FABF48',
     marginLeft: 30,
     marginRight: 30,
     marginTop: 20,
@@ -238,4 +311,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SignUpVisitorScreen;
+export default SignUpScreen;

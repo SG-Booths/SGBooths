@@ -21,7 +21,7 @@ const SignInScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   });
 
   const onFooterLinkPress = () => {
-    navigation.navigate('SignUpVendorScreen');
+    navigation.navigate('SignUpScreen');
   };
 
   const handlePasswordReset = (email: string) => {

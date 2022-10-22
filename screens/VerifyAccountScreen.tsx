@@ -188,7 +188,7 @@ export default function VerifyAccountScreen({ route, navigation }: any) {
             style={{
               backgroundColor: '#D54826FF',
               height: 48,
-              width: 180,
+              width: 220,
               borderRadius: 20,
               alignItems: 'center',
               alignSelf: 'center',

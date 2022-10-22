@@ -166,71 +166,6 @@ export default function SettingsScreen({ route, navigation }: any) {
     });
   };
 
-  const switchAccount = (type: string) => {
-    if (type === 'visitor') {
-      Alert.alert('Are you sure?', 'Switching to a Visitor account means that your shop data will be deleted!', [
-        {
-          text: 'Cancel',
-          onPress: () => console.log('Cancel Pressed'),
-          style: 'cancel',
-        },
-        { text: 'OK', onPress: () => deleteShop() },
-      ]);
-    } else {
-      navigation.navigate('UpdateInstagramUsernameScreen', {
-        email: value.email,
-        name: value.name,
-      });
-      setValue({
-        name: value.name,
-        instagram: route.params.instagram,
-        type: 'vendor',
-        email: value.email,
-        error: value.error,
-      });
-      getData;
-    }
-  };
-
-  const deleteShop = () => {
-    update(ref(db, '/users/' + auth.currentUser?.uid), {
-      type: 'visitor',
-      instagram: '',
-    });
-
-    deleteObject(ref1)
-      .then(() => {
-        // File deleted successfully
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-
-    deleteObject(ref2)
-      .then(() => {
-        // File deleted successfully
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-
-    deleteObject(ref3)
-      .then(() => {
-        // File deleted successfully
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-    setValue({
-      email: value.email,
-      error: value.error,
-      name: value.name,
-      type: 'visitor',
-      instagram: '',
-    });
-    getData;
-  };
-
   const handlePasswordReset = (email: string) => {
     sendPasswordResetEmail(auth, email)
       .then(function (user) {
@@ -276,10 +211,11 @@ export default function SettingsScreen({ route, navigation }: any) {
         name: value.name,
       });
     }
-
-    update(ref(db, '/users/' + auth.currentUser?.uid), {
-      instagram: value.instagram,
-    });
+    if (value.instagram != initialInstagram) {
+      update(ref(db, '/users/' + auth.currentUser?.uid), {
+        instagram: value.instagram,
+      });
+    }
 
     Alert.alert('Saved!', '', [
       {
@@ -294,7 +230,7 @@ export default function SettingsScreen({ route, navigation }: any) {
       },
     ]);
   }
-
+// TODO: issue when changing name
   return (
     <SafeAreaView style={styles.container}>
       <View
@@ -314,18 +250,8 @@ export default function SettingsScreen({ route, navigation }: any) {
       <ScrollView>
         {value.type === 'vendor' ? (
           <View style={{ backgroundColor: 'transparent' }}>
-            <View
-              style={{ flexDirection: 'row', alignSelf: 'center', marginVertical: 20, backgroundColor: 'transparent' }}
-            >
-              <TouchableOpacity style={styles.visitorButton} onPress={() => switchAccount('visitor')}>
-                <Text style={{ color: '#8FD8B5', fontSize: 16 }}>visitor</Text>
-              </TouchableOpacity>
-              <View style={styles.vendorButtonPressed}>
-                <Text style={{ color: 'white', fontSize: 16 }}>creator</Text>
-              </View>
-            </View>
             {value.error && <Text style={styles.error}>{value.error}</Text>}
-            <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>Shop Name</Text>
+            <Text style={{ marginLeft: 30, marginBottom: 10, fontWeight: '700', color: '#2A3242', marginTop: 30 }}>Shop Name</Text>
             <TextInput
               style={styles.input}
               placeholder="shop name"
@@ -358,7 +284,7 @@ export default function SettingsScreen({ route, navigation }: any) {
               }}
             >
               <Text style={{ fontWeight: '700', color: '#2A3242' }}>Email</Text>
-              <TouchableOpacity onPress={() => handlePasswordReset(auth?.currentUser?.email!)}>
+              <TouchableOpacity onPress={() => handlePasswordReset(value.email)}>
                 <Text style={{ color: '#FABF48', fontWeight: '600', fontStyle: 'italic' }}>Reset password</Text>
               </TouchableOpacity>
             </View>
@@ -408,18 +334,8 @@ export default function SettingsScreen({ route, navigation }: any) {
           </View>
         ) : (
           <View style={{ backgroundColor: 'transparent' }}>
-            <View
-              style={{ flexDirection: 'row', alignSelf: 'center', marginVertical: 20, backgroundColor: 'transparent' }}
-            >
-              <View style={styles.visitorButtonPressed}>
-                <Text style={{ color: 'white', fontSize: 16 }}>visitor</Text>
-              </View>
-              <TouchableOpacity style={styles.vendorButton} onPress={() => switchAccount('vendor')}>
-                <Text style={{ color: '#FABF48', fontSize: 16 }}>creator</Text>
-              </TouchableOpacity>
-            </View>
             {value.error && <Text style={styles.error}>{value.error}</Text>}
-            <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>Name</Text>
+            <Text style={{ marginLeft: 30, marginBottom: 10, fontWeight: '700', color: '#2A3242', marginTop: 30 }}>Name</Text>
             <TextInput
               style={styles.input}
               placeholder="name"

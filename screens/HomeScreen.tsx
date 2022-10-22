@@ -395,7 +395,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             </View>
           </View>
         ))}
-        {user?.uid === 'wtEK11lqiZex81waXY7CjFUNiMq2' && (
+        {value.type === 'admin' && (
           <TouchableOpacity onPress={() => navigation.navigate('AddEvent')} style={{ alignItems: 'center' }}>
             <Text>add event</Text>
           </TouchableOpacity>

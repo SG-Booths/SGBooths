@@ -474,7 +474,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
             </TouchableOpacity>
             <TouchableOpacity
               style={{
-                backgroundColor: '#575FCC',
+                backgroundColor: 'white',
                 borderRadius: 100,
                 height: 40,
                 width: 40,
@@ -494,7 +494,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
                 }
               }}
             >
-              <Icon name={boothFollowed ? 'bookmark' : 'bookmark-o'} size={25} color="white" />
+              <Icon name={boothFollowed ? 'bookmark' : 'bookmark-o'} size={25} color="#575FCC" />
             </TouchableOpacity>
           </SafeAreaView>
         </ImageBackground>
@@ -546,8 +546,8 @@ export default function EventInfoScreen({ route, navigation }: any) {
                   />
                 </TouchableOpacity>
               </View>
-              {(currentUser.type === 'vendor' && 
-                boothing) ? (
+              {currentUser.type === 'vendor' && 
+                 (boothing ? (
                   <View
                     style={{
                       borderRadius: 20,
@@ -589,7 +589,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
                   </View>
                 ) : (
                   <NotBoothing/>
-                )
+                ))
               }
             </View>
           )}

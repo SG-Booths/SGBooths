@@ -3,8 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
 import SignInScreen from '../screens/SignInScreen';
-import SignUpVendorScreen from '../screens/SignUpVendorScreen';
-import SignUpVisitorScreen from '../screens/SignUpVisitorScreen';
+import SignUpScreen from '../screens/SignUpScreen';
 import SetInstagramUsernameScreen from '../screens/SetInstagramUsernameScreen';
 import SetShopImagesScreen from '../screens/SetShopImagesScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
@@ -43,8 +42,7 @@ export default function AuthStack() {
           <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
         )}
         <Stack.Screen name="SignIn" component={SignInScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="SignUpVendorScreen" component={SignUpVendorScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="SignUpVisitorScreen" component={SignUpVisitorScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="SignUpScreen" component={SignUpScreen} options={{ headerShown: false }} />
         <Stack.Screen name="SetShopImagesScreen" component={SetShopImagesScreen} options={{ headerShown: false }} />
         <Stack.Screen
           name="SetInstagramUsernameScreen"

@@ -15,8 +15,6 @@ export type RootStackParamList = {
   AddEvent: undefined;
   SetInstagramUsernameScreen: undefined;
   SetShopImagesScreen: undefined;
-  UpdateInstagramUsernameScreen: undefined | any;
-  UpdateShopImagesScreen: undefined;
   VerifyAcountScreen: undefined;
 };
 

@@ -62,7 +62,8 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
   };
 
   async function signUp() {
-    console.log('img1:', imgUrl1Final.current);
+    if (imgUrl1 && imgUrl2 && imgUrl3) {
+      console.log('img1:', imgUrl1Final.current);
     console.log('img2:', imgUrl2Final.current);
     console.log('img3:', imgUrl3Final.current);
     try {
@@ -105,22 +106,40 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
                 .catch((error) => {
                   // Uh-oh, an error occurred!
                   console.log(error);
+                  setValue({
+                    ...value,
+                    error: error.message,
+                  });
                 });
               setUploading(false);
             })
             .catch((error) => {
               // Uh-oh, an error occurred!
               console.log(error);
+              setValue({
+                ...value,
+                error: error.message,
+              });
             });
         })
         .catch((error) => {
           // Uh-oh, an error occurred!
           console.log(error);
+          setValue({
+            ...value,
+            error: error.message,
+          });
         });
     } catch (error: any) {
       setValue({
         ...value,
         error: error.message,
+      });
+    }
+    } else {
+      setValue({
+        ...value,
+        error: '3 images are required',
       });
     }
   }
@@ -131,6 +150,7 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
       <Text style={styles.subtitle}>
         Visitors will see these images when browsing. Don't worry, you can change them later!
       </Text>
+      {value.error && <Text style={styles.error}>{value.error}</Text>}
       <View style={styles.eventImageContainer}>
         <TouchableOpacity onPress={() => _pickImage(1)}>
           <ImageBackground
@@ -162,7 +182,7 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
       </View>
       <TouchableOpacity
         style={imgUrl1 && imgUrl2 && imgUrl3 ? styles.button : styles.altButton}
-        onPress={() => imgUrl1 && imgUrl2 && imgUrl3 && !uploading && signUp()}
+        onPress={() => !uploading && signUp()}
       >
         <Text style={imgUrl1 && imgUrl2 && imgUrl3 ? styles.buttonTitle : styles.altButtonTitle}>NEXT →</Text>
       </TouchableOpacity>
@@ -262,5 +282,10 @@ const styles = StyleSheet.create({
     borderColor: '#C4C4C4',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  error: {
+    color: '#D54826FF',
+    marginLeft: 30,
+    marginBottom: 10,
   },
 });
