@@ -1,5 +1,7 @@
-import { StyleSheet, TouchableOpacity, TextInput, Text, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, TextInput, Text, View, SafeAreaView } from 'react-native';
 import React from 'react';
+import Icon from 'react-native-vector-icons/Feather';
+
 export default function UpdateInstagramUsernameScreen({ route, navigation }: any) {
   const { name, email } = route.params;
   const [value, setValue] = React.useState({
@@ -13,6 +15,13 @@ export default function UpdateInstagramUsernameScreen({ route, navigation }: any
     });
   };
   return (
+    <SafeAreaView style={{flex: 1, backgroundColor: '#FFF8F3'}}>
+    <TouchableOpacity onPress={() => navigation.navigate('SettingScreen', {
+      type: 'visitor',
+      instagram: value.instagram
+    })}>
+    <Icon name="x" color="#2A3242" size={30} style={{ marginLeft: 30, marginTop: 10}} />
+  </TouchableOpacity>
     <View style={styles.container}>
       <Text style={styles.title}>Shop Instagram</Text>
       <Text style={styles.subtitle}>This will allow visitors to visit your Instagram!</Text>
@@ -32,6 +41,7 @@ export default function UpdateInstagramUsernameScreen({ route, navigation }: any
         </Text>
       </TouchableOpacity>
     </View>
+    </SafeAreaView>
   );
 }
 

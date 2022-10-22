@@ -11,20 +11,21 @@ const OnboardingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     <Onboarding
       onDone={completeOnboarding}
       onSkip={completeOnboarding}
+      bottomBarHighlight={false}
       pages={[
         {
-          backgroundColor: '#9A99EF',
+          backgroundColor: '#9190F5',
           image: <Image source={require('../assets/images/onboarding_1.png')} style={{ height: 300, width: 300 }} />,
           title: 'Welcome to SGBooths!',
-          subtitle: 'A platform to keep track of upcoming events and booths here in Singapore',
+          subtitle: 'Keep track of upcoming events and booths here in Singapore',
           titleStyles: { color: 'white', fontWeight: '600' },
           subTitleStyles: { color: 'white', opacity: 0.7, width: 350 },
         },
         {
           backgroundColor: '#FEDA92',
           image: <Image source={require('../assets/images/onboarding_2.png')} style={{ height: 300, width: 300 }} />,
-          title: 'Made for creators...',
-          subtitle: 'Organise boothing plans and find like-minded others',
+          title: 'For creators...',
+          subtitle: 'Organise boothing dates and connect with the community',
           titleStyles: { color: '#2A3242', fontWeight: '600' },
           subTitleStyles: { color: '#2A3242', opacity: 0.7, width: 350 },
         },

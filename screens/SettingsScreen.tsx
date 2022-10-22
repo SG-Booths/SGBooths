@@ -25,10 +25,8 @@ export default function SettingsScreen({ route, navigation }: any) {
   const auth = getAuth();
 
   const initialInstagram = route.params.instagram;
-  console.log('initial instagram', initialInstagram);
 
   const initialType = route.params.type;
-  console.log('initial type', initialType);
 
   const [value, setValue] = React.useState({
     email: '',
@@ -50,12 +48,12 @@ export default function SettingsScreen({ route, navigation }: any) {
   let ref3: any;
   if (value.type === 'vendor') ref3 = ref_storage(storage, auth?.currentUser?.uid + '_3.png');
 
-  const getPermissionAsync = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      alert('...');
-    }
-  };
+  // const getPermissionAsync = async () => {
+  //   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  //   if (status !== 'granted') {
+  //     alert('...');
+  //   }
+  // };
 
   const _pickImage = async (number: number) => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -152,7 +150,7 @@ export default function SettingsScreen({ route, navigation }: any) {
           console.log('error:' + error);
         });
     }
-    getPermissionAsync();
+    // getPermissionAsync();
   }, [value]);
 
   useEffect(() => {
@@ -164,8 +162,7 @@ export default function SettingsScreen({ route, navigation }: any) {
       let data = querySnapShot.val() || {};
       let userData = { ...data };
       // setValue({ ...value, name: userData.name, email: user?.email! });
-
-      setValue({ ...value, name: userData.name, email: user?.email!, instagram: userData.instagram });
+      setValue({ ...value, name: user?.displayName!, email: user?.email!, instagram: userData.instagram });
     });
   };
 
@@ -186,7 +183,7 @@ export default function SettingsScreen({ route, navigation }: any) {
       });
       setValue({
         name: value.name,
-        instagram: route.params.name,
+        instagram: route.params.instagram,
         type: 'vendor',
         email: value.email,
         error: value.error,
@@ -253,13 +250,13 @@ export default function SettingsScreen({ route, navigation }: any) {
       return;
     }
 
-    // if (value.name === '') {
-    //   setValue({
-    //     ...value,
-    //     error: 'Name is mandatory.',
-    //   });
-    //   return;
-    // }
+    if (value.name === '') {
+      setValue({
+        ...value,
+        error: 'Name is mandatory.',
+      });
+      return;
+    }
 
     let changeEmail = false;
     if (value.email != auth.currentUser?.email) {
@@ -418,7 +415,7 @@ export default function SettingsScreen({ route, navigation }: any) {
                 <Text style={{ color: 'white', fontSize: 16 }}>visitor</Text>
               </View>
               <TouchableOpacity style={styles.vendorButton} onPress={() => switchAccount('vendor')}>
-                <Text style={{ color: '#FABF48', fontSize: 16 }}>vendor</Text>
+                <Text style={{ color: '#FABF48', fontSize: 16 }}>creator</Text>
               </TouchableOpacity>
             </View>
             {value.error && <Text style={styles.error}>{value.error}</Text>}
@@ -494,7 +491,7 @@ export default function SettingsScreen({ route, navigation }: any) {
           style={{
             backgroundColor: '#D54826FF',
             height: 48,
-            width: 200,
+            width: 220,
             borderRadius: 20,
             alignItems: 'center',
             alignSelf: 'center',

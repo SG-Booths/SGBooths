@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   ImageBackground,
   FlatList,
+  RefreshControl
 } from 'react-native';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
@@ -19,6 +20,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/MaterialIcons';
 
 export default function EventInfoScreen({ route, navigation }: any) {
+  const [refreshing, setRefreshing] = useState(true);
   const { user } = useAuthentication();
   const auth = getAuth();
   const { eventID, month, day, location, year, imgUrl, name, following } = route.params;
@@ -110,6 +112,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
           // }));
         })
       );
+      setRefreshing(false)
     });
   }, []);
 
@@ -122,6 +125,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
       let data2 = querySnapShot.val() || {};
       let vendorsFollowingTemp = { ...data2 };
       setVendorsFollowing(Object.keys(vendorsFollowingTemp));
+      setRefreshing(false)
     });
   }, []);
 
@@ -130,8 +134,52 @@ export default function EventInfoScreen({ route, navigation }: any) {
       let data3 = querySnapShot.val() || {};
       let userData = { ...data3 };
       setCurrentUser(userData);
+      setRefreshing(false)
     });
   }, []);
+
+  const loadNewData = () => {
+    return onValue(ref_db(db, '/events/' + eventID + '/vendors'), async (querySnapShot) => {
+      let data = (await querySnapShot.val()) || {};
+      let vendorList = { ...data };
+
+      setVendorList({});
+      setVendorArray([]);
+      setFilteredVendors([]);
+
+      Object.keys(vendorList).map((vendorKey: any) =>
+        onValue(ref_db(db, '/users/' + vendorKey), (querySnapShot) => {
+          let data = querySnapShot.val() || {};
+          let info = { ...data };
+          // let info = { ...data, boothNumber: vendorList[vendorKey]['boothNumber'] };
+
+          if (info.type === 'visitor' || !info) {
+            remove(ref(db, '/events/' + eventID + '/vendors/' + vendorKey));
+          } else {
+            let updatedValue = { [vendorKey]: info };
+            setVendorList((vendorInfo) => ({ ...vendorInfo, ...updatedValue }));
+            setVendorArray((vendorInfo: any) =>
+              Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
+                return item.uid != auth.currentUser?.uid;
+              })
+            );
+            setFilteredVendors((vendorInfo: any) =>
+              Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
+                return item.uid != auth.currentUser?.uid;
+              })
+            );
+          }
+          // setVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }).sort((a: any, b: any) => {
+          //   return a.boothNumber - b.boothNumber
+          // }));
+          // setFilteredVendors((vendorInfo) => Object.values({ ...vendorInfo, ...updatedValue }).sort((a: any, b: any) => {
+          //   return a.boothNumber - b.boothNumber
+          // }));
+        })
+      );
+      setRefreshing(false)
+    });
+  }
 
   const searchVendors = (text: string) => {
     // sets the search term to the current search box input
@@ -209,7 +257,11 @@ export default function EventInfoScreen({ route, navigation }: any) {
             return !(obj.uid === uid);
           })
         );
-      } else {
+      } 
+      else if (vendorsFollowing.includes(uid)) {
+        remove(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/' + uid));
+      }
+      else {
         update(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/'), {
           [uid]: '',
         });
@@ -224,7 +276,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
     }
   };
 
-  const VendorItem = ({ eventID, id, self }: any) => {
+  const VendorItem = ({ id, self }: any) => {
     let name: string, instagram: string, uid: string | any;
     if (!self) {
       name = filteredVendors[id as keyof typeof filteredVendors]['name' as keyof typeof filteredVendors];
@@ -342,7 +394,10 @@ export default function EventInfoScreen({ route, navigation }: any) {
             }}
           >
             <Text style={styles.vendorName}>{name}</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('SettingsScreen')}>
+            <TouchableOpacity onPress={() => navigation.navigate('SettingsScreen', {
+              instagram: currentUser.instagram,
+              type: currentUser.type,
+            })}>
               <Icon2 name="edit" color="#575FCC" size={25} />
             </TouchableOpacity>
           </View>
@@ -372,6 +427,22 @@ export default function EventInfoScreen({ route, navigation }: any) {
     remove(ref(db, '/events/' + eventID + '/vendors/' + auth.currentUser?.uid));
     remove(ref(db, '/users/' + auth.currentUser?.uid + '/upcomingBooths/' + eventID));
   };
+
+  const NotBoothing = () => {
+    return(
+      <TouchableOpacity style={styles.notBoothing} onPress={() => boothAtEvent()}>
+        <Text style={{ fontWeight: '800', color: '#8FD8B5' }}>CLICK IF BOOTHING</Text>
+      </TouchableOpacity>
+    )
+  }
+
+  const Boothing = () => {
+    return(
+      <TouchableOpacity style={styles.boothing} onPress={() => removeBoothFromEvent()}>
+        <Text style={{ fontWeight: '800', color: '#8FD8B5' }}>CLICK TO CANCEL BOOTH</Text>
+      </TouchableOpacity>
+    )
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: '#FFF8F3' }}>
@@ -434,10 +505,11 @@ export default function EventInfoScreen({ route, navigation }: any) {
           style={styles.eventList}
           showsVerticalScrollIndicator={false}
           data={Object.keys(filteredVendors)}
-          renderItem={({ item }) => <VendorItem eventID={eventID} id={item} self={false} />}
-          keyExtractor={(item) => eventID}
+          renderItem={({ item }) => <VendorItem id={item} self={false} />}
+          keyExtractor={(item) => filteredVendors[item]['uid' as keyof typeof filteredVendors]}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadNewData} />}
           ListEmptyComponent={() => <Text>no creators yet!</Text>}
-          ListHeaderComponent={() => (
+          ListHeaderComponent={(item) => (
             <View style={{ backgroundColor: 'transparent' }}>
               <Text style={styles.date}>
                 {monthNames[month - 1]} {day}, {year}
@@ -474,8 +546,8 @@ export default function EventInfoScreen({ route, navigation }: any) {
                   />
                 </TouchableOpacity>
               </View>
-              {currentUser.type === 'vendor' && [
-                boothing ? (
+              {(currentUser.type === 'vendor' && 
+                boothing) ? (
                   <View
                     style={{
                       borderRadius: 20,
@@ -498,9 +570,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
                         alignItems: 'center',
                       }}
                     >
-                      <TouchableOpacity style={styles.boothing} onPress={() => removeBoothFromEvent()}>
-                        <Text style={{ fontWeight: '800', color: '#8FD8B5' }}>BOOTHING</Text>
-                      </TouchableOpacity>
+                      <Boothing/>
                     </View>
                     <View
                       style={{
@@ -514,21 +584,21 @@ export default function EventInfoScreen({ route, navigation }: any) {
                         alignItems: 'center',
                       }}
                     >
-                      <VendorItem eventID={eventID} id={auth.currentUser?.uid} self={true} />
+                      <VendorItem id={auth.currentUser?.uid} self={true} />
                     </View>
                   </View>
                 ) : (
-                  <TouchableOpacity style={styles.notBoothing} onPress={() => boothAtEvent()}>
-                    <Text style={{ fontWeight: '800', color: '#8FD8B5' }}>NOT BOOTHING</Text>
-                  </TouchableOpacity>
-                ),
-              ]}
+                  <NotBoothing/>
+                )
+              }
             </View>
           )}
         />
       </View>
     </View>
   );
+
+
 }
 
 const styles = StyleSheet.create({

@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, Text, View, ImageBackground, ActivityIndicator } from 'react-native';
+import { StyleSheet, TouchableOpacity, Text, View, ImageBackground, ActivityIndicator, SafeAreaView } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { db, storage } from '../config/firebase';
 import { ref, update } from 'firebase/database';
@@ -7,6 +7,7 @@ import { ref as ref_storage, uploadBytesResumable } from 'firebase/storage';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
 import Icon from 'react-native-vector-icons/Entypo';
+import Icon2 from 'react-native-vector-icons/Entypo';
 
 const auth = getAuth();
 
@@ -27,15 +28,7 @@ export default function UpdateShopImagesScreen({ route, navigation }: any) {
   const [imgUrl3, setImgUrl3]: any = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    getPermissionAsync();
   }, []);
-
-  const getPermissionAsync = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      alert('...');
-    }
-  };
 
   const _pickImage = async (number: number) => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -131,6 +124,13 @@ export default function UpdateShopImagesScreen({ route, navigation }: any) {
   };
 
   return (
+    <SafeAreaView style={{flex: 1, backgroundColor: '#FFF8F3'}}>
+    <TouchableOpacity onPress={() => navigation.navigate('SettingScreen', {
+      type: 'visitor',
+      instagram: instagram
+    })}>
+    <Icon2 name="x" color="#2A3242" size={30} style={{ marginLeft: 30, marginTop: 10}} />
+  </TouchableOpacity>
     <View style={styles.container}>
       <Text style={styles.title}>Shop Images</Text>
       <Text style={styles.subtitle}>
@@ -173,6 +173,7 @@ export default function UpdateShopImagesScreen({ route, navigation }: any) {
       </TouchableOpacity>
       {uploading && <ActivityIndicator style={{ marginTop: 20 }} animating={true} />}
     </View>
+    </SafeAreaView>
   );
 }
 

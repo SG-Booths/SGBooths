@@ -63,7 +63,13 @@ const SignUpVisitorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) =>
           ...value,
           error: 'Email already in use',
         });
-      } else {
+      } else if (error.message.includes('weak-passwrd')) {
+        setValue({
+          ...value,
+          error: 'Password must be at least 6 characters',
+        });
+      }
+      else {
         setValue({
           ...value,
           error: error.message,
@@ -92,7 +98,7 @@ const SignUpVisitorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) =>
           onChangeText={(text) => setValue({ ...value, name: text })}
           value={value.name}
           underlineColorAndroid="transparent"
-          autoCapitalize="none"
+          autoCapitalize="words"
           autoCorrect={false}
         />
         <TextInput

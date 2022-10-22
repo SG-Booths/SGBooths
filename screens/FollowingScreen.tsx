@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   SafeAreaView,
@@ -29,6 +29,8 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(true);
 
   const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+  
+  let imgUrl: any = useRef()
 
   const loadNewData = () => {
     onValue(ref(db, '/events'), (querySnapShot) => {
@@ -113,16 +115,23 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     );
   };
 
-  const getImgUrl = (key: string) => {
+  const getImgUrl = (key: any, boothKey: any) => {
     const ref = ref_storage(storage, key + '.png');
 
     getDownloadURL(ref)
       .then((url) => {
-        return url;
+        navigation.navigate('EventInfoScreen', {
+          imgUrl: url,
+          eventID: events[boothKey.eventID as keyof typeof events]['key'],
+          month: events[boothKey.eventID as keyof typeof events]['date']['month'],
+          day: events[boothKey.eventID as keyof typeof events]['date']['day'],
+          location: events[boothKey.eventID as keyof typeof events]['location'],
+          avail: events[boothKey.eventID as keyof typeof events]['avail'],
+          name: events[boothKey.eventID as keyof typeof events]['name'],
+        })
       })
       .catch((error) => {
         console.log('error:' + error);
-        return error;
       });
   };
 
@@ -179,7 +188,6 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             NEXT BOOTHS
           </Text>
           {vendor.upcomingBooths ? (
-            [
               Object.values(vendor.upcomingBooths)
                 .sort((a: any, b: any) => {
                   return b.date - a.date;
@@ -187,7 +195,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
                 .slice(0, 2)
                 .map((boothKey: any) => (
                   <TouchableOpacity
-                    key={boothKey}
+                    key={vendor.uid + boothKey.eventID}
                     style={{
                       flexDirection: 'row',
                       backgroundColor: 'transparent',
@@ -196,15 +204,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
                       width: 340,
                     }}
                     onPress={() =>
-                      navigation.navigate('EventInfoScreen', {
-                        imgUrl: getImgUrl(events[boothKey.eventID as keyof typeof events]['key']),
-                        eventID: events[boothKey.eventID as keyof typeof events]['key'],
-                        month: events[boothKey.eventID as keyof typeof events]['date']['month'],
-                        day: events[boothKey.eventID as keyof typeof events]['date']['day'],
-                        location: events[boothKey.eventID as keyof typeof events]['location'],
-                        avail: events[boothKey.eventID as keyof typeof events]['avail'],
-                        name: events[boothKey.eventID as keyof typeof events]['name'],
-                      })
+                      getImgUrl(events[boothKey.eventID as keyof typeof events]['key'], boothKey)
                     }
                   >
                     <Text style={{ color: '#2A3242', marginLeft: 15, marginTop: 10 }}>
@@ -214,8 +214,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
                     </Text>
                     <Icon2 name="keyboard-arrow-right" size={20} color="#2A3242" />
                   </TouchableOpacity>
-                )),
-            ]
+                ))
           ) : (
             <Text style={{ color: '#2A3242', marginTop: 10, fontWeight: '400', marginLeft: 15 }}>
               no upcoming booths...
@@ -247,15 +246,15 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           showsVerticalScrollIndicator={false}
           style={{ height: 580 }}
           data={Object.keys(filteredVendorArray)}
-          keyExtractor={(item) => item}
+          keyExtractor={(item) => filteredVendorArray[item].uid}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadNewData} />}
           renderItem={({ item }) => (
             <View style={{ backgroundColor: '#FFfF8F3', marginTop: 20 }}>
-              <VendorItem vendor={filteredVendorArray[item]} />
+              <VendorItem vendor={filteredVendorArray[item]}/>
             </View>
           )}
           ListEmptyComponent={() => (
-            <Text style={{ marginTop: 30, color: '#2A3242' }}>time to follow some creators!</Text>
+            <Text style={{ marginTop: 30, color: '#2A3242' }}>pull to refresh if you don't see your favourite creators!</Text>
           )}
         />
       </View>

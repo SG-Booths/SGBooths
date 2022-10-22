@@ -93,6 +93,10 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   // toggles a card's starred status
   const updateStarred = (eventItem: any) => {
     if (boothsFollowing && boothsFollowing.length > 0) {
+      console.log('booths following:', boothsFollowing)
+      console.log('key:', eventItem['key'])
+      console.log('starred filter:', starredFilter)
+
       if (boothsFollowing.includes(eventItem['key']) && starredFilter === true) {
         remove(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/' + eventItem['key']));
         getStarred(starredFilter);
@@ -106,7 +110,11 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             return !(obj.key === eventItem['key']);
           })
         );
-      } else {
+      } 
+      else if (boothsFollowing.includes(eventItem['key'])) {
+        remove(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/' + eventItem['key']));
+      }
+        else {
         update(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/'), {
           [eventItem['key']]: '',
         });
@@ -337,7 +345,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         <TextInput
           style={styles.searchBar}
           value={search}
-          placeholder="search by event name or location..."
+          placeholder="search by event name..."
           underlineColorAndroid="transparent"
           onChangeText={(text) => searchEvents(text)}
           textAlign="left"

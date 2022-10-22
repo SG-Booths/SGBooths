@@ -28,17 +28,6 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
   const [imgUrl3, setImgUrl3] = useState<string | undefined>(undefined);
   let imgUrl3Final: any = useRef();
 
-  useEffect(() => {
-    getPermissionAsync();
-  }, []);
-
-  const getPermissionAsync = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      alert('...');
-    }
-  };
-
   const _pickImage = async (number: number) => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,

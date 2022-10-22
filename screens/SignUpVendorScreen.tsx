@@ -56,7 +56,14 @@ const SignUpVendorScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => 
           ...value,
           error: 'Please wait a while before trying again',
         });
-      } else if (error.message.includes('user-not-found')) {
+      } 
+      else if (error.message.includes('weak-passwrd')) {
+        setValue({
+          ...value,
+          error: 'Password must be at least 6 characters',
+        });
+      }
+      else if (error.message.includes('user-not-found')) {
         navigation.navigate('SetInstagramUsernameScreen', {
           email: value.email,
           password: value.password,
