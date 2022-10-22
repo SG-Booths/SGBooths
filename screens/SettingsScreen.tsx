@@ -5,8 +5,9 @@ import {
   TouchableOpacity,
   Alert,
   TextInput,
-  ScrollView,
+  Keyboard,
   ImageBackground,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { getAuth, signOut, sendPasswordResetEmail, updateProfile } from 'firebase/auth';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
@@ -215,203 +216,210 @@ export default function SettingsScreen({ route, navigation }: any) {
 
     Alert.alert('Saved!');
   }
-  // TODO: issue when changing name
   return (
     <SafeAreaView style={styles.container}>
-      <View
-        style={{
-          marginLeft: 20,
-          backgroundColor: 'transparent',
-          flexDirection: 'row',
-          marginTop: 30,
-          alignItems: 'center',
-        }}
-      >
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="keyboard-arrow-left" size={50} color="#575FCC" style={{ marginTop: 5 }} />
-        </TouchableOpacity>
-        <Text style={styles.title}>profile</Text>
-      </View>
-      <ScrollView>
-        {value.type === 'vendor' ? (
-          <View style={{ backgroundColor: 'transparent' }}>
-            {value.error && <Text style={styles.error}>{value.error}</Text>}
-            <Text style={{ marginLeft: 30, marginBottom: 10, fontWeight: '700', color: '#2A3242', marginTop: 30 }}>
-              Shop Name
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="shop name"
-              placeholderTextColor="#C4C4C4"
-              onChangeText={(text) => setValue({ ...value, name: text })}
-              value={value.name}
-              underlineColorAndroid="transparent"
-              autoCapitalize="none"
-              defaultValue={auth?.currentUser?.displayName!}
-            />
-            <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>Instagram</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="instagram username (without @)"
-              placeholderTextColor="#C4C4C4"
-              onChangeText={(text) => setValue({ ...value, instagram: text })}
-              value={value.instagram}
-              underlineColorAndroid="transparent"
-              autoCapitalize="none"
-              autoCorrect={false}
-              defaultValue={initialInstagram}
-            />
-            <View
-              style={{
-                marginVertical: 10,
-                marginHorizontal: 30,
-                backgroundColor: 'transparent',
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-              }}
-            >
-              <Text style={{ fontWeight: '700', color: '#2A3242' }}>Email</Text>
-              <TouchableOpacity onPress={() => handlePasswordReset(value.email)}>
-                <Text style={{ color: '#FABF48', fontWeight: '600', fontStyle: 'italic' }}>Reset password</Text>
-              </TouchableOpacity>
-            </View>
-            <TextInput
-              style={styles.input}
-              placeholder="email"
-              placeholderTextColor="#C4C4C4"
-              onChangeText={(text) => setValue({ ...value, email: text })}
-              value={value.email}
-              underlineColorAndroid="transparent"
-              autoCapitalize="none"
-              defaultValue={auth?.currentUser?.email!}
-              keyboardType="email-address"
-              textContentType="emailAddress"
-              editable={false}
-            />
-            <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>Shop Photos</Text>
-            <View style={styles.eventImageContainer}>
-              <TouchableOpacity onPress={() => _pickImage(1)}>
-                <ImageBackground
-                  source={{ uri: imgUrl1 }}
-                  style={[styles.vendorImage, imgUrl1 ? { borderWidth: 0 } : { borderWidth: 1 }]}
-                  imageStyle={{ borderRadius: 20 }}
-                >
-                  {!imgUrl1 && <Icon2 name="plus" color="#C4C4C4" size={40} />}
-                </ImageBackground>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => _pickImage(2)}>
-                <ImageBackground
-                  source={{ uri: imgUrl2 }}
-                  style={[styles.vendorImage, imgUrl2 ? { borderWidth: 0 } : { borderWidth: 1 }]}
-                  imageStyle={{ borderRadius: 20 }}
-                >
-                  {!imgUrl2 && <Icon2 name="plus" color="#C4C4C4" size={40} />}
-                </ImageBackground>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => _pickImage(3)}>
-                <ImageBackground
-                  source={{ uri: imgUrl3 }}
-                  style={[styles.vendorImage, imgUrl3 ? { borderWidth: 0 } : { borderWidth: 1 }]}
-                  imageStyle={{ borderRadius: 20 }}
-                >
-                  {!imgUrl3 && <Icon2 name="plus" color="#C4C4C4" size={40} />}
-                </ImageBackground>
-              </TouchableOpacity>
-            </View>
-          </View>
-        ) : (
-          <View style={{ backgroundColor: 'transparent' }}>
-            {value.error && <Text style={styles.error}>{value.error}</Text>}
-            <Text style={{ marginLeft: 30, marginBottom: 10, fontWeight: '700', color: '#2A3242', marginTop: 30 }}>
-              Name
-            </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="name"
-              placeholderTextColor="#C4C4C4"
-              onChangeText={(text) => setValue({ ...value, name: text })}
-              value={value.name}
-              underlineColorAndroid="transparent"
-              autoCapitalize="none"
-              defaultValue={auth?.currentUser?.displayName!}
-            />
-            <View
-              style={{
-                marginVertical: 10,
-                marginHorizontal: 30,
-                backgroundColor: 'transparent',
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-              }}
-            >
-              <Text style={{ fontWeight: '700', color: '#2A3242' }}>Email</Text>
-              <TouchableOpacity onPress={() => handlePasswordReset(value.email)}>
-                <Text style={{ color: '#FABF48', fontWeight: '600', fontStyle: 'italic' }}>Reset password</Text>
-              </TouchableOpacity>
-            </View>
-            <TextInput
-              style={styles.input}
-              placeholder="email"
-              placeholderTextColor="#C4C4C4"
-              onChangeText={(text) => setValue({ ...value, email: text })}
-              value={value.email}
-              underlineColorAndroid="transparent"
-              autoCapitalize="none"
-              defaultValue={auth?.currentUser?.email!}
-            />
-          </View>
-        )}
-        <View
-          style={{
-            marginLeft: 30,
-            marginRight: 30,
-            marginTop: 50,
-            backgroundColor: 'transparent',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-          }}
-        >
-          <TouchableOpacity
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+        <View style={styles.container}>
+          <View
             style={{
-              backgroundColor: '#575FCC',
-              height: 48,
-              width: 160,
-              borderRadius: 20,
+              marginLeft: 20,
+              backgroundColor: 'transparent',
+              flexDirection: 'row',
+              marginTop: 30,
               alignItems: 'center',
-              alignSelf: 'center',
-              justifyContent: 'center',
             }}
-            onPress={() => updateAccount()}
           >
-            <Text style={styles.buttonTitle}>SAVE</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, { marginHorizontal: 0, marginTop: 0, width: 160 }]}
-            onPress={() => signOut(auth)}
-          >
-            <Text style={styles.buttonTitle}>SIGN OUT</Text>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Icon name="keyboard-arrow-left" size={50} color="#575FCC" style={{ marginTop: 5 }} />
+            </TouchableOpacity>
+            <Text style={styles.title}>profile</Text>
+          </View>
+          <View style={{ backgroundColor: 'transparent' }}>
+            {value.type === 'vendor' ? (
+              <View style={{ backgroundColor: 'transparent' }}>
+                {value.error && <Text style={styles.error}>{value.error}</Text>}
+                <Text style={{ marginLeft: 30, marginBottom: 10, fontWeight: '700', color: '#2A3242', marginTop: 30 }}>
+                  Shop Name
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="shop name"
+                  placeholderTextColor="#C4C4C4"
+                  onChangeText={(text) => setValue({ ...value, name: text })}
+                  value={value.name}
+                  underlineColorAndroid="transparent"
+                  autoCapitalize="none"
+                  defaultValue={auth?.currentUser?.displayName!}
+                />
+                <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>
+                  Instagram
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="instagram username (without @)"
+                  placeholderTextColor="#C4C4C4"
+                  onChangeText={(text) => setValue({ ...value, instagram: text })}
+                  value={value.instagram}
+                  underlineColorAndroid="transparent"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  defaultValue={initialInstagram}
+                />
+                <View
+                  style={{
+                    marginVertical: 10,
+                    marginHorizontal: 30,
+                    backgroundColor: 'transparent',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Text style={{ fontWeight: '700', color: '#2A3242' }}>Email</Text>
+                  <TouchableOpacity onPress={() => handlePasswordReset(value.email)}>
+                    <Text style={{ color: '#FABF48', fontWeight: '600', fontStyle: 'italic' }}>Reset password</Text>
+                  </TouchableOpacity>
+                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="email"
+                  placeholderTextColor="#C4C4C4"
+                  onChangeText={(text) => setValue({ ...value, email: text })}
+                  value={value.email}
+                  underlineColorAndroid="transparent"
+                  autoCapitalize="none"
+                  defaultValue={auth?.currentUser?.email!}
+                  keyboardType="email-address"
+                  textContentType="emailAddress"
+                  editable={false}
+                />
+                <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>
+                  Shop Photos
+                </Text>
+                <View style={styles.eventImageContainer}>
+                  <TouchableOpacity onPress={() => _pickImage(1)}>
+                    <ImageBackground
+                      source={{ uri: imgUrl1 }}
+                      style={[styles.vendorImage, imgUrl1 ? { borderWidth: 0 } : { borderWidth: 1 }]}
+                      imageStyle={{ borderRadius: 20 }}
+                    >
+                      {!imgUrl1 && <Icon2 name="plus" color="#C4C4C4" size={40} />}
+                    </ImageBackground>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => _pickImage(2)}>
+                    <ImageBackground
+                      source={{ uri: imgUrl2 }}
+                      style={[styles.vendorImage, imgUrl2 ? { borderWidth: 0 } : { borderWidth: 1 }]}
+                      imageStyle={{ borderRadius: 20 }}
+                    >
+                      {!imgUrl2 && <Icon2 name="plus" color="#C4C4C4" size={40} />}
+                    </ImageBackground>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => _pickImage(3)}>
+                    <ImageBackground
+                      source={{ uri: imgUrl3 }}
+                      style={[styles.vendorImage, imgUrl3 ? { borderWidth: 0 } : { borderWidth: 1 }]}
+                      imageStyle={{ borderRadius: 20 }}
+                    >
+                      {!imgUrl3 && <Icon2 name="plus" color="#C4C4C4" size={40} />}
+                    </ImageBackground>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              <View style={{ backgroundColor: 'transparent' }}>
+                {value.error && <Text style={styles.error}>{value.error}</Text>}
+                <Text style={{ marginLeft: 30, marginBottom: 10, fontWeight: '700', color: '#2A3242', marginTop: 30 }}>
+                  Name
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="name"
+                  placeholderTextColor="#C4C4C4"
+                  onChangeText={(text) => setValue({ ...value, name: text })}
+                  value={value.name}
+                  underlineColorAndroid="transparent"
+                  autoCapitalize="none"
+                  defaultValue={auth?.currentUser?.displayName!}
+                />
+                <View
+                  style={{
+                    marginVertical: 10,
+                    marginHorizontal: 30,
+                    backgroundColor: 'transparent',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Text style={{ fontWeight: '700', color: '#2A3242' }}>Email</Text>
+                  <TouchableOpacity onPress={() => handlePasswordReset(value.email)}>
+                    <Text style={{ color: '#FABF48', fontWeight: '600', fontStyle: 'italic' }}>Reset password</Text>
+                  </TouchableOpacity>
+                </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="email"
+                  placeholderTextColor="#C4C4C4"
+                  onChangeText={(text) => setValue({ ...value, email: text })}
+                  value={value.email}
+                  underlineColorAndroid="transparent"
+                  autoCapitalize="none"
+                  defaultValue={auth?.currentUser?.email!}
+                />
+              </View>
+            )}
+            <View
+              style={{
+                marginLeft: 30,
+                marginRight: 30,
+                marginTop: 50,
+                backgroundColor: 'transparent',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+              }}
+            >
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#575FCC',
+                  height: 48,
+                  width: 160,
+                  borderRadius: 20,
+                  alignItems: 'center',
+                  alignSelf: 'center',
+                  justifyContent: 'center',
+                }}
+                onPress={() => updateAccount()}
+              >
+                <Text style={styles.buttonTitle}>SAVE</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.button, { marginHorizontal: 0, marginTop: 0, width: 160 }]}
+                onPress={() => signOut(auth)}
+              >
+                <Text style={styles.buttonTitle}>SIGN OUT</Text>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity
+              style={{
+                backgroundColor: '#D54826FF',
+                height: 48,
+                width: 220,
+                borderRadius: 20,
+                alignItems: 'center',
+                alignSelf: 'center',
+                justifyContent: 'center',
+                marginTop: 20,
+              }}
+              onPress={() =>
+                navigation.navigate('VerifyAccountScreen', {
+                  type: 'delete account',
+                })
+              }
+            >
+              <Text style={styles.buttonTitle}>DELETE ACCOUNT</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-        <TouchableOpacity
-          style={{
-            backgroundColor: '#D54826FF',
-            height: 48,
-            width: 220,
-            borderRadius: 20,
-            alignItems: 'center',
-            alignSelf: 'center',
-            justifyContent: 'center',
-            marginTop: 20,
-          }}
-          onPress={() =>
-            navigation.navigate('VerifyAccountScreen', {
-              type: 'delete account',
-            })
-          }
-        >
-          <Text style={styles.buttonTitle}>DELETE ACCOUNT</Text>
-        </TouchableOpacity>
-      </ScrollView>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 }

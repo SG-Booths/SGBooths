@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, KeyboardAvoidingView, Alert } from 'react-native';
+import { StyleSheet, Text, View, TouchableWithoutFeedback, Alert, Keyboard } from 'react-native';
 import { StackScreenProps } from '@react-navigation/stack';
 import { TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
@@ -120,115 +120,120 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={styles.title}>sign up</Text>
-        {value.error && <Text style={styles.error}>{value.error}</Text>}
-        <View
-          style={{
-            flexDirection: 'row',
-            backgroundColor: 'transparent',
-            justifyContent: 'space-between',
-            marginHorizontal: 60,
-            zIndex: 10,
-            alignItems: 'center',
-          }}
-        >
-          <DropDownPicker
-            placeholder="account type"
-            placeholderStyle={{ color: '#C4C4C4' }}
-            dropDownContainerStyle={{
-              width: 270,
-              borderRadius: 20,
-              overflow: 'hidden',
-              backgroundColor: 'white',
-              marginTop: 20,
-              marginBottom: 10,
-              paddingLeft: 7,
-              borderWidth: 1,
-              borderColor: '#C4C4C4',
-            }}
+      <TouchableWithoutFeedback
+        onPress={() => Keyboard.dismiss()}
+        style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <View style={styles.container}>
+          <Text style={styles.title}>sign up</Text>
+          {value.error && <Text style={styles.error}>{value.error}</Text>}
+          <View
             style={{
-              width: 270,
-              height: 48,
-              borderRadius: 20,
-              overflow: 'hidden',
-              backgroundColor: 'white',
-              marginTop: 20,
-              marginBottom: 10,
-              paddingLeft: 16,
-              borderWidth: 1,
-              borderColor: '#C4C4C4',
-            }}
-            open={open}
-            value={type}
-            items={items}
-            setOpen={setOpen}
-            setValue={setType}
-            setItems={setItems}
-          />
-          <TouchableOpacity
-            style={{ marginTop: 12 }}
-            onPress={() => {
-              Alert.alert(
-                'What do the account types mean?',
-                'While both account types are able to browse events and creators, only creators can add booths to events.'
-              );
+              flexDirection: 'row',
+              backgroundColor: 'transparent',
+              justifyContent: 'space-between',
+              marginHorizontal: 60,
+              zIndex: 10,
+              alignItems: 'center',
             }}
           >
-            <Icon name="questioncircleo" color="#2A3242" size={30} />
+            <DropDownPicker
+              placeholder="account type"
+              placeholderStyle={{ color: '#C4C4C4' }}
+              dropDownContainerStyle={{
+                width: 270,
+                borderRadius: 20,
+                overflow: 'hidden',
+                backgroundColor: 'white',
+                marginTop: 20,
+                marginBottom: 10,
+                paddingLeft: 7,
+                borderWidth: 1,
+                borderColor: '#C4C4C4',
+              }}
+              style={{
+                width: 270,
+                height: 48,
+                borderRadius: 20,
+                overflow: 'hidden',
+                backgroundColor: 'white',
+                marginTop: 20,
+                marginBottom: 10,
+                paddingLeft: 16,
+                borderWidth: 1,
+                borderColor: '#C4C4C4',
+              }}
+              open={open}
+              value={type}
+              items={items}
+              setOpen={setOpen}
+              setValue={setType}
+              setItems={setItems}
+            />
+            <TouchableOpacity
+              style={{ marginTop: 12 }}
+              onPress={() => {
+                Alert.alert(
+                  'What do the account types mean?',
+                  'While both account types are able to browse events and creators, only creators can add booths to events.'
+                );
+              }}
+            >
+              <Icon name="questioncircleo" color="#2A3242" size={30} />
+            </TouchableOpacity>
+          </View>
+          <TextInput
+            style={styles.input}
+            placeholder={type === 'vendor' ? 'shop name' : 'name'}
+            placeholderTextColor="#C4C4C4"
+            onChangeText={(text) => setValue({ ...value, name: text })}
+            value={value.name}
+            underlineColorAndroid="transparent"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="email address"
+            placeholderTextColor="#C4C4C4"
+            onChangeText={(text) => setValue({ ...value, email: text })}
+            value={value.email}
+            keyboardType="email-address"
+            textContentType="emailAddress"
+            underlineColorAndroid="transparent"
+            autoCapitalize="none"
+          />
+          <TextInput
+            style={styles.input}
+            placeholderTextColor="#C4C4C4"
+            secureTextEntry
+            placeholder="password"
+            onChangeText={(text) => setValue({ ...value, password: text })}
+            value={value.password}
+            underlineColorAndroid="transparent"
+            autoCapitalize="none"
+          />
+          <TextInput
+            style={styles.input}
+            placeholderTextColor="#C4C4C4"
+            secureTextEntry
+            placeholder="confirm password"
+            onChangeText={(text) => setValue({ ...value, confirmPassword: text })}
+            value={value.confirmPassword}
+            underlineColorAndroid="transparent"
+            autoCapitalize="none"
+          />
+          <TouchableOpacity style={styles.button} onPress={() => signUp()}>
+            <Text style={styles.buttonTitle}>SIGN UP →</Text>
           </TouchableOpacity>
+          <View style={styles.footerView}>
+            <Text style={styles.footerText}>already have an account? </Text>
+            <TouchableOpacity onPress={onFooterLinkPress}>
+              <Text style={styles.footerLink}>log in</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-        <TextInput
-          style={styles.input}
-          placeholder={type === 'vendor' ? 'shop name' : 'name'}
-          placeholderTextColor="#C4C4C4"
-          onChangeText={(text) => setValue({ ...value, name: text })}
-          value={value.name}
-          underlineColorAndroid="transparent"
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="email address"
-          placeholderTextColor="#C4C4C4"
-          onChangeText={(text) => setValue({ ...value, email: text })}
-          value={value.email}
-          keyboardType="email-address"
-          textContentType="emailAddress"
-          underlineColorAndroid="transparent"
-          autoCapitalize="none"
-        />
-        <TextInput
-          style={styles.input}
-          placeholderTextColor="#C4C4C4"
-          secureTextEntry
-          placeholder="password"
-          onChangeText={(text) => setValue({ ...value, password: text })}
-          value={value.password}
-          underlineColorAndroid="transparent"
-          autoCapitalize="none"
-        />
-        <TextInput
-          style={styles.input}
-          placeholderTextColor="#C4C4C4"
-          secureTextEntry
-          placeholder="confirm password"
-          onChangeText={(text) => setValue({ ...value, confirmPassword: text })}
-          value={value.confirmPassword}
-          underlineColorAndroid="transparent"
-          autoCapitalize="none"
-        />
-        <TouchableOpacity style={styles.button} onPress={() => signUp()}>
-          <Text style={styles.buttonTitle}>SIGN UP →</Text>
-        </TouchableOpacity>
-        <View style={styles.footerView}>
-          <Text style={styles.footerText}>already have an account? </Text>
-          <TouchableOpacity onPress={onFooterLinkPress}>
-            <Text style={styles.footerLink}>log in</Text>
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 };
@@ -237,6 +242,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   title: {
     alignSelf: 'center',

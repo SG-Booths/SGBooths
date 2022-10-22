@@ -4,10 +4,11 @@ import {
   Text,
   View,
   Alert,
-  KeyboardAvoidingView,
   TextInput,
   TouchableOpacity,
   SafeAreaView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { StackScreenProps } from '@react-navigation/stack';
@@ -78,45 +79,50 @@ const SignInScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={styles.title}>log in</Text>
-        {value.error && <Text style={styles.error}>{value.error}</Text>}
-        <TextInput
-          style={styles.input}
-          placeholder="email address"
-          placeholderTextColor="#C4C4C4"
-          onChangeText={(text) => setValue({ ...value, email: text })}
-          keyboardType="email-address"
-          textContentType="emailAddress"
-          value={value.email}
-          underlineColorAndroid="transparent"
-          autoCapitalize="none"
-        />
-        <TextInput
-          style={styles.input}
-          placeholderTextColor="#C4C4C4"
-          secureTextEntry
-          placeholder="password"
-          onChangeText={(text) => setValue({ ...value, password: text })}
-          value={value.password}
-          underlineColorAndroid="transparent"
-          autoCapitalize="none"
-        />
-        <TouchableOpacity style={styles.button} onPress={() => signIn()}>
-          <Text style={styles.buttonTitle}>LOG IN →</Text>
-        </TouchableOpacity>
-        <View style={styles.footerView}>
-          <Text style={styles.footerText}>don't have an account? </Text>
-          <TouchableOpacity onPress={onFooterLinkPress}>
-            <Text style={styles.footerLink}>sign up</Text>
+      <TouchableWithoutFeedback
+        onPress={() => Keyboard.dismiss()}
+        style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <View style={styles.container}>
+          <Text style={styles.title}>log in</Text>
+          {value.error && <Text style={styles.error}>{value.error}</Text>}
+          <TextInput
+            style={styles.input}
+            placeholder="email address"
+            placeholderTextColor="#C4C4C4"
+            onChangeText={(text) => setValue({ ...value, email: text })}
+            keyboardType="email-address"
+            textContentType="emailAddress"
+            value={value.email}
+            underlineColorAndroid="transparent"
+            autoCapitalize="none"
+          />
+          <TextInput
+            style={styles.input}
+            placeholderTextColor="#C4C4C4"
+            secureTextEntry
+            placeholder="password"
+            onChangeText={(text) => setValue({ ...value, password: text })}
+            value={value.password}
+            underlineColorAndroid="transparent"
+            autoCapitalize="none"
+          />
+          <TouchableOpacity style={styles.button} onPress={() => signIn()}>
+            <Text style={styles.buttonTitle}>LOG IN →</Text>
+          </TouchableOpacity>
+          <View style={styles.footerView}>
+            <Text style={styles.footerText}>don't have an account? </Text>
+            <TouchableOpacity onPress={onFooterLinkPress}>
+              <Text style={styles.footerLink}>sign up</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity onPress={() => handlePasswordReset(value.email)}>
+            <Text style={{ fontSize: 16, color: '#FABF48', marginTop: 30, fontWeight: '600', fontStyle: 'italic' }}>
+              reset password
+            </Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={() => handlePasswordReset(value.email)}>
-          <Text style={{ fontSize: 16, color: '#FABF48', marginTop: 30, fontWeight: '600', fontStyle: 'italic' }}>
-            reset password
-          </Text>
-        </TouchableOpacity>
-      </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 };
@@ -125,6 +131,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   title: {
     alignSelf: 'center',
