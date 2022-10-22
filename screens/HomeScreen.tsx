@@ -93,9 +93,9 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   // toggles a card's starred status
   const updateStarred = (eventItem: any) => {
     if (boothsFollowing && boothsFollowing.length > 0) {
-      console.log('booths following:', boothsFollowing)
-      console.log('key:', eventItem['key'])
-      console.log('starred filter:', starredFilter)
+      console.log('booths following:', boothsFollowing);
+      console.log('key:', eventItem['key']);
+      console.log('starred filter:', starredFilter);
 
       if (boothsFollowing.includes(eventItem['key']) && starredFilter === true) {
         remove(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/' + eventItem['key']));
@@ -110,11 +110,9 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             return !(obj.key === eventItem['key']);
           })
         );
-      } 
-      else if (boothsFollowing.includes(eventItem['key'])) {
+      } else if (boothsFollowing.includes(eventItem['key'])) {
         remove(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/' + eventItem['key']));
-      }
-        else {
+      } else {
         update(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/'), {
           [eventItem['key']]: '',
         });

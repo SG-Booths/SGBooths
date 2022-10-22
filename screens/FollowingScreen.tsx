@@ -29,8 +29,8 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(true);
 
   const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-  
-  let imgUrl: any = useRef()
+
+  let imgUrl: any = useRef();
 
   const loadNewData = () => {
     onValue(ref(db, '/events'), (querySnapShot) => {
@@ -50,13 +50,9 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           let data = querySnapShot.val() || {};
           let info = { ...data };
 
-          if (info.type === 'visitor' || !info) {
-            remove(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/' + vendorKey));
-          } else {
-            let updatedValue = { [vendorKey]: info };
-            setVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }));
-            setFilteredVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }));
-          }
+          let updatedValue = { [vendorKey]: info };
+          setVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }));
+          setFilteredVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }));
         })
       );
       setRefreshing(false);
@@ -128,7 +124,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           location: events[boothKey.eventID as keyof typeof events]['location'],
           avail: events[boothKey.eventID as keyof typeof events]['avail'],
           name: events[boothKey.eventID as keyof typeof events]['name'],
-        })
+        });
       })
       .catch((error) => {
         console.log('error:' + error);
@@ -188,33 +184,31 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             NEXT BOOTHS
           </Text>
           {vendor.upcomingBooths ? (
-              Object.values(vendor.upcomingBooths)
-                .sort((a: any, b: any) => {
-                  return b.date - a.date;
-                })
-                .slice(0, 2)
-                .map((boothKey: any) => (
-                  <TouchableOpacity
-                    key={vendor.uid + boothKey.eventID}
-                    style={{
-                      flexDirection: 'row',
-                      backgroundColor: 'transparent',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      width: 340,
-                    }}
-                    onPress={() =>
-                      getImgUrl(events[boothKey.eventID as keyof typeof events]['key'], boothKey)
-                    }
-                  >
-                    <Text style={{ color: '#2A3242', marginLeft: 15, marginTop: 10 }}>
-                      {monthNames[events[boothKey.eventID as keyof typeof events]['date']['month'] - 1]}{' '}
-                      {events[boothKey.eventID as keyof typeof events]['date']['day']} @{' '}
-                      {events[boothKey.eventID as keyof typeof events]['name']}
-                    </Text>
-                    <Icon2 name="keyboard-arrow-right" size={20} color="#2A3242" />
-                  </TouchableOpacity>
-                ))
+            Object.values(vendor.upcomingBooths)
+              .sort((a: any, b: any) => {
+                return b.date - a.date;
+              })
+              .slice(0, 2)
+              .map((boothKey: any) => (
+                <TouchableOpacity
+                  key={vendor.uid + boothKey.eventID}
+                  style={{
+                    flexDirection: 'row',
+                    backgroundColor: 'transparent',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    width: 340,
+                  }}
+                  onPress={() => getImgUrl(events[boothKey.eventID as keyof typeof events]['key'], boothKey)}
+                >
+                  <Text style={{ color: '#2A3242', marginLeft: 15, marginTop: 10 }}>
+                    {monthNames[events[boothKey.eventID as keyof typeof events]['date']['month'] - 1]}{' '}
+                    {events[boothKey.eventID as keyof typeof events]['date']['day']} @{' '}
+                    {events[boothKey.eventID as keyof typeof events]['name']}
+                  </Text>
+                  <Icon2 name="keyboard-arrow-right" size={20} color="#2A3242" />
+                </TouchableOpacity>
+              ))
           ) : (
             <Text style={{ color: '#2A3242', marginTop: 10, fontWeight: '400', marginLeft: 15 }}>
               no upcoming booths...
@@ -250,11 +244,13 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadNewData} />}
           renderItem={({ item }) => (
             <View style={{ backgroundColor: '#FFfF8F3', marginTop: 20 }}>
-              <VendorItem vendor={filteredVendorArray[item]}/>
+              <VendorItem vendor={filteredVendorArray[item]} />
             </View>
           )}
           ListEmptyComponent={() => (
-            <Text style={{ marginTop: 30, color: '#2A3242' }}>pull to refresh if you don't see your favourite creators!</Text>
+            <Text style={{ marginTop: 30, color: '#2A3242' }}>
+              pull to refresh if you don't see your favourite creators!
+            </Text>
           )}
         />
       </View>

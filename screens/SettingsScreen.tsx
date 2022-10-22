@@ -230,7 +230,7 @@ export default function SettingsScreen({ route, navigation }: any) {
       },
     ]);
   }
-// TODO: issue when changing name
+  // TODO: issue when changing name
   return (
     <SafeAreaView style={styles.container}>
       <View
@@ -251,7 +251,9 @@ export default function SettingsScreen({ route, navigation }: any) {
         {value.type === 'vendor' ? (
           <View style={{ backgroundColor: 'transparent' }}>
             {value.error && <Text style={styles.error}>{value.error}</Text>}
-            <Text style={{ marginLeft: 30, marginBottom: 10, fontWeight: '700', color: '#2A3242', marginTop: 30 }}>Shop Name</Text>
+            <Text style={{ marginLeft: 30, marginBottom: 10, fontWeight: '700', color: '#2A3242', marginTop: 30 }}>
+              Shop Name
+            </Text>
             <TextInput
               style={styles.input}
               placeholder="shop name"
@@ -335,7 +337,9 @@ export default function SettingsScreen({ route, navigation }: any) {
         ) : (
           <View style={{ backgroundColor: 'transparent' }}>
             {value.error && <Text style={styles.error}>{value.error}</Text>}
-            <Text style={{ marginLeft: 30, marginBottom: 10, fontWeight: '700', color: '#2A3242', marginTop: 30 }}>Name</Text>
+            <Text style={{ marginLeft: 30, marginBottom: 10, fontWeight: '700', color: '#2A3242', marginTop: 30 }}>
+              Name
+            </Text>
             <TextInput
               style={styles.input}
               placeholder="name"

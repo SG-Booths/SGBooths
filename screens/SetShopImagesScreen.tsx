@@ -64,78 +64,78 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
   async function signUp() {
     if (imgUrl1 && imgUrl2 && imgUrl3) {
       console.log('img1:', imgUrl1Final.current);
-    console.log('img2:', imgUrl2Final.current);
-    console.log('img3:', imgUrl3Final.current);
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      const metadata = {
-        contentType: 'image/png',
-      };
-      setUploading(true);
-      const ref1 = ref_storage(storage, auth?.currentUser?.uid + '_1.png');
-      const response1 = await fetch(imgUrl1Final.current);
-      const blob1 = await response1.blob();
-      uploadBytesResumable(ref1, blob1, metadata)
-        .then(async (snapshot) => {
-          console.log('Uploaded image 1');
+      console.log('img2:', imgUrl2Final.current);
+      console.log('img3:', imgUrl3Final.current);
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        const metadata = {
+          contentType: 'image/png',
+        };
+        setUploading(true);
+        const ref1 = ref_storage(storage, auth?.currentUser?.uid + '_1.png');
+        const response1 = await fetch(imgUrl1Final.current);
+        const blob1 = await response1.blob();
+        uploadBytesResumable(ref1, blob1, metadata)
+          .then(async (snapshot) => {
+            console.log('Uploaded image 1');
 
-          const ref2 = ref_storage(storage, auth?.currentUser?.uid + '_2.png');
-          const response2 = await fetch(imgUrl2Final.current);
-          const blob2 = await response2.blob();
-          uploadBytesResumable(ref2, blob2, metadata)
-            .then(async (snapshot) => {
-              console.log('Uploaded image 2');
+            const ref2 = ref_storage(storage, auth?.currentUser?.uid + '_2.png');
+            const response2 = await fetch(imgUrl2Final.current);
+            const blob2 = await response2.blob();
+            uploadBytesResumable(ref2, blob2, metadata)
+              .then(async (snapshot) => {
+                console.log('Uploaded image 2');
 
-              const ref3 = ref_storage(storage, auth?.currentUser?.uid + '_3.png');
-              const response3 = await fetch(imgUrl3Final.current);
-              const blob3 = await response3.blob();
-              uploadBytesResumable(ref3, blob3, metadata)
-                .then(async (snapshot) => {
-                  console.log('Uploaded image 3');
+                const ref3 = ref_storage(storage, auth?.currentUser?.uid + '_3.png');
+                const response3 = await fetch(imgUrl3Final.current);
+                const blob3 = await response3.blob();
+                uploadBytesResumable(ref3, blob3, metadata)
+                  .then(async (snapshot) => {
+                    console.log('Uploaded image 3');
 
-                  await updateProfile(auth.currentUser!, {
-                    displayName: name.trim(),
+                    await updateProfile(auth.currentUser!, {
+                      displayName: name.trim(),
+                    });
+                    set(ref(db, '/users/' + auth.currentUser?.uid), {
+                      type: 'vendor',
+                      name: name.trim(),
+                      uid: auth.currentUser?.uid,
+                      instagram: instagram.replace(/\s+/g, ''),
+                    });
+                  })
+                  .catch((error) => {
+                    // Uh-oh, an error occurred!
+                    console.log(error);
+                    setValue({
+                      ...value,
+                      error: error.message,
+                    });
                   });
-                  set(ref(db, '/users/' + auth.currentUser?.uid), {
-                    type: 'vendor',
-                    name: name.trim(),
-                    uid: auth.currentUser?.uid,
-                    instagram: instagram.replace(/\s+/g, ''),
-                  });
-                })
-                .catch((error) => {
-                  // Uh-oh, an error occurred!
-                  console.log(error);
-                  setValue({
-                    ...value,
-                    error: error.message,
-                  });
+                setUploading(false);
+              })
+              .catch((error) => {
+                // Uh-oh, an error occurred!
+                console.log(error);
+                setValue({
+                  ...value,
+                  error: error.message,
                 });
-              setUploading(false);
-            })
-            .catch((error) => {
-              // Uh-oh, an error occurred!
-              console.log(error);
-              setValue({
-                ...value,
-                error: error.message,
               });
+          })
+          .catch((error) => {
+            // Uh-oh, an error occurred!
+            console.log(error);
+            setValue({
+              ...value,
+              error: error.message,
             });
-        })
-        .catch((error) => {
-          // Uh-oh, an error occurred!
-          console.log(error);
-          setValue({
-            ...value,
-            error: error.message,
           });
+      } catch (error: any) {
+        setValue({
+          ...value,
+          error: error.message,
         });
-    } catch (error: any) {
-      setValue({
-        ...value,
-        error: error.message,
-      });
-    }
+      }
     } else {
       setValue({
         ...value,

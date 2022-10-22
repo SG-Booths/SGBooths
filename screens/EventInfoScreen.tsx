@@ -6,7 +6,7 @@ import {
   SafeAreaView,
   ImageBackground,
   FlatList,
-  RefreshControl
+  RefreshControl,
 } from 'react-native';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
@@ -88,22 +88,18 @@ export default function EventInfoScreen({ route, navigation }: any) {
           let info = { ...data };
           // let info = { ...data, boothNumber: vendorList[vendorKey]['boothNumber'] };
 
-          if (info.type === 'visitor' || !info) {
-            remove(ref(db, '/events/' + eventID + '/vendors/' + vendorKey));
-          } else {
-            let updatedValue = { [vendorKey]: info };
-            setVendorList((vendorInfo) => ({ ...vendorInfo, ...updatedValue }));
-            setVendorArray((vendorInfo: any) =>
-              Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
-                return item.uid != auth.currentUser?.uid;
-              })
-            );
-            setFilteredVendors((vendorInfo: any) =>
-              Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
-                return item.uid != auth.currentUser?.uid;
-              })
-            );
-          }
+          let updatedValue = { [vendorKey]: info };
+          setVendorList((vendorInfo) => ({ ...vendorInfo, ...updatedValue }));
+          setVendorArray((vendorInfo: any) =>
+            Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
+              return item.uid != auth.currentUser?.uid;
+            })
+          );
+          setFilteredVendors((vendorInfo: any) =>
+            Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
+              return item.uid != auth.currentUser?.uid;
+            })
+          );
           // setVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }).sort((a: any, b: any) => {
           //   return a.boothNumber - b.boothNumber
           // }));
@@ -112,7 +108,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
           // }));
         })
       );
-      setRefreshing(false)
+      setRefreshing(false);
     });
   }, []);
 
@@ -125,7 +121,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
       let data2 = querySnapShot.val() || {};
       let vendorsFollowingTemp = { ...data2 };
       setVendorsFollowing(Object.keys(vendorsFollowingTemp));
-      setRefreshing(false)
+      setRefreshing(false);
     });
   }, []);
 
@@ -134,7 +130,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
       let data3 = querySnapShot.val() || {};
       let userData = { ...data3 };
       setCurrentUser(userData);
-      setRefreshing(false)
+      setRefreshing(false);
     });
   }, []);
 
@@ -177,9 +173,9 @@ export default function EventInfoScreen({ route, navigation }: any) {
           // }));
         })
       );
-      setRefreshing(false)
+      setRefreshing(false);
     });
-  }
+  };
 
   const searchVendors = (text: string) => {
     // sets the search term to the current search box input
@@ -257,11 +253,9 @@ export default function EventInfoScreen({ route, navigation }: any) {
             return !(obj.uid === uid);
           })
         );
-      } 
-      else if (vendorsFollowing.includes(uid)) {
+      } else if (vendorsFollowing.includes(uid)) {
         remove(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/' + uid));
-      }
-      else {
+      } else {
         update(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/'), {
           [uid]: '',
         });
@@ -394,10 +388,14 @@ export default function EventInfoScreen({ route, navigation }: any) {
             }}
           >
             <Text style={styles.vendorName}>{name}</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('SettingsScreen', {
-              instagram: currentUser.instagram,
-              type: currentUser.type,
-            })}>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('SettingsScreen', {
+                  instagram: currentUser.instagram,
+                  type: currentUser.type,
+                })
+              }
+            >
               <Icon2 name="edit" color="#575FCC" size={25} />
             </TouchableOpacity>
           </View>
@@ -429,20 +427,20 @@ export default function EventInfoScreen({ route, navigation }: any) {
   };
 
   const NotBoothing = () => {
-    return(
+    return (
       <TouchableOpacity style={styles.notBoothing} onPress={() => boothAtEvent()}>
         <Text style={{ fontWeight: '800', color: '#8FD8B5' }}>CLICK IF BOOTHING</Text>
       </TouchableOpacity>
-    )
-  }
+    );
+  };
 
   const Boothing = () => {
-    return(
+    return (
       <TouchableOpacity style={styles.boothing} onPress={() => removeBoothFromEvent()}>
         <Text style={{ fontWeight: '800', color: '#8FD8B5' }}>CLICK TO CANCEL BOOTH</Text>
       </TouchableOpacity>
-    )
-  }
+    );
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: '#FFF8F3' }}>
@@ -546,8 +544,8 @@ export default function EventInfoScreen({ route, navigation }: any) {
                   />
                 </TouchableOpacity>
               </View>
-              {currentUser.type === 'vendor' && 
-                 (boothing ? (
+              {currentUser.type === 'vendor' &&
+                (boothing ? (
                   <View
                     style={{
                       borderRadius: 20,
@@ -570,7 +568,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
                         alignItems: 'center',
                       }}
                     >
-                      <Boothing/>
+                      <Boothing />
                     </View>
                     <View
                       style={{
@@ -588,17 +586,14 @@ export default function EventInfoScreen({ route, navigation }: any) {
                     </View>
                   </View>
                 ) : (
-                  <NotBoothing/>
-                ))
-              }
+                  <NotBoothing />
+                ))}
             </View>
           )}
         />
       </View>
     </View>
   );
-
-
 }
 
 const styles = StyleSheet.create({

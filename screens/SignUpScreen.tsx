@@ -20,8 +20,8 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   const [type, setType] = useState('');
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState([
-    {label: 'visitor', value: 'visitor'},
-    {label: 'creator', value: 'vendor'}
+    { label: 'visitor', value: 'visitor' },
+    { label: 'creator', value: 'vendor' },
   ]);
 
   const onFooterLinkPress = () => {
@@ -67,14 +67,12 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             ...value,
             error: 'Please wait a while before trying again',
           });
-        } 
-        else if (error.message.includes('weak-password')) {
+        } else if (error.message.includes('weak-password')) {
           setValue({
             ...value,
             error: 'Password must be at least 6 characters',
           });
-        }
-        else if (error.message.includes('user-not-found')) {
+        } else if (error.message.includes('user-not-found')) {
           navigation.navigate('SetInstagramUsernameScreen', {
             email: value.email,
             password: value.password,
@@ -110,8 +108,7 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             ...value,
             error: 'Password must be at least 6 characters',
           });
-        }
-        else {
+        } else {
           setValue({
             ...value,
             error: error.message,
@@ -126,7 +123,16 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       <KeyboardAvoidingView style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
         <Text style={styles.title}>sign up</Text>
         {value.error && <Text style={styles.error}>{value.error}</Text>}
-        <View style={{flexDirection: 'row', backgroundColor: 'transparent', justifyContent: 'space-between', marginHorizontal: 60, zIndex: 10, alignItems: 'center'}}>
+        <View
+          style={{
+            flexDirection: 'row',
+            backgroundColor: 'transparent',
+            justifyContent: 'space-between',
+            marginHorizontal: 60,
+            zIndex: 10,
+            alignItems: 'center',
+          }}
+        >
           <DropDownPicker
             placeholder="account type"
             placeholderStyle={{ color: '#C4C4C4' }}
@@ -160,13 +166,21 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             setValue={setType}
             setItems={setItems}
           />
-          <TouchableOpacity style={{ marginTop: 12 }} onPress={() => {Alert.alert('What do the account types mean?', 'While both account types are able to browse events and creators, only creators can add booths to events.')}}>
-            <Icon name="questioncircleo" color="#2A3242" size={30}/>
+          <TouchableOpacity
+            style={{ marginTop: 12 }}
+            onPress={() => {
+              Alert.alert(
+                'What do the account types mean?',
+                'While both account types are able to browse events and creators, only creators can add booths to events.'
+              );
+            }}
+          >
+            <Icon name="questioncircleo" color="#2A3242" size={30} />
           </TouchableOpacity>
         </View>
         <TextInput
           style={styles.input}
-          placeholder={type === 'vendor' ? "shop name" : "name"}
+          placeholder={type === 'vendor' ? 'shop name' : 'name'}
           placeholderTextColor="#C4C4C4"
           onChangeText={(text) => setValue({ ...value, name: text })}
           value={value.name}

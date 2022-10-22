@@ -47,6 +47,40 @@ export default function VerifyAccountScreen({ route, navigation }: any) {
       });
   };
 
+  const removeFollows = () => {
+    onValue(ref(db, '/users'), (querySnapShot) => {
+      let data = querySnapShot.val() || {};
+      let users = { ...data };
+
+      Object.values(users).map((vendorKey: any) => {
+        Object.values(vendorKey).map((vendorKey2: any) => {
+          Object.keys(vendorKey2).map((vendorKey3: any) => {
+            if (vendorKey3 === auth?.currentUser?.uid) {
+              remove(ref(db, '/users/' + vendorKey.uid + '/vendorsFollowing/' + auth?.currentUser?.uid));
+            }
+          });
+        });
+      });
+    });
+  };
+
+  const removeBooths = () => {
+    onValue(ref(db, '/events'), (querySnapShot) => {
+      let data = querySnapShot.val() || {};
+      let events = { ...data };
+
+      Object.values(events).map((eventKey: any) => {
+        Object.values(eventKey).map((eventKey2: any) => {
+          Object.keys(eventKey2).map((eventKey3: any) => {
+            if (eventKey3 === auth?.currentUser?.uid) {
+              remove(ref(db, '/events/' + eventKey.key + '/vendors/' + auth?.currentUser?.uid));
+            }
+          });
+        });
+      });
+    });
+  };
+
   const deleteAccount = async () => {
     Alert.alert('Are you sure?', 'This is irreversible!', [
       {
@@ -62,9 +96,10 @@ export default function VerifyAccountScreen({ route, navigation }: any) {
 
             try {
               await reauthenticateWithCredential(auth?.currentUser!, authCredential);
-
               try {
                 remove(ref(db, '/users/' + auth?.currentUser?.uid));
+                removeFollows();
+                removeBooths();
                 await deleteUser(auth?.currentUser!)
                   .then(() => {
                     let ref1: any;
@@ -99,6 +134,8 @@ export default function VerifyAccountScreen({ route, navigation }: any) {
                   setError('Please wait a while before trying again');
                 } else if (error.message.includes('user-mismatch')) {
                   setError('Please make sure your email address is correct');
+                } else if (error.message.includes('internal-error')) {
+                  setError('Please enter both your email and password');
                 } else {
                   setError(error.message);
                 }
@@ -111,6 +148,8 @@ export default function VerifyAccountScreen({ route, navigation }: any) {
                 setError('Please wait a while before trying again');
               } else if (error.message.includes('user-mismatch')) {
                 setError('Please make sure your email address is correct');
+              } else if (error.message.includes('internal-error')) {
+                setError('Please enter both your email and password');
               } else {
                 setError(error.message);
               }
@@ -123,6 +162,8 @@ export default function VerifyAccountScreen({ route, navigation }: any) {
               setError('Please wait a while before trying again');
             } else if (error.message.includes('user-mismatch')) {
               setError('Please make sure your email address is correct');
+            } else if (error.message.includes('internal-error')) {
+              setError('Please enter both your email and password');
             } else {
               setError(error.message);
             }
