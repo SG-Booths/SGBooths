@@ -193,11 +193,6 @@ export default function SettingsScreen({ route, navigation }: any) {
       return;
     }
 
-    let changeEmail = false;
-    if (value.email != auth.currentUser?.email) {
-      changeEmail = true;
-    }
-
     if (value.name != auth.currentUser?.displayName) {
       try {
         updateProfile(auth.currentUser!, { displayName: value.name });
@@ -211,24 +206,14 @@ export default function SettingsScreen({ route, navigation }: any) {
         name: value.name,
       });
     }
+
     if (value.instagram != initialInstagram) {
       update(ref(db, '/users/' + auth.currentUser?.uid), {
         instagram: value.instagram,
       });
     }
 
-    Alert.alert('Saved!', '', [
-      {
-        text: 'OK',
-        onPress: () => {
-          changeEmail &&
-            navigation.navigate('VerifyAccountScreen', {
-              type: 'change email',
-              newEmail: value.email,
-            });
-        },
-      },
-    ]);
+    Alert.alert('Saved!');
   }
   // TODO: issue when changing name
   return (

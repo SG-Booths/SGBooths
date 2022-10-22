@@ -173,6 +173,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
           // }));
         })
       );
+      getStarred(starredFilter);
       setRefreshing(false);
     });
   };
@@ -506,7 +507,9 @@ export default function EventInfoScreen({ route, navigation }: any) {
           renderItem={({ item }) => <VendorItem id={item} self={false} />}
           keyExtractor={(item) => filteredVendors[item]['uid' as keyof typeof filteredVendors]}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadNewData} />}
-          ListEmptyComponent={() => <Text>no creators yet!</Text>}
+          ListEmptyComponent={() =>
+            !starredFilter ? <Text>no creators yet!</Text> : <Text>no creators you follow are boothing here!</Text>
+          }
           ListHeaderComponent={(item) => (
             <View style={{ backgroundColor: 'transparent' }}>
               <Text style={styles.date}>

@@ -87,6 +87,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       let boothsFollowingTemp = { ...data2 };
       setBoothsFollowing(Object.keys(boothsFollowingTemp));
     });
+    getStarred(starredFilter);
     setRefreshing(false);
   };
 
