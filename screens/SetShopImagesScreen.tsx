@@ -18,7 +18,7 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
     error: '',
     tooBig1: false,
     tooBig2: false,
-    tooBig3: false
+    tooBig3: false,
   });
   const [uploading, setUploading] = useState(false);
 
@@ -33,46 +33,37 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
 
   const _pickImage = async (number: number) => {
     let result: any = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.1,
-        maxWidth: 500,
-        maxHeight: 500,
-      });
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.1,
+      maxWidth: 500,
+      maxHeight: 500,
+    });
 
-    console.log(result.fileSize)
+    console.log(result.fileSize);
 
-    let name = 'tooBig' + number
-    let otherName = false
-    let otherOtherName = false
+    let name = 'tooBig' + number;
+    let otherName = false;
+    let otherOtherName = false;
     if (number === 1) {
-      otherName = value.tooBig2
-      otherOtherName = value.tooBig3
+      otherName = value.tooBig2;
+      otherOtherName = value.tooBig3;
     } else if (number === 2) {
-      otherName = value.tooBig1
-      otherOtherName = value.tooBig3
+      otherName = value.tooBig1;
+      otherOtherName = value.tooBig3;
     } else {
-      otherName = value.tooBig1
-      otherOtherName = value.tooBig2
+      otherName = value.tooBig1;
+      otherOtherName = value.tooBig2;
     }
 
     if (result.fileSize > 4000000) {
-      setValue({...value, 
-        [name]: true,
-        error: 'Image is too large! Please pick another one.'
-      })
-    }
-    else if (result.fileSize < 4000000) {
-      setValue({...value, 
-        [name]: false,
-      })
+      setValue({ ...value, [name]: true, error: 'Image is too large! Please pick another one.' });
+    } else if (result.fileSize < 4000000) {
+      setValue({ ...value, [name]: false });
 
       if (!otherName && !otherOtherName) {
-        setValue({...value, 
-          [name]: false,
-          error: '',
-        })
+        setValue({ ...value, [name]: false, error: '' });
       }
     }
 
@@ -97,57 +88,58 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
   };
 
   async function signUp() {
-    console.log(value.tooBig1 + ' ' + value.tooBig2 + ' ' + value.tooBig3)
+    console.log(value.tooBig1 + ' ' + value.tooBig2 + ' ' + value.tooBig3);
     if (imgUrl1 && imgUrl2 && imgUrl3 && !value.tooBig1 && !value.tooBig2 && !value.tooBig3) {
       console.log('img1:', imgUrl1Final.current);
       console.log('img2:', imgUrl2Final.current);
       console.log('img3:', imgUrl3Final.current);
-        await createUserWithEmailAndPassword(auth, email, password).then(async data => {
-          console.log("UID:", data.user.uid);
+      await createUserWithEmailAndPassword(auth, email, password)
+        .then(async (data) => {
+          console.log('UID:', data.user.uid);
           const metadata = {
             contentType: 'image/png',
           };
           setUploading(true);
           const ref1 = ref_storage(storage, data.user.uid + '_1.png');
-          console.log('ref 1 done')
+          console.log('ref 1 done');
           const response1 = await fetch(imgUrl1Final.current);
-          console.log('response 1 done')
+          console.log('response 1 done');
           const blob1 = await response1.blob();
-          console.log('blob 1 done')
+          console.log('blob 1 done');
 
           const file1 = new File([blob1], `${data.user.uid}_1.png`, {
             type: 'image/png',
-          })
+          });
           uploadBytesResumable(ref1, file1, metadata)
             .then(async (snapshot) => {
               console.log('Uploaded image 1');
-  
+
               const ref2 = ref_storage(storage, data.user.uid + '_2.png');
-              console.log('ref 2 done')
+              console.log('ref 2 done');
               const response2 = await fetch(imgUrl2Final.current);
-              console.log('response 2 done')
+              console.log('response 2 done');
               const blob2 = await response2.blob();
-              console.log('blob 2 done')
+              console.log('blob 2 done');
               const file2 = new File([blob2], `${data.user.uid}_2.png`, {
                 type: 'image/png',
-              })
+              });
               uploadBytesResumable(ref2, file2, metadata)
                 .then(async (snapshot) => {
                   console.log('Uploaded image 2');
-  
+
                   const ref3 = ref_storage(storage, data.user.uid + '_3.png');
-                  console.log('ref 3 done')
+                  console.log('ref 3 done');
                   const response3 = await fetch(imgUrl3Final.current);
-                  console.log('response 3 done')
+                  console.log('response 3 done');
                   const blob3 = await response3.blob();
-                  console.log('blob 3 done')
+                  console.log('blob 3 done');
                   const file3 = new File([blob3], `${data.user.uid}_3.png`, {
                     type: 'image/png',
-                  })
+                  });
                   uploadBytesResumable(ref3, file3, metadata)
                     .then(async (snapshot) => {
                       console.log('Uploaded image 3');
-  
+
                       await updateProfile(auth.currentUser!, {
                         displayName: name.trim(),
                       });
@@ -186,12 +178,12 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
               });
             });
         })
-      .catch((error) => {
-        setValue({
-          ...value,
-          error: error.message,
+        .catch((error) => {
+          setValue({
+            ...value,
+            error: error.message,
+          });
         });
-      })
     } else if (!value.tooBig1 && !value.tooBig2 && !value.tooBig3) {
       setValue({
         ...value,

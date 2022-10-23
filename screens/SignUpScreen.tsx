@@ -78,6 +78,11 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             password: value.password,
             name: value.name,
           });
+        } else if (error.message.includes('invalid-email')) {
+          setValue({
+            ...value,
+            error: 'Please enter a valid email',
+          });
         } else {
           setValue({
             ...value,
@@ -86,8 +91,9 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         }
       }
     } else {
-        await createUserWithEmailAndPassword(auth, value.email.trim(), value.password.trim()).then(async data => {  
-          console.log("UID:", data.user.uid);
+      await createUserWithEmailAndPassword(auth, value.email.trim(), value.password.trim())
+        .then(async (data) => {
+          console.log('UID:', data.user.uid);
 
           await updateProfile(auth.currentUser!, {
             displayName: value.name.trim(),
@@ -97,25 +103,30 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             name: value.name.trim(),
             uid: data.user.uid,
           });
-       })
-       .catch(error => {
-        if (error.message.includes('email-already-in-use')) {
-          setValue({
-            ...value,
-            error: 'Email already in use',
-          });
-        } else if (error.message.includes('weak-passwrd')) {
-          setValue({
-            ...value,
-            error: 'Password must be at least 6 characters',
-          });
-        } else {
-          setValue({
-            ...value,
-            error: error.message,
-          });
-        }
-       });
+        })
+        .catch((error) => {
+          if (error.message.includes('email-already-in-use')) {
+            setValue({
+              ...value,
+              error: 'Email already in use',
+            });
+          } else if (error.message.includes('weak-passwrd')) {
+            setValue({
+              ...value,
+              error: 'Password must be at least 6 characters',
+            });
+          } else if (error.message.includes('invalid-email')) {
+            setValue({
+              ...value,
+              error: 'Please enter a valid email',
+            });
+          } else {
+            setValue({
+              ...value,
+              error: error.message,
+            });
+          }
+        });
     }
   }
 
@@ -176,7 +187,7 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
               onPress={() => {
                 Alert.alert(
                   'What do the account types mean?',
-                  'While both account types are able to browse events and creators, only creators can add booths to events.'
+                  'While both account types are able to browse events and creators, only creators can indicate that they are boothing at an event.'
                 );
               }}
             >
@@ -328,7 +339,7 @@ const styles = StyleSheet.create({
   error: {
     color: '#D54826FF',
     marginLeft: 30,
-    marginBottom: 20,
+    marginTop: 10,
   },
 });
 

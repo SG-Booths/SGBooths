@@ -224,29 +224,29 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           )
         ) {
           remove(ref(db, '/events/' + newArray[i].key));
-          newArray = newArray.splice(i, 1)
+          newArray = newArray.splice(i, 1);
 
           onValue(ref(db, '/users'), (querySnapShot) => {
             let data = querySnapShot.val() || {};
             let users = { ...data };
-      
+
             Object.values(users).map((userKey: any) => {
-              console.log('userKeys', userKey)
+              console.log('userKeys', userKey);
               Object.values(userKey).map((userKey2: any) => {
-                console.log('userKeys2', userKey2)
+                console.log('userKeys2', userKey2);
                 Object.keys(userKey2).map((userKey3: any) => {
-                  console.log('userKeys3', userKey3)
+                  console.log('userKeys3', userKey3);
                   if (userKey3 === newArray[i].key) {
-                    console.log('match:', userKey3)
+                    console.log('match:', userKey3);
                     remove(ref(db, '/users/' + userKey.uid + '/boothsFollowing/' + newArray[i].key));
                   }
                   Object.keys(userKey3).map((userKey4: any) => {
-                    console.log('userKeys4', userKey4)
-                  if (userKey4 === newArray[i].key) {
-                    console.log('match:', userKey4)
-                    remove(ref(db, '/users/' + userKey.uid + '/upcomingBooths/' + newArray[i].key));
-                  }
-                  })
+                    console.log('userKeys4', userKey4);
+                    if (userKey4 === newArray[i].key) {
+                      console.log('match:', userKey4);
+                      remove(ref(db, '/users/' + userKey.uid + '/upcomingBooths/' + newArray[i].key));
+                    }
+                  });
                 });
               });
             });
@@ -272,7 +272,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 
       setValue({
         name: data2.name,
-        email: user?.email!,
+        email: auth?.currentUser?.email!,
         instagram: data2.instagram,
         type: data2.type,
       });
@@ -420,6 +420,13 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             </View>
           </View>
         ))}
+        {filteredEvents.length === 0 &&
+          !search &&
+          (!starredFilter ? (
+            <Text style={{ color: '#2A3242', height: 500 }}>no events yet!</Text>
+          ) : (
+            <Text style={{ color: '#2A3242', height: 500 }}>you haven't saved any events!</Text>
+          ))}
         {value.type === 'admin' && (
           <TouchableOpacity onPress={() => navigation.navigate('AddEvent')} style={{ alignItems: 'center' }}>
             <Text>add event</Text>

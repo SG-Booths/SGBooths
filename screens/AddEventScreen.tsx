@@ -31,7 +31,7 @@ export default function AddEventScreen({ navigation }: RootStackScreenProps<'Add
       key: newReference.key,
     });
 
-    alert('uploaded')
+    alert('uploaded');
     setValue({
       name: '',
       day: '',

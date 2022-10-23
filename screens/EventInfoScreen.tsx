@@ -65,7 +65,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
   };
 
   useMemo(() => {
-    if (Object.keys(vendorList).includes(user?.uid!)) {
+    if (Object.keys(vendorList).includes(auth?.currentUser?.uid!)) {
       setBoothing(true);
       console.log('boothing');
     } else {
@@ -74,6 +74,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
   }, [vendorList]);
 
   useEffect(() => {
+    setRefreshing(true);
     return onValue(ref_db(db, '/events/' + eventID + '/vendors'), async (querySnapShot) => {
       let data = (await querySnapShot.val()) || {};
       let vendorList = { ...data };
@@ -117,6 +118,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
     //   ref_db(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing'),
     //   orderByChild('boothNumber')
     // );
+    setRefreshing(true);
     return onValue(ref_db(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing'), (querySnapShot) => {
       let data2 = querySnapShot.val() || {};
       let vendorsFollowingTemp = { ...data2 };
@@ -126,6 +128,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
   }, []);
 
   useEffect(() => {
+    setRefreshing(true);
     return onValue(ref_db(db, '/users/' + auth.currentUser?.uid), (querySnapShot) => {
       let data3 = querySnapShot.val() || {};
       let userData = { ...data3 };
@@ -179,32 +182,31 @@ export default function EventInfoScreen({ route, navigation }: any) {
   };
 
   const searchVendors = (text: string) => {
+    console.log('search: ' + text);
     // sets the search term to the current search box input
     setSearch(text);
 
     // applies the search: sets filteredCards to Cards in cardArray that contain the search term
     // since Card is an object, checks if any of the english, chinese, and pinyin properties include the search term
-    if (text.replace(/ /g, '')) {
-      setFilteredVendors(
-        vendorArray.filter((obj: { name: string }) => {
-          return obj.name
-            .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
-            .replace(/\s{2,}/g, ' ')
-            .toLowerCase()
-            .includes(text);
-          // ||
-          // obj.boothNumber
-          //   .toString()
-          //   .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
-          //   .replace(/\s{2,}/g, ' ')
-          //   .toLowerCase()
-          //   .includes(text)
-        })
-        // .sort((a: { boothNumber: number }, b: { boothNumber: number }) => {
-        //   return a.boothNumber - b.boothNumber
-        // })
-      );
-    }
+    setFilteredVendors(
+      vendorArray.filter((obj: any) => {
+        return obj.name
+          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+          .replace(/\s{2,}/g, ' ')
+          .toLowerCase()
+          .includes(text);
+      })
+    );
+    console.log(
+      'filtered: ',
+      vendorArray.filter((obj: any) => {
+        return obj.name
+          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+          .replace(/\s{2,}/g, ' ')
+          .toLowerCase()
+          .includes(text);
+      })
+    );
   };
 
   // gets all cards that match the starred filter (while still matching the search term)
@@ -500,6 +502,86 @@ export default function EventInfoScreen({ route, navigation }: any) {
       </View>
 
       <View style={styles.container}>
+        <View style={{ backgroundColor: 'transparent', marginTop: 10 }}>
+          <Text style={styles.date}>
+            {monthNames[month - 1]} {day}, {year}
+          </Text>
+          <Text style={styles.name}>{name}</Text>
+          <Text style={styles.location}>{location}</Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              backgroundColor: 'transparent',
+              alignContent: 'flex-end',
+              marginBottom: 10,
+            }}
+          >
+            <TextInput
+              style={styles.searchBar}
+              value={search}
+              placeholder="search by creator..."
+              underlineColorAndroid="transparent"
+              onChangeText={(text) => searchVendors(text)}
+              textAlign="left"
+              placeholderTextColor="#C4C4C4"
+              autoCapitalize="none"
+              autoComplete="off"
+              autoCorrect={false}
+            />
+            <TouchableOpacity style={styles.savedButton} onPress={() => applyStarredFilter()}>
+              <Icon
+                name={starredFilter ? 'bookmark' : 'bookmark-o'}
+                size={20}
+                color="#FFFFFF"
+                style={{ alignSelf: 'center' }}
+              />
+            </TouchableOpacity>
+          </View>
+          {currentUser.type === 'vendor' &&
+            (boothing ? (
+              <View
+                style={{
+                  borderRadius: 20,
+                  borderWidth: 1,
+                  borderColor: 'transparent',
+                  backgroundColor: 'transparent',
+                  height: 240,
+                  marginVertical: 20,
+                }}
+              >
+                <View
+                  style={{
+                    borderTopLeftRadius: 20,
+                    borderTopRightRadius: 20,
+                    borderWidth: 1,
+                    borderColor: 'transparent',
+                    backgroundColor: '#8FD8B5',
+                    marginTop: -2,
+                    height: 70,
+                    alignItems: 'center',
+                  }}
+                >
+                  <Boothing />
+                </View>
+                <View
+                  style={{
+                    borderBottomLeftRadius: 20,
+                    borderBottomRightRadius: 20,
+                    borderWidth: 1,
+                    borderColor: '#8FD8B5',
+                    backgroundColor: 'white',
+                    marginTop: -2,
+                    height: 180,
+                    alignItems: 'center',
+                  }}
+                >
+                  <VendorItem id={auth.currentUser?.uid} self={true} />
+                </View>
+              </View>
+            ) : (
+              <NotBoothing />
+            ))}
+        </View>
         <FlatList
           style={styles.eventList}
           showsVerticalScrollIndicator={false}
@@ -508,91 +590,12 @@ export default function EventInfoScreen({ route, navigation }: any) {
           keyExtractor={(item) => filteredVendors[item]['uid' as keyof typeof filteredVendors]}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadNewData} />}
           ListEmptyComponent={() =>
-            !starredFilter ? <Text>no creators yet!</Text> : <Text>no creators you follow are boothing here!</Text>
+            !starredFilter ? (
+              <Text>no creators yet!</Text>
+            ) : !search ? (
+              <Text>no creators you follow are boothing here!</Text>
+            ) : null
           }
-          ListHeaderComponent={(item) => (
-            <View style={{ backgroundColor: 'transparent' }}>
-              <Text style={styles.date}>
-                {monthNames[month - 1]} {day}, {year}
-              </Text>
-              <Text style={styles.name}>{name}</Text>
-              <Text style={styles.location}>{location}</Text>
-
-              <View
-                style={{
-                  flexDirection: 'row',
-                  backgroundColor: 'transparent',
-                  alignContent: 'flex-end',
-                  marginBottom: 10,
-                }}
-              >
-                <TextInput
-                  style={styles.searchBar}
-                  value={search}
-                  placeholder="search by creator..."
-                  underlineColorAndroid="transparent"
-                  onChangeText={(text) => searchVendors(text)}
-                  textAlign="left"
-                  placeholderTextColor="#C4C4C4"
-                  autoCapitalize="none"
-                  autoComplete="off"
-                  autoCorrect={false}
-                />
-                <TouchableOpacity style={styles.savedButton} onPress={() => applyStarredFilter()}>
-                  <Icon
-                    name={starredFilter ? 'bookmark' : 'bookmark-o'}
-                    size={20}
-                    color="#FFFFFF"
-                    style={{ alignSelf: 'center' }}
-                  />
-                </TouchableOpacity>
-              </View>
-              {currentUser.type === 'vendor' &&
-                (boothing ? (
-                  <View
-                    style={{
-                      borderRadius: 20,
-                      borderWidth: 1,
-                      borderColor: 'transparent',
-                      backgroundColor: 'transparent',
-                      height: 240,
-                      marginVertical: 20,
-                    }}
-                  >
-                    <View
-                      style={{
-                        borderTopLeftRadius: 20,
-                        borderTopRightRadius: 20,
-                        borderWidth: 1,
-                        borderColor: 'transparent',
-                        backgroundColor: '#8FD8B5',
-                        marginTop: -2,
-                        height: 70,
-                        alignItems: 'center',
-                      }}
-                    >
-                      <Boothing />
-                    </View>
-                    <View
-                      style={{
-                        borderBottomLeftRadius: 20,
-                        borderBottomRightRadius: 20,
-                        borderWidth: 1,
-                        borderColor: '#8FD8B5',
-                        backgroundColor: 'white',
-                        marginTop: -2,
-                        height: 180,
-                        alignItems: 'center',
-                      }}
-                    >
-                      <VendorItem id={auth.currentUser?.uid} self={true} />
-                    </View>
-                  </View>
-                ) : (
-                  <NotBoothing />
-                ))}
-            </View>
-          )}
         />
       </View>
     </View>
@@ -633,7 +636,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   eventDetailsContainer: {
-    width: 360,
+    width: 350,
     height: 170,
     backgroundColor: 'white',
     borderRadius: 20,
@@ -645,7 +648,7 @@ const styles = StyleSheet.create({
   },
   contentContainerStyle: {},
   eventList: {
-    marginTop: 20,
+    marginTop: 10,
     marginBottom: 40,
   },
   eventImageContainer: {
@@ -670,7 +673,7 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     height: 40,
-    width: 300,
+    width: 290,
     borderRadius: 20,
     backgroundColor: 'white',
     marginTop: 20,
@@ -691,7 +694,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#8FD8B5',
-    width: 360,
+    width: 350,
     height: 45,
     marginVertical: 20,
     backgroundColor: 'transparent',

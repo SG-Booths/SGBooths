@@ -58,29 +58,24 @@ export default function SettingsScreen({ route, navigation }: any) {
 
   const _pickImage = async (number: number) => {
     let result: any = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.1,
-        maxWidth: 500,
-        maxHeight: 500,
-      });
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.1,
+      maxWidth: 500,
+      maxHeight: 500,
+    });
 
-    console.log(result.fileSize)
+    console.log(result.fileSize);
 
-    let tooBig = false
+    let tooBig = false;
 
     if (result.fileSize > 3000000) {
-    tooBig = true
-      setValue({...value, 
-        error: 'Image is too large! Please pick another one.'
-      })
-    }
-    else if (result.fileSize < 3000000) {
-      tooBig = false
-      setValue({...value, 
-        error: ''
-      })
+      tooBig = true;
+      setValue({ ...value, error: 'Image is too large! Please pick another one.' });
+    } else if (result.fileSize < 3000000) {
+      tooBig = false;
+      setValue({ ...value, error: '' });
     }
 
     const metadata = {
@@ -96,27 +91,27 @@ export default function SettingsScreen({ route, navigation }: any) {
           const blob1 = await response1.blob();
 
           getDownloadURL(ref1)
-          .then(url => {
-            deleteObject(ref1)
-            .then(() => {
-              uploadBytes(ref1, blob1, metadata).then((snapshot) => {
-                console.log('Uploaded image 1');
-              });
+            .then((url) => {
+              deleteObject(ref1)
+                .then(() => {
+                  uploadBytes(ref1, blob1, metadata).then((snapshot) => {
+                    console.log('Uploaded image 1');
+                  });
+                })
+                .catch((error) => {
+                  // Uh-oh, an error occurred!
+                  console.log(error);
+                });
             })
             .catch((error) => {
-              // Uh-oh, an error occurred!
-              console.log(error);
+              if (error.code === 'storage/object-not-found') {
+                uploadBytes(ref1, blob1, metadata).then((snapshot) => {
+                  console.log('Uploaded image 1');
+                });
+              } else {
+                console.log(error);
+              }
             });
-          })
-          .catch(error => {
-            if (error.code === 'storage/object-not-found') {
-              uploadBytes(ref1, blob1, metadata).then((snapshot) => {
-                console.log('Uploaded image 1');
-              });
-            } else {
-              console.log(error);
-            }
-          });
           break;
         case 2:
           setImgUrl2(result.uri);
@@ -124,27 +119,27 @@ export default function SettingsScreen({ route, navigation }: any) {
           const blob2 = await response2.blob();
 
           getDownloadURL(ref2)
-          .then(url => {
-            deleteObject(ref2)
-            .then(() => {
-              uploadBytes(ref2, blob2, metadata).then((snapshot) => {
-                console.log('Uploaded image 2');
-              });
+            .then((url) => {
+              deleteObject(ref2)
+                .then(() => {
+                  uploadBytes(ref2, blob2, metadata).then((snapshot) => {
+                    console.log('Uploaded image 2');
+                  });
+                })
+                .catch((error) => {
+                  // Uh-oh, an error occurred!
+                  console.log(error);
+                });
             })
             .catch((error) => {
-              // Uh-oh, an error occurred!
-              console.log(error);
+              if (error.code === 'storage/object-not-found') {
+                uploadBytes(ref2, blob2, metadata).then((snapshot) => {
+                  console.log('Uploaded image 2');
+                });
+              } else {
+                console.log(error);
+              }
             });
-          })
-          .catch(error => {
-            if (error.code === 'storage/object-not-found') {
-              uploadBytes(ref2, blob2, metadata).then((snapshot) => {
-                console.log('Uploaded image 2');
-              });
-            } else {
-              console.log(error);
-            }
-          });
           break;
         case 3:
           setImgUrl3(result.uri);
@@ -152,27 +147,27 @@ export default function SettingsScreen({ route, navigation }: any) {
           const blob3 = await response3.blob();
 
           getDownloadURL(ref3)
-          .then(url => {
-            deleteObject(ref3)
-            .then(() => {
-              uploadBytes(ref3, blob3, metadata).then((snapshot) => {
-                console.log('Uploaded image 3');
-              });
+            .then((url) => {
+              deleteObject(ref3)
+                .then(() => {
+                  uploadBytes(ref3, blob3, metadata).then((snapshot) => {
+                    console.log('Uploaded image 3');
+                  });
+                })
+                .catch((error) => {
+                  // Uh-oh, an error occurred!
+                  console.log(error);
+                });
             })
             .catch((error) => {
-              // Uh-oh, an error occurred!
-              console.log(error);
+              if (error.code === 'storage/object-not-found') {
+                uploadBytes(ref3, blob3, metadata).then((snapshot) => {
+                  console.log('Uploaded image 3');
+                });
+              } else {
+                console.log(error);
+              }
             });
-          })
-          .catch(error => {
-            if (error.code === 'storage/object-not-found') {
-              uploadBytes(ref3, blob3, metadata).then((snapshot) => {
-                console.log('Uploaded image 3');
-              });
-            } else {
-              console.log(error);
-            }
-          });
           break;
         default:
           break;
@@ -214,11 +209,16 @@ export default function SettingsScreen({ route, navigation }: any) {
   }, []);
 
   const getData = async () => {
-    return await onValue(ref(db, '/users/' + user?.uid), (querySnapShot) => {
+    return await onValue(ref(db, '/users/' + auth?.currentUser?.uid), (querySnapShot) => {
       let data = querySnapShot.val() || {};
       let userData = { ...data };
       // setValue({ ...value, name: userData.name, email: user?.email! });
-      setValue({ ...value, name: user?.displayName!, email: user?.email!, instagram: userData.instagram });
+      setValue({
+        ...value,
+        name: auth?.currentUser?.displayName!,
+        email: auth?.currentUser?.email!,
+        instagram: userData.instagram,
+      });
     });
   };
 
@@ -270,7 +270,7 @@ export default function SettingsScreen({ route, navigation }: any) {
     }
 
     Alert.alert('Saved!');
-    Keyboard.dismiss()
+    Keyboard.dismiss();
   }
   return (
     <SafeAreaView style={styles.container}>
