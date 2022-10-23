@@ -175,9 +175,10 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             marginTop: 15,
             borderBottomLeftRadius: 20,
             borderBottomRightRadius: 20,
-            height: 110,
+            flex: 1,
             borderWidth: 1,
             borderColor: '#C4C4C4',
+            paddingBottom: 20
           }}
         >
           <Text style={{ color: '#2A3242', alignSelf: 'flex-start', marginLeft: 15, fontWeight: '700', marginTop: 15 }}>
@@ -188,7 +189,6 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
               .sort((a: any, b: any) => {
                 return b.date - a.date;
               })
-              .slice(0, 2)
               .map((boothKey: any) => (
                 <TouchableOpacity
                   key={vendor.uid + boothKey.eventID}
@@ -248,7 +248,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             </View>
           )}
           ListEmptyComponent={() => (
-            <Text style={{ marginTop: 30, color: '#2A3242' }}>
+            <Text style={{ marginTop: 30, color: '#2A3242', height: 500 }}>
               pull to refresh if you don't see your saved creators!
             </Text>
           )}
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
   },
   eventDetailsContainer: {
     width: 350,
-    height: 170,
+    flex: 1,
     backgroundColor: '#575FCC',
     borderRadius: 20,
     flexDirection: 'column',

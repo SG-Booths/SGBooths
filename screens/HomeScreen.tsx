@@ -17,7 +17,7 @@ import { getAuth } from 'firebase/auth';
 import { db, storage } from '../config/firebase';
 import { ref, onValue, remove, set, update } from 'firebase/database';
 import { ref as ref_storage, getDownloadURL } from 'firebase/storage';
-import { eachMonthOfInterval, addMonths, getMonth, getYear, isPast, compareAsc } from 'date-fns';
+import { eachMonthOfInterval, addMonths, getMonth, getYear, isPast, compareAsc, compareDesc } from 'date-fns';
 import { zonedTimeToUtc } from 'date-fns-tz';
 import { StackScreenProps } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -208,9 +208,9 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       setEvents(eventItems);
 
       let newArray: any = Object.values(eventItems).sort((a: any, b: any) => {
-        return compareAsc(
-          new Date(a.date.year, a.date.month, a.date.day),
-          new Date(b.date.year, b.date.month, b.date.day)
+        return (
+          new Date(a.date.year, a.date.month, a.date.day).getTime() -
+          new Date(b.date.year, b.date.month, b.date.day).getTime()
         );
       });
 
@@ -223,8 +223,34 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             )
           )
         ) {
-          remove(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/' + newArray[i].key));
           remove(ref(db, '/events/' + newArray[i].key));
+          newArray = newArray.splice(i, 1)
+
+          onValue(ref(db, '/users'), (querySnapShot) => {
+            let data = querySnapShot.val() || {};
+            let users = { ...data };
+      
+            Object.values(users).map((userKey: any) => {
+              console.log('userKeys', userKey)
+              Object.values(userKey).map((userKey2: any) => {
+                console.log('userKeys2', userKey2)
+                Object.keys(userKey2).map((userKey3: any) => {
+                  console.log('userKeys3', userKey3)
+                  if (userKey3 === newArray[i].key) {
+                    console.log('match:', userKey3)
+                    remove(ref(db, '/users/' + userKey.uid + '/boothsFollowing/' + newArray[i].key));
+                  }
+                  Object.keys(userKey3).map((userKey4: any) => {
+                    console.log('userKeys4', userKey4)
+                  if (userKey4 === newArray[i].key) {
+                    console.log('match:', userKey4)
+                    remove(ref(db, '/users/' + userKey.uid + '/upcomingBooths/' + newArray[i].key));
+                  }
+                  })
+                });
+              });
+            });
+          });
         }
       }
 

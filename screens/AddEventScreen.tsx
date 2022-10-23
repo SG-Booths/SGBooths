@@ -31,28 +31,14 @@ export default function AddEventScreen({ navigation }: RootStackScreenProps<'Add
       key: newReference.key,
     });
 
-    const ref1 = ref_storage(storage, newReference.key + '.png');
-
-    getDownloadURL(ref1)
-      .then((url) => {
-        console.log('url is ', url);
-        let imgurl = url;
-        set(newReference, {
-          key: newReference.key,
-          imgUrl: imgurl,
-        });
-        alert('done');
-        setValue({
-          name: '',
-          day: '',
-          month: '',
-          year: '',
-          location: '',
-        });
-      })
-      .catch((error) => {
-        console.log('error:' + error);
-      });
+    alert('uploaded')
+    setValue({
+      name: '',
+      day: '',
+      month: '',
+      year: '',
+      location: '',
+    });
   };
   return (
     <SafeAreaView style={styles.container}>
