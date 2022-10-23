@@ -54,11 +54,15 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       setFilteredVendorArray(
         vendorArray.filter((obj: any) => {
           return (
-            obj.name
-              .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
-              .replace(/\s{2,}/g, ' ')
-              .toLowerCase()
-              .includes(search) &&
+            (obj.name
+          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+          .replace(/\s{2,}/g, ' ')
+          .toLowerCase()
+          .includes(search) || obj.instagram
+          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+          .replace(/\s{2,}/g, ' ')
+          .toLowerCase()
+          .includes(search)) &&
             //   ||
             // obj.boothNumber
             //   .toString()
@@ -80,8 +84,8 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 
   // toggles a card's starred status
   const updateStarred = (uid: string) => {
-    console.log('updating starred');
-    loadNewData();
+    console.log('updating starred')
+    loadNewData()
     if (vendorsFollowing && vendorsFollowing.length > 0) {
       if (vendorsFollowing.includes(uid) && starredFilter === true) {
         remove(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/' + uid));
@@ -126,16 +130,16 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         setVendorsFollowing(Object.keys(vendorsFollowing));
         console.log('vendors following:', Object.keys(vendorsFollowing));
 
-        onValue(ref(db, '/users'), (querySnapShot) => {
-          let data = querySnapShot.val() || {};
-          let vendorList = { ...data };
-          let newArray: any = Object.values(vendorList).filter((a: any) => {
-            return a.type === 'vendor' && a.uid != auth?.currentUser?.uid;
-          });
-          console.log('all vendors:', newArray);
-          setVendorArray(newArray);
-          setFilteredVendorArray(newArray);
-        });
+    onValue(ref(db, '/users'), (querySnapShot) => {
+      let data = querySnapShot.val() || {};
+      let vendorList = { ...data };
+      let newArray: any = Object.values(vendorList).filter((a: any) => {
+        return a.type === 'vendor' && a.uid != auth?.currentUser?.uid;
+      });
+      console.log('all vendors:', newArray);
+      setVendorArray(newArray);
+      setFilteredVendorArray(newArray);
+    });
       });
     });
     getStarred(starredFilter);
@@ -143,28 +147,28 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   };
 
   useEffect(() => {
-    setRefreshing(true);
+    setRefreshing(true)
     return onValue(ref(db, '/events'), (querySnapShot) => {
       let data = querySnapShot.val() || {};
       let eventItems = { ...data };
       setEvents(eventItems);
-      setRefreshing(false);
-    });
+      setRefreshing(false)
+    })
   }, []);
 
   useEffect(() => {
-    setRefreshing(true);
+    setRefreshing(true)
     return onValue(ref(db, '/users/' + auth?.currentUser?.uid + '/vendorsFollowing'), async (querySnapShot) => {
-      let data = (await querySnapShot.val()) || {};
+      let data = await querySnapShot.val() || {};
       let vendorData = { ...data };
       setVendorsFollowing(Object.keys(vendorData));
       console.log('vendors following:', Object.keys(vendorData));
-      setRefreshing(false);
-    });
+      setRefreshing(false)
+    })
   }, []);
 
   useEffect(() => {
-    setRefreshing(true);
+    setRefreshing(true)
     return onValue(ref(db, '/users'), (querySnapShot) => {
       let data = querySnapShot.val() || {};
       let vendorList = { ...data };
@@ -174,7 +178,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       console.log('all vendors:', newArray);
       setVendorArray(newArray);
       setFilteredVendorArray(newArray);
-      setRefreshing(false);
+      setRefreshing(false)
     });
   }, []);
 
@@ -189,6 +193,10 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     setFilteredVendorArray(
       vendorArray.filter((obj: any) => {
         return obj.name
+          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+          .replace(/\s{2,}/g, ' ')
+          .toLowerCase()
+          .includes(text) || obj.instagram
           .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
           .replace(/\s{2,}/g, ' ')
           .toLowerCase()
