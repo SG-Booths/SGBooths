@@ -182,7 +182,7 @@ export default function VerifyAccountScreen({ route, navigation }: any) {
         </Text>
         {error && <Text style={styles.error}>{error}</Text>}
         <TextInput
-          style={[styles.input, { width: 350, marginLeft: 10, marginTop: 20 }]}
+          style={[styles.input, { width: '90%', marginLeft: 10, marginTop: 20 }]}
           placeholder="email address"
           placeholderTextColor="#C4C4C4"
           onChangeText={(text) => setVerifyEmail(text)}
@@ -191,9 +191,10 @@ export default function VerifyAccountScreen({ route, navigation }: any) {
           textContentType="emailAddress"
           underlineColorAndroid="transparent"
           autoCapitalize="none"
+          editable={false}
         />
         <TextInput
-          style={[styles.input, { width: 350, marginLeft: 10, marginTop: 20 }]}
+          style={[styles.input, { width: '90%', marginLeft: 10, marginTop: 20 }]}
           placeholderTextColor="#C4C4C4"
           secureTextEntry
           placeholder="password"

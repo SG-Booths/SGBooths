@@ -8,6 +8,7 @@ import {
   Keyboard,
   ImageBackground,
   TouchableWithoutFeedback,
+  Dimensions,
 } from 'react-native';
 import { getAuth, signOut, sendPasswordResetEmail, updateProfile } from 'firebase/auth';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
@@ -436,7 +437,7 @@ export default function SettingsScreen({ route, navigation }: any) {
                 style={{
                   backgroundColor: '#575FCC',
                   height: 48,
-                  width: 160,
+                  width: '45%',
                   borderRadius: 20,
                   alignItems: 'center',
                   alignSelf: 'center',
@@ -447,7 +448,14 @@ export default function SettingsScreen({ route, navigation }: any) {
                 <Text style={styles.buttonTitle}>SAVE</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.button, { marginHorizontal: 0, marginTop: 0, width: 160 }]}
+                style={{
+                  backgroundColor: '#2A3242',
+                height: 48,
+                width: '45%',
+                borderRadius: 20,
+                alignItems: 'center',
+                alignSelf: 'center',
+                justifyContent: 'center'}}
                 onPress={() => signOut(auth)}
               >
                 <Text style={styles.buttonTitle}>SIGN OUT</Text>
@@ -457,7 +465,7 @@ export default function SettingsScreen({ route, navigation }: any) {
               style={{
                 backgroundColor: '#D54826FF',
                 height: 48,
-                width: 220,
+                width: '45%',
                 borderRadius: 20,
                 alignItems: 'center',
                 alignSelf: 'center',
@@ -575,11 +583,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   eventImageContainer: {
-    marginLeft: 30,
-    width: 85,
-    height: 85,
+    marginLeft: 50,
+    marginRight: 30,
     flexDirection: 'row',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     marginTop: 10,
     backgroundColor: 'transparent',
   },

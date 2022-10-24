@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   FlatList,
+  Dimensions
 } from 'react-native';
 import { Text, View } from '../components/Themed';
 import { StackScreenProps } from '@react-navigation/stack';
@@ -238,6 +239,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             maxHeight: 30,
             marginTop: 20,
             justifyContent: 'space-between',
+            paddingHorizontal: 5
           }}
         >
           <Text style={styles.vendorName}>{vendor.name}</Text>
@@ -273,7 +275,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             paddingBottom: 20,
           }}
         >
-          <Text style={{ color: '#2A3242', alignSelf: 'flex-start', marginLeft: 15, fontWeight: '700', marginTop: 15 }}>
+          <Text style={{ color: '#2A3242', alignSelf: 'flex-start', marginLeft: 20, fontWeight: '700', marginTop: 15 }}>
             NEXT BOOTHS
           </Text>
           {vendor.upcomingBooths ? (
@@ -290,6 +292,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     width: 340,
+                    marginLeft: 5
                   }}
                   onPress={() => getImgUrl(events[boothKey.eventID as keyof typeof events]['key'], boothKey)}
                 >
@@ -298,7 +301,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
                     {events[boothKey.eventID as keyof typeof events]['date']['day']} @{' '}
                     {events[boothKey.eventID as keyof typeof events]['name']}
                   </Text>
-                  <Icon2 name="keyboard-arrow-right" size={20} color="#2A3242" />
+                  <Icon2 name="keyboard-arrow-right" size={20} color="#2A3242" style={{marginRight: 10}}/>
                 </TouchableOpacity>
               ))
           ) : (
@@ -313,7 +316,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={{ marginLeft: 30, backgroundColor: 'transparent' }}>
+      <View style={{ marginHorizontal: 30, backgroundColor: 'transparent' }}>
         <Text style={styles.title}>creators</Text>
         <View
           style={{
@@ -321,6 +324,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             backgroundColor: 'transparent',
             alignContent: 'flex-end',
             marginBottom: 10,
+            alignSelf: 'center'
           }}
         >
           <TextInput
@@ -345,25 +349,27 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           </TouchableOpacity>
         </View>
         {refreshing ? <ActivityIndicator /> : null}
-        <FlatList
-          showsVerticalScrollIndicator={false}
-          style={{ height: 580, marginTop: 10 }}
-          data={Object.keys(filteredVendorArray)}
-          keyExtractor={(item) => filteredVendorArray[item].uid}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadNewData} />}
-          renderItem={({ item }) => (
-            <View style={{ backgroundColor: '#FFfF8F3', marginBottom: 20 }}>
-              <VendorItem vendor={filteredVendorArray[item]} />
-            </View>
-          )}
-          ListEmptyComponent={() =>
-            search ? null : (
-              <Text style={{ marginTop: 10, marginLeft: 10, color: '#2A3242', height: 500 }}>
-                you haven't saved any creators!
-              </Text>
-            )
-          }
-        />
+        <View style={{backgroundColor: 'transparent', alignSelf: 'center'}}>
+          <FlatList
+            showsVerticalScrollIndicator={false}
+            style={{ marginTop: 10 }}
+            data={Object.keys(filteredVendorArray)}
+            keyExtractor={(item) => filteredVendorArray[item].uid}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadNewData} />}
+            renderItem={({ item }) => (
+              <View style={{ backgroundColor: '#FFfF8F3', marginBottom: 20 }}>
+                <VendorItem vendor={filteredVendorArray[item]} />
+              </View>
+            )}
+            ListEmptyComponent={() =>
+              search ? null : (
+                <Text style={{ marginTop: 10, marginLeft: 10, color: '#2A3242', height: 500 }}>
+                  you haven't saved any creators!
+                </Text>
+              )
+            }
+          />
+          </View>
       </View>
     </SafeAreaView>
   );

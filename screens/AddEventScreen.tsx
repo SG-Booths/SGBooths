@@ -101,7 +101,7 @@ export default function AddEventScreen({ navigation }: RootStackScreenProps<'Add
         style={styles.input}
         placeholder="name"
         placeholderTextColor="#C4C4C4"
-        onChangeText={(text) => setValue({ ...value, name: text })}
+        onChangeText={(text) => setValue({ ...value, name: text.toLowerCase() })}
         value={value.name}
         underlineColorAndroid="transparent"
         autoCapitalize="none"
@@ -145,7 +145,7 @@ export default function AddEventScreen({ navigation }: RootStackScreenProps<'Add
         style={styles.input}
         placeholder="location"
         placeholderTextColor="#C4C4C4"
-        onChangeText={(text) => setValue({ ...value, location: text })}
+        onChangeText={(text) => setValue({ ...value, location: text.toLowerCase() })}
         value={value.location}
         underlineColorAndroid="transparent"
         autoCapitalize="none"

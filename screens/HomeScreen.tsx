@@ -142,7 +142,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       });
 
     return (
-      <View style={{ marginBottom: 15, borderWidth: 1, borderRadius: 20, borderColor: '#C4C4C4' }}>
+      <View style={{ marginBottom: 20, borderWidth: 1, borderRadius: 20, borderColor: '#C4C4C4' }}>
         <Pressable
           onPress={() =>
             navigation.navigate('EventInfoScreen', {
@@ -225,8 +225,6 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         ) {
 
           remove(ref(db, '/events/' + newArray[i].key));
-          newArray = newArray.splice(i, 1);
-
           onValue(ref(db, '/users'), (querySnapShot) => {
             let data = querySnapShot.val() || {};
             let users = { ...data };
@@ -238,6 +236,19 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           });
 
           deleteObject(ref_storage(storage, newArray[i].key + '.png'))
+
+          return onValue(ref(db, '/events'), (querySnapShot) => {
+            let data = querySnapShot.val() || {};
+            let eventItems = { ...data };
+            setEvents(eventItems);
+      
+            newArray = Object.values(eventItems).sort((a: any, b: any) => {
+              return (
+                new Date(a.date.year, a.date.month, a.date.day).getTime() -
+                new Date(b.date.year, b.date.month, b.date.day).getTime()
+              );
+            });
+          })
         }
       }
 
@@ -336,7 +347,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           flexDirection: 'row',
           backgroundColor: 'transparent',
           justifyContent: 'space-between',
-          width: 390,
+          width: '100%',
           marginTop: 30,
         }}
       >
@@ -350,10 +361,10 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             })
           }
         >
-          <Icon2 name="person-circle-outline" size={35} color="#2A3242" />
+          <Icon2 name="person-circle-outline" size={35} color="#2A3242" style={{marginRight: 20}}/>
         </TouchableOpacity>
       </View>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center' }}>
         <TextInput
           style={styles.searchBar}
           value={search}
@@ -481,7 +492,6 @@ const styles = StyleSheet.create({
     height: 40,
     width: 300,
     borderRadius: 20,
-    marginLeft: 30,
     backgroundColor: 'white',
     marginTop: 20,
     paddingLeft: 20,

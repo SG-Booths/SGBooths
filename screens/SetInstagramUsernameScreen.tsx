@@ -40,7 +40,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 20,
     backgroundColor: '#FFF8F3',
   },
   title: {
@@ -58,7 +57,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   input: {
-    width: 320,
+    width: '90%',
     height: 48,
     borderRadius: 20,
     overflow: 'hidden',

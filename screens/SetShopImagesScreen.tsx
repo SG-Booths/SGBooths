@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, Text, View, ImageBackground, ActivityIndicator } from 'react-native';
+import { Dimensions, StyleSheet, TouchableOpacity, Text, View, ImageBackground, ActivityIndicator } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import { db, storage } from '../config/firebase';
 import { ref, set } from 'firebase/database';
@@ -243,7 +243,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 20,
     backgroundColor: '#FFF8F3',
   },
   title: {
@@ -259,6 +258,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     marginLeft: 30,
     marginBottom: 10,
+    width: '90%'
   },
   input: {
     width: 320,
@@ -311,11 +311,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   eventImageContainer: {
-    marginLeft: 30,
-    width: 85,
-    height: 85,
+    marginHorizontal: 30,
     flexDirection: 'row',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     marginTop: 10,
     backgroundColor: 'transparent',
     marginBottom: 30,

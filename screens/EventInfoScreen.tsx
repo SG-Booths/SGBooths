@@ -7,6 +7,9 @@ import {
   ImageBackground,
   FlatList,
   RefreshControl,
+  Platform,
+  StatusBar,
+  Dimensions
 } from 'react-native';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
@@ -457,7 +460,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
           }}
         >
           <SafeAreaView
-            style={{ flexDirection: 'row', justifyContent: 'space-between', backgroundColor: 'transparent' }}
+            style={{ flexDirection: 'row', justifyContent: 'space-between', backgroundColor: 'transparent',  paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,}}
           >
             <TouchableOpacity
               style={{
@@ -502,7 +505,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
       </View>
 
       <View style={styles.container}>
-        <View style={{ backgroundColor: 'transparent', marginTop: 10 }}>
+        <View style={{ marginTop: 10, marginLeft: 30, width: Dimensions.get('window').width - 60, backgroundColor: 'transparent' }}>
           <Text style={styles.date}>
             {monthNames[month - 1]} {day}, {year}
           </Text>
@@ -514,6 +517,8 @@ export default function EventInfoScreen({ route, navigation }: any) {
               backgroundColor: 'transparent',
               alignContent: 'flex-end',
               marginBottom: 10,
+              justifyContent: 'center',
+              alignSelf: 'center'
             }}
           >
             <TextInput
@@ -537,7 +542,25 @@ export default function EventInfoScreen({ route, navigation }: any) {
               />
             </TouchableOpacity>
           </View>
-          {currentUser.type === 'vendor' &&
+        </View>
+        <View style={{ alignSelf: 'center', backgroundColor: 'transparent'}}>
+        <FlatList
+          style={styles.eventList}
+          showsVerticalScrollIndicator={false}
+          data={Object.keys(filteredVendors)}
+          renderItem={({ item }) => <VendorItem id={item} self={false} />}
+          keyExtractor={(item) => filteredVendors[item]['uid' as keyof typeof filteredVendors]}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadNewData} />}
+          ListEmptyComponent={() =>
+            !starredFilter ? (
+              <Text>no creators yet!</Text>
+            ) : !search ? (
+              <Text>no creators you follow are boothing here!</Text>
+            ) : null
+          }
+          ListHeaderComponent={() => 
+            <View style={{backgroundColor: 'transparent'}}>
+            {currentUser.type === 'vendor' ?
             (boothing ? (
               <View
                 style={{
@@ -580,23 +603,10 @@ export default function EventInfoScreen({ route, navigation }: any) {
               </View>
             ) : (
               <NotBoothing />
-            ))}
-        </View>
-        <FlatList
-          style={styles.eventList}
-          showsVerticalScrollIndicator={false}
-          data={Object.keys(filteredVendors)}
-          renderItem={({ item }) => <VendorItem id={item} self={false} />}
-          keyExtractor={(item) => filteredVendors[item]['uid' as keyof typeof filteredVendors]}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadNewData} />}
-          ListEmptyComponent={() =>
-            !starredFilter ? (
-              <Text>no creators yet!</Text>
-            ) : !search ? (
-              <Text>no creators you follow are boothing here!</Text>
-            ) : null
-          }
+            )) : <View></View>}
+            </View>}
         />
+        </View>
       </View>
     </View>
   );
@@ -608,12 +618,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'flex-start',
     marginTop: 10,
-    marginLeft: 30,
     backgroundColor: '#FFF8F3',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
   },
   image: {
     height: 200,
@@ -629,11 +634,13 @@ const styles = StyleSheet.create({
     color: '#575FCC',
     fontWeight: '500',
     marginBottom: 10,
-  },
+    width: Dimensions.get('window').width * 0.85,
+    },
   location: {
     color: '#FABF48',
     fontSize: 16,
     fontWeight: '700',
+    width: Dimensions.get('window').width * 0.85,
   },
   eventDetailsContainer: {
     width: 350,
@@ -645,11 +652,12 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderWidth: 1,
     borderColor: '#C4C4C4',
+    justifyContent: 'center'
   },
-  contentContainerStyle: {},
+  contentContainerStyle: {
+  },
   eventList: {
     marginTop: 10,
-    marginBottom: 40,
   },
   eventImageContainer: {
     width: 85,
