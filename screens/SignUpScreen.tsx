@@ -6,7 +6,7 @@ import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, up
 import Icon from 'react-native-vector-icons/AntDesign';
 import { db } from '../config/firebase';
 import { ref, set } from 'firebase/database';
-import { Dropdown } from 'react-native-element-dropdown'
+import { Dropdown } from 'react-native-element-dropdown';
 import Checkbox from 'expo-checkbox';
 
 const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
@@ -20,7 +20,7 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   });
   const [type, setType] = useState('');
   const [isChecked, setChecked] = useState(false);
-    const [items, setItems] = useState([
+  const [items, setItems] = useState([
     { label: 'visitor', value: 'visitor' },
     { label: 'creator', value: 'vendor' },
   ]);
@@ -30,7 +30,7 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   };
 
   async function signUp() {
-    if (!isChecked){
+    if (!isChecked) {
       setValue({
         ...value,
         error: 'Accept the Privacy Policy to continue',
@@ -151,39 +151,39 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
               flexDirection: 'row',
               width: 320,
               marginBottom: 10,
-              marginTop: 20
+              marginTop: 20,
             }}
           >
             <Dropdown
-            statusBarIsTranslucent={true}
-            style={{
-              width: 270,
-              height: 48,
-              borderRadius: 20,
-              backgroundColor: 'white',
-              borderWidth: 1,
-              borderColor: '#C4C4C4',
-              alignSelf: 'flex-start',
-              paddingHorizontal: 16,
-            }}
-            containerStyle={{
-              width: 270,
-              borderRadius: 20,
-              backgroundColor: 'white',
-              borderWidth: 1,
-              borderColor: '#C4C4C4',
-            }}
-            itemContainerStyle={{
-              borderRadius: 20,
-            }}
-            placeholder='account type'
-            placeholderStyle={{color: '#C4C4C4'}}
+              statusBarIsTranslucent={true}
+              style={{
+                width: 270,
+                height: 48,
+                borderRadius: 20,
+                backgroundColor: 'white',
+                borderWidth: 1,
+                borderColor: '#C4C4C4',
+                alignSelf: 'flex-start',
+                paddingHorizontal: 16,
+              }}
+              containerStyle={{
+                width: 270,
+                borderRadius: 20,
+                backgroundColor: 'white',
+                borderWidth: 1,
+                borderColor: '#C4C4C4',
+              }}
+              itemContainerStyle={{
+                borderRadius: 20,
+              }}
+              placeholder="account type"
+              placeholderStyle={{ color: '#C4C4C4' }}
               value={type}
               data={items}
               onChange={(item) => setType(item.value)}
-              labelField = 'label'
-              valueField = 'value'
-            /> 
+              labelField="label"
+              valueField="value"
+            />
             <TouchableOpacity
               style={{ justifyContent: 'center', marginLeft: 20 }}
               onPress={() => {
@@ -237,14 +237,14 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             underlineColorAndroid="transparent"
             autoCapitalize="none"
           />
-          <View style={{backgroundColor: 'transparent', flexDirection: 'row', marginTop: 10}}>
+          <View style={{ backgroundColor: 'transparent', flexDirection: 'row', marginTop: 10 }}>
             <Checkbox
-              style={{marginRight: 10}}
+              style={{ marginRight: 10 }}
               value={isChecked}
               onValueChange={setChecked}
               color={isChecked ? '#2A3242' : undefined}
             />
-            <Text style={{color: '#2A3242'}}>I have read and agree to the </Text>
+            <Text style={{ color: '#2A3242' }}>I have read and agree to the </Text>
             <TouchableOpacity
               onPress={() =>
                 Linking.openURL('https://www.iubenda.com/privacy-policy/57949571').catch((err) => {
@@ -253,7 +253,7 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
                 })
               }
             >
-              <Text style={{color: '#2A3242', fontWeight: 'bold'}}>Privacy Policy</Text>
+              <Text style={{ color: '#2A3242', fontWeight: 'bold' }}>Privacy Policy</Text>
             </TouchableOpacity>
           </View>
           <TouchableOpacity style={styles.button} onPress={() => signUp()}>

@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   FlatList,
-  Dimensions
+  Dimensions,
 } from 'react-native';
 import { Text, View } from '../components/Themed';
 import { StackScreenProps } from '@react-navigation/stack';
@@ -56,14 +56,15 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         vendorArray.filter((obj: any) => {
           return (
             (obj.name
-          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
-          .replace(/\s{2,}/g, ' ')
-          .toLowerCase()
-          .includes(search) || obj.instagram
-          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
-          .replace(/\s{2,}/g, ' ')
-          .toLowerCase()
-          .includes(search)) &&
+              .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+              .replace(/\s{2,}/g, ' ')
+              .toLowerCase()
+              .includes(search) ||
+              obj.instagram
+                .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+                .replace(/\s{2,}/g, ' ')
+                .toLowerCase()
+                .includes(search)) &&
             //   ||
             // obj.boothNumber
             //   .toString()
@@ -85,8 +86,8 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 
   // toggles a card's starred status
   const updateStarred = (uid: string) => {
-    console.log('updating starred')
-    loadNewData()
+    console.log('updating starred');
+    loadNewData();
     if (vendorsFollowing && vendorsFollowing.length > 0) {
       if (vendorsFollowing.includes(uid) && starredFilter === true) {
         remove(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/' + uid));
@@ -131,16 +132,16 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         setVendorsFollowing(Object.keys(vendorsFollowing));
         console.log('vendors following:', Object.keys(vendorsFollowing));
 
-    onValue(ref(db, '/users'), (querySnapShot) => {
-      let data = querySnapShot.val() || {};
-      let vendorList = { ...data };
-      let newArray: any = Object.values(vendorList).filter((a: any) => {
-        return a.type === 'vendor' && a.uid != auth?.currentUser?.uid;
-      });
-      console.log('all vendors:', newArray);
-      setVendorArray(newArray);
-      setFilteredVendorArray(newArray);
-    });
+        onValue(ref(db, '/users'), (querySnapShot) => {
+          let data = querySnapShot.val() || {};
+          let vendorList = { ...data };
+          let newArray: any = Object.values(vendorList).filter((a: any) => {
+            return a.type === 'vendor' && a.uid != auth?.currentUser?.uid;
+          });
+          console.log('all vendors:', newArray);
+          setVendorArray(newArray);
+          setFilteredVendorArray(newArray);
+        });
       });
     });
     getStarred(starredFilter);
@@ -148,28 +149,28 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   };
 
   useEffect(() => {
-    setRefreshing(true)
+    setRefreshing(true);
     return onValue(ref(db, '/events'), (querySnapShot) => {
       let data = querySnapShot.val() || {};
       let eventItems = { ...data };
       setEvents(eventItems);
-      setRefreshing(false)
-    })
+      setRefreshing(false);
+    });
   }, []);
 
   useEffect(() => {
-    setRefreshing(true)
+    setRefreshing(true);
     return onValue(ref(db, '/users/' + auth?.currentUser?.uid + '/vendorsFollowing'), async (querySnapShot) => {
-      let data = await querySnapShot.val() || {};
+      let data = (await querySnapShot.val()) || {};
       let vendorData = { ...data };
       setVendorsFollowing(Object.keys(vendorData));
       console.log('vendors following:', Object.keys(vendorData));
-      setRefreshing(false)
-    })
+      setRefreshing(false);
+    });
   }, []);
 
   useEffect(() => {
-    setRefreshing(true)
+    setRefreshing(true);
     return onValue(ref(db, '/users'), (querySnapShot) => {
       let data = querySnapShot.val() || {};
       let vendorList = { ...data };
@@ -179,7 +180,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       console.log('all vendors:', newArray);
       setVendorArray(newArray);
       setFilteredVendorArray(newArray);
-      setRefreshing(false)
+      setRefreshing(false);
     });
   }, []);
 
@@ -193,15 +194,18 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     // since Card is an object, checks if any of the english, chinese, and pinyin properties include the search term
     setFilteredVendorArray(
       vendorArray.filter((obj: any) => {
-        return obj.name
-          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
-          .replace(/\s{2,}/g, ' ')
-          .toLowerCase()
-          .includes(text) || obj.instagram
-          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
-          .replace(/\s{2,}/g, ' ')
-          .toLowerCase()
-          .includes(text);
+        return (
+          obj.name
+            .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+            .replace(/\s{2,}/g, ' ')
+            .toLowerCase()
+            .includes(text) ||
+          obj.instagram
+            .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+            .replace(/\s{2,}/g, ' ')
+            .toLowerCase()
+            .includes(text)
+        );
       })
     );
   };
@@ -239,7 +243,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             maxHeight: 30,
             marginTop: 20,
             justifyContent: 'space-between',
-            paddingHorizontal: 5
+            paddingHorizontal: 5,
           }}
         >
           <Text style={styles.vendorName}>{vendor.name}</Text>
@@ -292,7 +296,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     width: 340,
-                    marginLeft: 5
+                    marginLeft: 5,
                   }}
                   onPress={() => getImgUrl(events[boothKey.eventID as keyof typeof events]['key'], boothKey)}
                 >
@@ -301,7 +305,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
                     {events[boothKey.eventID as keyof typeof events]['date']['day']} @{' '}
                     {events[boothKey.eventID as keyof typeof events]['name']}
                   </Text>
-                  <Icon2 name="keyboard-arrow-right" size={20} color="#2A3242" style={{marginRight: 10}}/>
+                  <Icon2 name="keyboard-arrow-right" size={20} color="#2A3242" style={{ marginRight: 10 }} />
                 </TouchableOpacity>
               ))
           ) : (
@@ -324,7 +328,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             backgroundColor: 'transparent',
             alignContent: 'flex-end',
             marginBottom: 10,
-            alignSelf: 'center'
+            alignSelf: 'center',
           }}
         >
           <TextInput
@@ -349,7 +353,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           </TouchableOpacity>
         </View>
         {refreshing ? <ActivityIndicator /> : null}
-        <View style={{backgroundColor: 'transparent', alignSelf: 'center'}}>
+        <View style={{ backgroundColor: 'transparent', alignSelf: 'center' }}>
           <FlatList
             showsVerticalScrollIndicator={false}
             style={{ marginTop: 10 }}
@@ -369,7 +373,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
               )
             }
           />
-          </View>
+        </View>
       </View>
     </SafeAreaView>
   );

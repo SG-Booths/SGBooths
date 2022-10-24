@@ -455,12 +455,13 @@ export default function SettingsScreen({ route, navigation }: any) {
               <TouchableOpacity
                 style={{
                   backgroundColor: '#2A3242',
-                height: 48,
-                width: '45%',
-                borderRadius: 20,
-                alignItems: 'center',
-                alignSelf: 'center',
-                justifyContent: 'center'}}
+                  height: 48,
+                  width: '45%',
+                  borderRadius: 20,
+                  alignItems: 'center',
+                  alignSelf: 'center',
+                  justifyContent: 'center',
+                }}
                 onPress={() => signOut(auth)}
               >
                 <Text style={styles.buttonTitle}>SIGN OUT</Text>

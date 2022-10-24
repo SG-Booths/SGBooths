@@ -46,11 +46,12 @@ export default {
     },
     plugins: [
       [
-        "expo-image-picker",
+        'expo-image-picker',
         {
-          photosPermission: "The app accesses your photos to let you share them with visitors browsing your creator profile."
-        }
-      ]
+          photosPermission:
+            'The app accesses your photos to let you share them with visitors browsing your creator profile.',
+        },
+      ],
     ],
   },
 };

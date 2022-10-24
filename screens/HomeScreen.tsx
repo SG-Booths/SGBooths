@@ -223,7 +223,6 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             )
           )
         ) {
-
           remove(ref(db, '/events/' + newArray[i].key));
           onValue(ref(db, '/users'), (querySnapShot) => {
             let data = querySnapShot.val() || {};
@@ -232,23 +231,23 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             Object.values(users).map((userKey: any) => {
               remove(ref(db, '/users/' + userKey.uid + '/upcomingBooths/' + newArray[i].key));
               remove(ref(db, '/users/' + userKey.uid + '/boothsFollowing/' + newArray[i].key));
-              });
+            });
           });
 
-          deleteObject(ref_storage(storage, newArray[i].key + '.png'))
+          deleteObject(ref_storage(storage, newArray[i].key + '.png'));
 
           return onValue(ref(db, '/events'), (querySnapShot) => {
             let data = querySnapShot.val() || {};
             let eventItems = { ...data };
             setEvents(eventItems);
-      
+
             newArray = Object.values(eventItems).sort((a: any, b: any) => {
               return (
                 new Date(a.date.year, a.date.month, a.date.day).getTime() -
                 new Date(b.date.year, b.date.month, b.date.day).getTime()
               );
             });
-          })
+          });
         }
       }
 
@@ -361,7 +360,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             })
           }
         >
-          <Icon2 name="person-circle-outline" size={35} color="#2A3242" style={{marginRight: 20}}/>
+          <Icon2 name="person-circle-outline" size={35} color="#2A3242" style={{ marginRight: 20 }} />
         </TouchableOpacity>
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center' }}>

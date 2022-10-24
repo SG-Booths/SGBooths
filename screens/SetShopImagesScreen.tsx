@@ -31,9 +31,7 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
   const [imgUrl3, setImgUrl3] = useState<string | undefined>(undefined);
   let imgUrl3Final: any = useRef();
 
-  useEffect(() => {
-    
-  }, [])
+  useEffect(() => {}, []);
 
   const _pickImage = async (number: number) => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -41,7 +39,7 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
       alert("You've refused to allow this appp to access your photos!");
       return;
     }
-    
+
     let result: any = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -268,7 +266,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     marginLeft: 30,
     marginBottom: 10,
-    width: '90%'
+    width: '90%',
   },
   input: {
     width: 320,

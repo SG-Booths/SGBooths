@@ -1,5 +1,5 @@
 import { StyleSheet, SafeAreaView, TextInput, TouchableOpacity, ImageBackground } from 'react-native';
-import React, {useState, useRef} from 'react';
+import React, { useState, useRef } from 'react';
 import { db, storage } from '../config/firebase';
 import { ref, push, set, update } from 'firebase/database';
 import { ref as ref_storage, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
@@ -17,7 +17,7 @@ export default function AddEventScreen({ navigation }: RootStackScreenProps<'Add
     year: '',
     location: '',
     error: '',
-    tooBig: false
+    tooBig: false,
   });
 
   const [imgUrl1, setImgUrl1] = useState<string | undefined>(undefined);
@@ -58,39 +58,38 @@ export default function AddEventScreen({ navigation }: RootStackScreenProps<'Add
         },
         location: value.location,
       });
-  
+
       update(newReference, {
         key: newReference.key,
       });
 
       const ref1 = ref_storage(storage, newReference.key + '.png');
-          console.log('ref 1 done');
-          const response1 = await fetch(imgUrl1Final.current);
-          console.log('response 1 done');
-          const blob1 = await response1.blob();
-          console.log('blob 1 done');
+      console.log('ref 1 done');
+      const response1 = await fetch(imgUrl1Final.current);
+      console.log('response 1 done');
+      const blob1 = await response1.blob();
+      console.log('blob 1 done');
 
-          const metadata = {
-            contentType: 'image/png',
-          };
+      const metadata = {
+        contentType: 'image/png',
+      };
 
-          const file1 = new File([blob1], `${newReference.key}.png`, {
-            type: 'image/png',
-          });
-          uploadBytesResumable(ref1, file1, metadata)
-            .then(async (snapshot) => {
-              console.log('Uploaded image 1');
-              alert('uploaded');
-              setValue({
-                name: '',
-                day: '',
-                month: '',
-                year: '',
-                location: '',
-                error: '',
-                tooBig: false
-              });
-                    })
+      const file1 = new File([blob1], `${newReference.key}.png`, {
+        type: 'image/png',
+      });
+      uploadBytesResumable(ref1, file1, metadata).then(async (snapshot) => {
+        console.log('Uploaded image 1');
+        alert('uploaded');
+        setValue({
+          name: '',
+          day: '',
+          month: '',
+          year: '',
+          location: '',
+          error: '',
+          tooBig: false,
+        });
+      });
     }
   };
   return (
@@ -153,14 +152,14 @@ export default function AddEventScreen({ navigation }: RootStackScreenProps<'Add
         multiline={true}
       />
       <TouchableOpacity onPress={() => _pickImage()}>
-          <ImageBackground
-            source={{ uri: imgUrl1 }}
-            style={[styles.vendorImage, imgUrl1 ? { borderWidth: 0 } : { borderWidth: 1 }]}
-            imageStyle={{ borderRadius: 20 }}
-          >
-            {!imgUrl1 && <Icon name="plus" color="#C4C4C4" size={40} />}
-          </ImageBackground>
-        </TouchableOpacity>
+        <ImageBackground
+          source={{ uri: imgUrl1 }}
+          style={[styles.vendorImage, imgUrl1 ? { borderWidth: 0 } : { borderWidth: 1 }]}
+          imageStyle={{ borderRadius: 20 }}
+        >
+          {!imgUrl1 && <Icon name="plus" color="#C4C4C4" size={40} />}
+        </ImageBackground>
+      </TouchableOpacity>
       <TouchableOpacity onPress={() => addEvent()}>
         <Text style={{ color: 'black' }}>add event</Text>
       </TouchableOpacity>
