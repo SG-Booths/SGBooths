@@ -2,8 +2,8 @@ import 'dotenv/config';
 
 export default {
   expo: {
-    name: 'SGBooths',
-    slug: 'SGBooths',
+    name: 'SG Booths',
+    slug: 'SG Booths',
     version: '1.0.0',
     orientation: 'portrait',
     icon: './assets/images/icon.png',
