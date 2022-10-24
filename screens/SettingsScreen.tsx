@@ -433,19 +433,19 @@ export default function SettingsScreen({ route, navigation }: any) {
                       });
                       return;
                     }
-                      try {
-                        updateProfile(auth.currentUser!, { displayName: nativeEvent.text.trim() });
-                        // setValue({ ...value, name: nativeEvent.text.trim()});
-                        update(ref(db, '/users/' + auth.currentUser?.uid), {
-                          name: nativeEvent.text.trim(),
-                        });
-                        getData();
-                      } catch (error: any) {
-                        setValue({
-                          ...value,
-                          error: error.message,
-                        });
-                      }
+                    try {
+                      updateProfile(auth.currentUser!, { displayName: nativeEvent.text.trim() });
+                      // setValue({ ...value, name: nativeEvent.text.trim()});
+                      update(ref(db, '/users/' + auth.currentUser?.uid), {
+                        name: nativeEvent.text.trim(),
+                      });
+                      getData();
+                    } catch (error: any) {
+                      setValue({
+                        ...value,
+                        error: error.message,
+                      });
+                    }
                   }}
                 />
                 <View

@@ -195,7 +195,6 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   }, []);
 
   const searchVendors = (text: string) => {
-
     // sets the search term to the current search box input
     setSearch(text);
 
@@ -352,7 +351,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
               Blocked! Click on the icon to unblock.
             </Text>
           ) : (
-            <View style={{backgroundColor: 'transparent'}}>
+            <View style={{ backgroundColor: 'transparent' }}>
               <Text
                 style={{ color: '#2A3242', alignSelf: 'flex-start', marginLeft: 20, fontWeight: '700', marginTop: 15 }}
               >
@@ -361,7 +360,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
               {vendor.upcomingBooths ? (
                 Object.values(vendor.upcomingBooths)
                   .sort((a: any, b: any) => {
-                    return b.date - a.date;
+                    return a.date - b.date;
                   })
                   .map((boothKey: any) => (
                     <TouchableOpacity
@@ -435,7 +434,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           <FlatList
             contentContainerStyle={{ paddingBottom: filteredVendorArray.length * 65 }}
             showsVerticalScrollIndicator={false}
-            style={{ marginTop: 10,  }}
+            style={{ marginTop: 10 }}
             data={Object.keys(filteredVendorArray)}
             keyExtractor={(item) => filteredVendorArray[item].uid}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadNewData} />}

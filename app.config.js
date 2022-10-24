@@ -4,7 +4,7 @@ export default {
   expo: {
     name: 'SG Booths',
     slug: 'SGBooths',
-    version: '1.0.0',
+    version: '1.0.1',
     orientation: 'portrait',
     icon: './assets/images/icon.png',
     scheme: 'myapp',
@@ -19,7 +19,7 @@ export default {
     },
     assetBundlePatterns: ['**/*'],
     ios: {
-      supportsTablet: true,
+      supportsTablet: false,
       bundleIdentifier: 'SGBooths',
     },
     android: {
@@ -28,7 +28,7 @@ export default {
         backgroundColor: '#5857CC',
       },
       package: 'com.StudioMOOK.SGBooths',
-      versionCode: 1,
+      versionCode: 2,
     },
     web: {
       favicon: './assets/images/favicon.png',
@@ -51,8 +51,7 @@ export default {
           photosPermission:
             'The app accesses your photos to let you share them with visitors browsing your creator profile.',
         },
-      ],
-      'react-native-email-link',
+      ]
     ],
   },
 };

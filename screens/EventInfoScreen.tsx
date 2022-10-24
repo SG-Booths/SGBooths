@@ -74,7 +74,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
       setBoothing(true);
       console.log('boothing');
     } else {
-      setBoothing(false)
+      setBoothing(false);
     }
   }, [vendorList]);
 
@@ -195,7 +195,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
         setBoothing(true);
         console.log('boothing');
       } else {
-        setBoothing(false)
+        setBoothing(false);
       }
       getStarred(starredFilter);
       setRefreshing(false);
@@ -515,7 +515,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
     remove(ref(db, '/events/' + eventID + '/vendors/' + auth.currentUser?.uid));
     remove(ref(db, '/users/' + auth.currentUser?.uid + '/upcomingBooths/' + eventID));
     setBoothing(false);
-    loadNewData()
+    loadNewData();
   };
 
   const NotBoothing = () => {
@@ -644,7 +644,6 @@ export default function EventInfoScreen({ route, navigation }: any) {
         <View style={{ alignSelf: 'center', backgroundColor: 'transparent' }}>
           <FlatList
             contentContainerStyle={{ paddingBottom: 90 + filteredVendors.length * 90 }}
-            style={styles.eventList}
             showsVerticalScrollIndicator={false}
             data={Object.keys(filteredVendors)}
             renderItem={({ item }) => <VendorItem id={item} self={false} />}
@@ -755,10 +754,6 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderWidth: 1,
     borderColor: '#C4C4C4',
-  },
-  contentContainerStyle: {},
-  eventList: {
-    marginTop: 10,
   },
   eventImageContainer: {
     width: 85,
