@@ -70,13 +70,7 @@ export default function VerifyAccountScreen({ route, navigation }: any) {
       let events = { ...data };
 
       Object.values(events).map((eventKey: any) => {
-        Object.values(eventKey).map((eventKey2: any) => {
-          Object.keys(eventKey2).map((eventKey3: any) => {
-            if (eventKey3 === auth?.currentUser?.uid) {
-              remove(ref(db, '/events/' + eventKey.key + '/vendors/' + auth?.currentUser?.uid));
-            }
-          });
-        });
+        remove(ref(db, '/events/' + eventKey.key + '/vendors/' + auth?.currentUser?.uid));
       });
     });
   };
