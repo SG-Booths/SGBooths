@@ -40,7 +40,6 @@ const SignInScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   };
 
   async function signIn() {
-    console.log(value.email, value.password);
     if (value.email === '' || value.password === '') {
       setValue({
         ...value,

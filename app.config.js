@@ -52,6 +52,5 @@ export default {
         }
       ]
     ],
-    permissions: ["CAMERA", "READ_EXTERNAL_STORAGE"],
   },
 };

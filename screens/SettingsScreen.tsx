@@ -241,7 +241,7 @@ export default function SettingsScreen({ route, navigation }: any) {
     if (value.email === '') {
       setValue({
         ...value,
-        error: 'Email is mandatory.',
+        error: 'Email is mandatory',
       });
       return;
     }
@@ -249,7 +249,7 @@ export default function SettingsScreen({ route, navigation }: any) {
     if (value.name === '') {
       setValue({
         ...value,
-        error: 'Name is mandatory.',
+        error: 'Name is mandatory',
       });
       return;
     }

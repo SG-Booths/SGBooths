@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableWithoutFeedback, Alert, Keyboard } from 'react-native';
+import { StyleSheet, Text, View, TouchableWithoutFeedback, Alert, Keyboard, Linking } from 'react-native';
 import { StackScreenProps } from '@react-navigation/stack';
 import { TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import DropDownPicker from 'react-native-dropdown-picker';
 import Icon from 'react-native-vector-icons/AntDesign';
 import { db } from '../config/firebase';
 import { ref, set } from 'firebase/database';
 import { Dropdown } from 'react-native-element-dropdown'
+import Checkbox from 'expo-checkbox';
 
 const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   const auth = getAuth();
@@ -19,8 +19,8 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     name: '',
   });
   const [type, setType] = useState('');
-  const [open, setOpen] = useState(false);
-  const [items, setItems] = useState([
+  const [isChecked, setChecked] = useState(false);
+    const [items, setItems] = useState([
     { label: 'visitor', value: 'visitor' },
     { label: 'creator', value: 'vendor' },
   ]);
@@ -30,10 +30,18 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   };
 
   async function signUp() {
+    if (!isChecked){
+      setValue({
+        ...value,
+        error: 'Accept the Privacy Policy to continue',
+      });
+      return;
+    }
+
     if (value.email === '' || value.password === '') {
       setValue({
         ...value,
-        error: 'Email and password are mandatory.',
+        error: 'Email and password are mandatory',
       });
       return;
     }
@@ -41,14 +49,14 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     if (value.password != value.confirmPassword) {
       setValue({
         ...value,
-        error: 'Passwords must match.',
+        error: 'Passwords must match',
       });
     }
 
     if (value.name === '') {
       setValue({
         ...value,
-        error: 'Name is mandatory.',
+        error: 'Name is mandatory',
       });
       return;
     }
@@ -94,8 +102,6 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     } else {
       await createUserWithEmailAndPassword(auth, value.email.trim(), value.password.trim())
         .then(async (data) => {
-          console.log('UID:', data.user.uid);
-
           await updateProfile(auth.currentUser!, {
             displayName: value.name.trim(),
           });
@@ -231,6 +237,25 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             underlineColorAndroid="transparent"
             autoCapitalize="none"
           />
+          <View style={{backgroundColor: 'transparent', flexDirection: 'row', marginTop: 10}}>
+            <Checkbox
+              style={{marginRight: 10}}
+              value={isChecked}
+              onValueChange={setChecked}
+              color={isChecked ? '#2A3242' : undefined}
+            />
+            <Text style={{color: '#2A3242'}}>I have read and agree to the </Text>
+            <TouchableOpacity
+              onPress={() =>
+                Linking.openURL('https://www.iubenda.com/privacy-policy/57949571').catch((err) => {
+                  console.error('Failed opening page because: ', err);
+                  alert('Failed to open page');
+                })
+              }
+            >
+              <Text style={{color: '#2A3242', fontWeight: 'bold'}}>Privacy Policy</Text>
+            </TouchableOpacity>
+          </View>
           <TouchableOpacity style={styles.button} onPress={() => signUp()}>
             <Text style={styles.buttonTitle}>SIGN UP →</Text>
           </TouchableOpacity>
