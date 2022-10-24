@@ -16,8 +16,8 @@ const OnboardingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         {
           backgroundColor: '#9190F5',
           image: <Image source={require('../assets/images/onboarding_1.png')} style={{ height: 300, width: 300 }} />,
-          title: 'Welcome to SGBooths!',
-          subtitle: 'Keep track of upcoming events and booths here in Singapore',
+          title: 'Welcome to SG Booths!',
+          subtitle: 'Keep track of upcoming arts & crafts events and booths here in Singapore',
           titleStyles: { color: 'white', fontWeight: '600' },
           subTitleStyles: { color: 'white', opacity: 0.7, width: 350 },
         },

@@ -85,8 +85,6 @@ export default function SettingsScreen({ route, navigation }: any) {
     if (!result.cancelled && !tooBig) {
       switch (number) {
         case 1:
-          setImgUrl1(result.uri);
-
           const response1 = await fetch(result.uri);
           const blob1 = await response1.blob();
 
@@ -96,6 +94,7 @@ export default function SettingsScreen({ route, navigation }: any) {
                 .then(() => {
                   uploadBytes(ref1, blob1, metadata).then((snapshot) => {
                     console.log('Uploaded image 1');
+                    setImgUrl1(result.uri);
                   });
                 })
                 .catch((error) => {
@@ -114,7 +113,6 @@ export default function SettingsScreen({ route, navigation }: any) {
             });
           break;
         case 2:
-          setImgUrl2(result.uri);
           const response2 = await fetch(result.uri);
           const blob2 = await response2.blob();
 
@@ -124,6 +122,7 @@ export default function SettingsScreen({ route, navigation }: any) {
                 .then(() => {
                   uploadBytes(ref2, blob2, metadata).then((snapshot) => {
                     console.log('Uploaded image 2');
+                    setImgUrl2(result.uri);
                   });
                 })
                 .catch((error) => {
@@ -142,7 +141,6 @@ export default function SettingsScreen({ route, navigation }: any) {
             });
           break;
         case 3:
-          setImgUrl3(result.uri);
           const response3 = await fetch(result.uri);
           const blob3 = await response3.blob();
 
@@ -152,6 +150,7 @@ export default function SettingsScreen({ route, navigation }: any) {
                 .then(() => {
                   uploadBytes(ref3, blob3, metadata).then((snapshot) => {
                     console.log('Uploaded image 3');
+                    setImgUrl3(result.uri);
                   });
                 })
                 .catch((error) => {

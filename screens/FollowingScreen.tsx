@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     flexDirection: 'column',
     alignItems: 'center',
-    marginVertical: 10,
+    marginTop: 10,
     borderLeftWidth: 1,
     borderRightWidth: 1,
     borderTopWidth: 1,

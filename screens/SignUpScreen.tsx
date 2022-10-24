@@ -7,6 +7,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import Icon from 'react-native-vector-icons/AntDesign';
 import { db } from '../config/firebase';
 import { ref, set } from 'firebase/database';
+import { Dropdown } from 'react-native-element-dropdown'
 
 const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   const auth = getAuth();
@@ -142,48 +143,43 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           <View
             style={{
               flexDirection: 'row',
-              backgroundColor: 'transparent',
-              justifyContent: 'space-between',
-              marginHorizontal: 60,
-              zIndex: 10,
-              alignItems: 'center',
+              width: 320,
+              marginBottom: 10,
+              marginTop: 20
             }}
           >
-            <DropDownPicker
-              placeholder="account type"
-              placeholderStyle={{ color: '#C4C4C4' }}
-              dropDownContainerStyle={{
-                width: 270,
-                borderRadius: 20,
-                overflow: 'hidden',
-                backgroundColor: 'white',
-                marginTop: 20,
-                marginBottom: 10,
-                paddingLeft: 7,
-                borderWidth: 1,
-                borderColor: '#C4C4C4',
-              }}
-              style={{
-                width: 270,
-                height: 48,
-                borderRadius: 20,
-                overflow: 'hidden',
-                backgroundColor: 'white',
-                marginTop: 20,
-                marginBottom: 10,
-                paddingLeft: 16,
-                borderWidth: 1,
-                borderColor: '#C4C4C4',
-              }}
-              open={open}
+            <Dropdown
+            statusBarIsTranslucent={true}
+            style={{
+              width: 270,
+              height: 48,
+              borderRadius: 20,
+              backgroundColor: 'white',
+              borderWidth: 1,
+              borderColor: '#C4C4C4',
+              alignSelf: 'flex-start',
+              paddingHorizontal: 16,
+            }}
+            containerStyle={{
+              width: 270,
+              borderRadius: 20,
+              backgroundColor: 'white',
+              borderWidth: 1,
+              borderColor: '#C4C4C4',
+            }}
+            itemContainerStyle={{
+              borderRadius: 20,
+            }}
+            placeholder='account type'
+            placeholderStyle={{color: '#C4C4C4'}}
               value={type}
-              items={items}
-              setOpen={setOpen}
-              setValue={setType}
-              setItems={setItems}
-            />
+              data={items}
+              onChange={(item) => setType(item.value)}
+              labelField = 'label'
+              valueField = 'value'
+            /> 
             <TouchableOpacity
-              style={{ marginTop: 12 }}
+              style={{ justifyContent: 'center', marginLeft: 20 }}
               onPress={() => {
                 Alert.alert(
                   'What do the account types mean?',
@@ -270,8 +266,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     marginTop: 10,
     marginBottom: 10,
-    marginLeft: 30,
-    marginRight: 30,
     paddingLeft: 16,
     borderWidth: 1,
     borderColor: '#C4C4C4',

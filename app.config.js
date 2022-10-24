@@ -44,6 +44,5 @@ export default {
         projectId: '2795faa8-7998-4589-b204-0d962797a5c3',
       },
     },
-    plugins: 'react-native-compressor',
   },
 };
