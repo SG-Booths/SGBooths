@@ -52,6 +52,7 @@ export default {
             'The app accesses your photos to let you share them with visitors browsing your creator profile.',
         },
       ],
+      'react-native-email-link',
     ],
   },
 };

@@ -13,6 +13,12 @@
     "production": {}
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "meganyap04@gmail.com",
+        "ascAppId": "6443992125",
+        "appleTeamId": "3VYP8ARU57"
+      }
+    }
   }
 }

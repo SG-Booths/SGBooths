@@ -9,6 +9,7 @@ import {
   ImageBackground,
   TouchableWithoutFeedback,
   Dimensions,
+  Linking,
 } from 'react-native';
 import { getAuth, signOut, sendPasswordResetEmail, updateProfile } from 'firebase/auth';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
@@ -220,7 +221,7 @@ export default function SettingsScreen({ route, navigation }: any) {
       // setValue({ ...value, name: userData.name, email: user?.email! });
       setValue({
         ...value,
-        name: auth?.currentUser?.displayName!,
+        name: userData.name,
         email: auth?.currentUser?.email!,
         instagram: userData.instagram,
       });
@@ -238,14 +239,6 @@ export default function SettingsScreen({ route, navigation }: any) {
   };
 
   async function updateAccount() {
-    if (value.email === '') {
-      setValue({
-        ...value,
-        error: 'Email is mandatory',
-      });
-      return;
-    }
-
     if (value.name === '') {
       setValue({
         ...value,
@@ -274,12 +267,17 @@ export default function SettingsScreen({ route, navigation }: any) {
       });
     }
 
-    Alert.alert('Saved!');
-    Keyboard.dismiss();
+    getData();
   }
+
+  // TODO: add contact us
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <TouchableWithoutFeedback
+        onPress={() => {
+          Keyboard.dismiss(), updateAccount();
+        }}
+      >
         <View style={styles.container}>
           <View
             style={{
@@ -307,6 +305,31 @@ export default function SettingsScreen({ route, navigation }: any) {
                   placeholder="shop name"
                   placeholderTextColor="#C4C4C4"
                   onChangeText={(text) => setValue({ ...value, name: text })}
+                  onSubmitEditing={({ nativeEvent }) => {
+                    console.log(nativeEvent.text);
+                    if (nativeEvent.text === '') {
+                      setValue({
+                        ...value,
+                        error: 'Name is mandatory',
+                      });
+                      return;
+                    }
+                    if (value.name != auth.currentUser?.displayName) {
+                      try {
+                        updateProfile(auth.currentUser!, { displayName: nativeEvent.text.trim() });
+                        setValue({ ...value, name: nativeEvent.text.trim() });
+                        getData();
+                      } catch (error: any) {
+                        setValue({
+                          ...value,
+                          error: error.message,
+                        });
+                      }
+                      update(ref(db, '/users/' + auth.currentUser?.uid), {
+                        name: nativeEvent.text,
+                      });
+                    }
+                  }}
                   value={value.name}
                   underlineColorAndroid="transparent"
                   autoCapitalize="none"
@@ -401,6 +424,29 @@ export default function SettingsScreen({ route, navigation }: any) {
                   underlineColorAndroid="transparent"
                   autoCapitalize="none"
                   defaultValue={auth?.currentUser?.displayName!}
+                  onSubmitEditing={({ nativeEvent }) => {
+                    console.log(nativeEvent.text);
+                    if (nativeEvent.text === '') {
+                      setValue({
+                        ...value,
+                        error: 'Name is mandatory',
+                      });
+                      return;
+                    }
+                      try {
+                        updateProfile(auth.currentUser!, { displayName: nativeEvent.text.trim() });
+                        // setValue({ ...value, name: nativeEvent.text.trim()});
+                        update(ref(db, '/users/' + auth.currentUser?.uid), {
+                          name: nativeEvent.text.trim(),
+                        });
+                        getData();
+                      } catch (error: any) {
+                        setValue({
+                          ...value,
+                          error: error.message,
+                        });
+                      }
+                  }}
                 />
                 <View
                   style={{
@@ -432,31 +478,17 @@ export default function SettingsScreen({ route, navigation }: any) {
               style={{
                 marginLeft: 30,
                 marginRight: 30,
-                marginTop: 50,
                 backgroundColor: 'transparent',
                 flexDirection: 'row',
                 justifyContent: 'space-between',
+                marginVertical: 20,
               }}
             >
               <TouchableOpacity
                 style={{
-                  backgroundColor: '#575FCC',
-                  height: 48,
-                  width: '45%',
-                  borderRadius: 20,
-                  alignItems: 'center',
-                  alignSelf: 'center',
-                  justifyContent: 'center',
-                }}
-                onPress={() => updateAccount()}
-              >
-                <Text style={styles.buttonTitle}>SAVE</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={{
                   backgroundColor: '#2A3242',
                   height: 48,
-                  width: '45%',
+                  width: '38%',
                   borderRadius: 20,
                   alignItems: 'center',
                   alignSelf: 'center',
@@ -466,25 +498,38 @@ export default function SettingsScreen({ route, navigation }: any) {
               >
                 <Text style={styles.buttonTitle}>SIGN OUT</Text>
               </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#D54826FF',
+                  height: 48,
+                  width: '55%',
+                  borderRadius: 20,
+                  alignItems: 'center',
+                  alignSelf: 'center',
+                  justifyContent: 'center',
+                }}
+                onPress={() =>
+                  navigation.navigate('VerifyAccountScreen', {
+                    type: 'delete account',
+                  })
+                }
+              >
+                <Text style={styles.buttonTitle}>DELETE ACCOUNT</Text>
+              </TouchableOpacity>
             </View>
             <TouchableOpacity
               style={{
-                backgroundColor: '#D54826FF',
+                backgroundColor: '#575FCC',
                 height: 48,
-                width: '45%',
+                width: '90%',
                 borderRadius: 20,
                 alignItems: 'center',
                 alignSelf: 'center',
                 justifyContent: 'center',
-                marginTop: 20,
               }}
-              onPress={() =>
-                navigation.navigate('VerifyAccountScreen', {
-                  type: 'delete account',
-                })
-              }
+              onPress={() => Linking.openURL('mailto:mellistudio325@gmail.com')}
             >
-              <Text style={styles.buttonTitle}>DELETE ACCOUNT</Text>
+              <Text style={styles.buttonTitle}>CONTACT US</Text>
             </TouchableOpacity>
           </View>
         </View>

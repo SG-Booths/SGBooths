@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableWithoutFeedback, Alert, Keyboard, Linking } from 'react-native';
+import { StyleSheet, Text, View, TouchableWithoutFeedback, Alert, Keyboard, Linking, Dimensions } from 'react-native';
 import { StackScreenProps } from '@react-navigation/stack';
 import { TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
@@ -20,6 +20,7 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   });
   const [type, setType] = useState('');
   const [isChecked, setChecked] = useState(false);
+
   const [items, setItems] = useState([
     { label: 'visitor', value: 'visitor' },
     { label: 'creator', value: 'vendor' },
@@ -33,7 +34,7 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
     if (!isChecked) {
       setValue({
         ...value,
-        error: 'Accept the Privacy Policy to continue',
+        error: 'Accept the Privacy Policy and Terms and Conditions to continue',
       });
       return;
     }
@@ -247,13 +248,26 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             <Text style={{ color: '#2A3242' }}>I have read and agree to the </Text>
             <TouchableOpacity
               onPress={() =>
-                Linking.openURL('https://www.iubenda.com/privacy-policy/57949571').catch((err) => {
+                Linking.openURL('https://www.iubenda.com/privacy-policy/57949571/full-legal').catch((err) => {
                   console.error('Failed opening page because: ', err);
                   alert('Failed to open page');
                 })
               }
             >
               <Text style={{ color: '#2A3242', fontWeight: 'bold' }}>Privacy Policy</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={{ backgroundColor: 'transparent', flexDirection: 'row', marginTop: 5 }}>
+            <Text style={{ color: '#2A3242' }}> and </Text>
+            <TouchableOpacity
+              onPress={() =>
+                Linking.openURL('https://www.iubenda.com/terms-and-conditions/57949571').catch((err) => {
+                  console.error('Failed opening page because: ', err);
+                  alert('Failed to open page');
+                })
+              }
+            >
+              <Text style={{ color: '#2A3242', fontWeight: 'bold' }}>Terms and Conditions</Text>
             </TouchableOpacity>
           </View>
           <TouchableOpacity style={styles.button} onPress={() => signUp()}>
@@ -357,8 +371,9 @@ const styles = StyleSheet.create({
   },
   error: {
     color: '#D54826FF',
-    marginLeft: 30,
+    marginHorizontal: 30,
     marginTop: 10,
+    maxWidth: '80%',
   },
 });
 

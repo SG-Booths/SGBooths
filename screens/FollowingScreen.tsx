@@ -9,6 +9,7 @@ import {
   RefreshControl,
   FlatList,
   Dimensions,
+  Alert,
 } from 'react-native';
 import { Text, View } from '../components/Themed';
 import { StackScreenProps } from '@react-navigation/stack';
@@ -25,6 +26,8 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   const auth = getAuth();
 
   const [vendorsFollowing, setVendorsFollowing]: any = useState([]);
+  const [vendorsBlocked, setVendorsBlocked]: any = useState([]);
+
   const [vendorArray, setVendorArray]: any = useState([]);
   const [filteredVendorArray, setFilteredVendorArray]: any = useState([]);
   const [search, setSearch] = useState('');
@@ -130,7 +133,6 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         let data = querySnapShot.val() || {};
         let vendorsFollowing = { ...data };
         setVendorsFollowing(Object.keys(vendorsFollowing));
-        console.log('vendors following:', Object.keys(vendorsFollowing));
 
         onValue(ref(db, '/users'), (querySnapShot) => {
           let data = querySnapShot.val() || {};
@@ -138,7 +140,6 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           let newArray: any = Object.values(vendorList).filter((a: any) => {
             return a.type === 'vendor' && a.uid != auth?.currentUser?.uid;
           });
-          console.log('all vendors:', newArray);
           setVendorArray(newArray);
           setFilteredVendorArray(newArray);
         });
@@ -171,13 +172,22 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 
   useEffect(() => {
     setRefreshing(true);
+    return onValue(ref_db(db, '/users/' + auth.currentUser?.uid + '/blocked'), (querySnapShot) => {
+      let data2 = querySnapShot.val() || {};
+      let blockedTemp = { ...data2 };
+      setVendorsBlocked(Object.keys(blockedTemp));
+      setRefreshing(false);
+    });
+  }, []);
+
+  useEffect(() => {
+    setRefreshing(true);
     return onValue(ref(db, '/users'), (querySnapShot) => {
       let data = querySnapShot.val() || {};
       let vendorList = { ...data };
       let newArray: any = Object.values(vendorList).filter((a: any) => {
         return a.type === 'vendor' && a.uid != auth?.currentUser?.uid;
       });
-      console.log('all vendors:', newArray);
       setVendorArray(newArray);
       setFilteredVendorArray(newArray);
       setRefreshing(false);
@@ -185,7 +195,6 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   }, []);
 
   const searchVendors = (text: string) => {
-    console.log('filtered: ', vendorArray);
 
     // sets the search term to the current search box input
     setSearch(text);
@@ -231,6 +240,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   };
 
   const VendorItem = ({ vendor }: any) => {
+    let blocked = vendorsBlocked.includes(vendor.uid);
     return (
       <View style={styles.eventDetailsContainer}>
         <View
@@ -248,7 +258,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         >
           <Text style={styles.vendorName}>{vendor.name}</Text>
           <View style={{ backgroundColor: 'transparent', flexDirection: 'row' }}>
-            {vendor.instagram && (
+            {vendor.instagram && !blocked && (
               <TouchableOpacity
                 style={{ marginRight: 20 }}
                 onPress={() =>
@@ -261,8 +271,66 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
                 <Icon name="instagram" color="white" size={25} />
               </TouchableOpacity>
             )}
-            <TouchableOpacity onPress={() => updateStarred(vendor.uid)}>
-              <Icon name={vendorsFollowing.includes(vendor.uid) ? 'bookmark' : 'bookmark-o'} size={25} color="white" />
+            {!blocked && (
+              <TouchableOpacity onPress={() => updateStarred(vendor.uid)}>
+                <Icon
+                  name={vendorsFollowing.includes(vendor.uid) ? 'bookmark' : 'bookmark-o'}
+                  size={25}
+                  color="white"
+                  style={{ marginRight: 20 }}
+                />
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              onPress={() =>
+                Alert.alert(
+                  'Report Inappropriate Content',
+                  'Reported content will be checked within 24 hours and removed if deemed inappropriate.',
+                  [
+                    {
+                      text: 'Cancel',
+                      onPress: () => console.log('Cancel Pressed'),
+                      style: 'cancel',
+                    },
+                    {
+                      text: 'Report',
+                      onPress: () => {
+                        update(ref(db, '/reportedUsers/'), {
+                          [vendor.uid]: '',
+                        });
+                        Alert.alert(
+                          'Reported successfully',
+                          'We will review the content in 24 hours and remove it if inappropriate.'
+                        );
+                      },
+                    },
+                    {
+                      text: blocked ? 'Unblock user' : 'Block User and Report',
+                      onPress: !blocked
+                        ? () => {
+                            update(ref(db, '/reportedUsers/'), {
+                              [vendor.uid]: '',
+                            });
+                            update(ref(db, '/users/' + auth?.currentUser?.uid + '/blocked'), {
+                              [vendor.uid]: '',
+                            });
+                            Alert.alert(
+                              'Reported and blocked successfully',
+                              "We will review the content in 24 hours and remove it if inappropriate. You will no longer see this user's details."
+                            );
+                          }
+                        : () => {
+                            remove(ref(db, '/reportedUsers/' + vendor.uid));
+                            remove(ref(db, '/users/' + auth?.currentUser?.uid + '/blocked/' + vendor.uid));
+                            remove(ref(db, '/users/' + auth?.currentUser?.uid + '/vendorsFollowing/' + vendor.uid));
+                            Alert.alert('Successfully unblocked.');
+                          },
+                    },
+                  ]
+                )
+              }
+            >
+              <Icon2 name={'report'} size={25} color="white" />
             </TouchableOpacity>
           </View>
         </View>
@@ -279,39 +347,49 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             paddingBottom: 20,
           }}
         >
-          <Text style={{ color: '#2A3242', alignSelf: 'flex-start', marginLeft: 20, fontWeight: '700', marginTop: 15 }}>
-            NEXT BOOTHS
-          </Text>
-          {vendor.upcomingBooths ? (
-            Object.values(vendor.upcomingBooths)
-              .sort((a: any, b: any) => {
-                return b.date - a.date;
-              })
-              .map((boothKey: any) => (
-                <TouchableOpacity
-                  key={vendor.uid + boothKey.eventID}
-                  style={{
-                    flexDirection: 'row',
-                    backgroundColor: 'transparent',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    width: 340,
-                    marginLeft: 5,
-                  }}
-                  onPress={() => getImgUrl(events[boothKey.eventID as keyof typeof events]['key'], boothKey)}
-                >
-                  <Text style={{ color: '#2A3242', marginLeft: 15, marginTop: 10 }}>
-                    {monthNames[events[boothKey.eventID as keyof typeof events]['date']['month'] - 1]}{' '}
-                    {events[boothKey.eventID as keyof typeof events]['date']['day']} @{' '}
-                    {events[boothKey.eventID as keyof typeof events]['name']}
-                  </Text>
-                  <Icon2 name="keyboard-arrow-right" size={20} color="#2A3242" style={{ marginRight: 10 }} />
-                </TouchableOpacity>
-              ))
-          ) : (
-            <Text style={{ color: '#2A3242', marginTop: 10, fontWeight: '400', marginLeft: 15 }}>
-              no upcoming booths...
+          {blocked ? (
+            <Text style={{ color: 'black', alignSelf: 'flex-start', marginLeft: 30, marginTop: 15 }}>
+              Blocked! Click on the icon to unblock.
             </Text>
+          ) : (
+            <View style={{backgroundColor: 'transparent'}}>
+              <Text
+                style={{ color: '#2A3242', alignSelf: 'flex-start', marginLeft: 20, fontWeight: '700', marginTop: 15 }}
+              >
+                NEXT BOOTHS
+              </Text>
+              {vendor.upcomingBooths ? (
+                Object.values(vendor.upcomingBooths)
+                  .sort((a: any, b: any) => {
+                    return b.date - a.date;
+                  })
+                  .map((boothKey: any) => (
+                    <TouchableOpacity
+                      key={vendor.uid + boothKey.eventID}
+                      style={{
+                        flexDirection: 'row',
+                        backgroundColor: 'transparent',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        width: 340,
+                        marginLeft: 5,
+                      }}
+                      onPress={() => getImgUrl(events[boothKey.eventID as keyof typeof events]['key'], boothKey)}
+                    >
+                      <Text style={{ color: '#2A3242', marginLeft: 15, marginTop: 10 }}>
+                        {monthNames[events[boothKey.eventID as keyof typeof events]['date']['month'] - 1]}{' '}
+                        {events[boothKey.eventID as keyof typeof events]['date']['day']} @{' '}
+                        {events[boothKey.eventID as keyof typeof events]['name']}
+                      </Text>
+                      <Icon2 name="keyboard-arrow-right" size={20} color="#2A3242" style={{ marginRight: 10 }} />
+                    </TouchableOpacity>
+                  ))
+              ) : (
+                <Text style={{ color: '#2A3242', marginTop: 10, fontWeight: '400', marginLeft: 15 }}>
+                  no upcoming booths...
+                </Text>
+              )}
+            </View>
           )}
         </View>
       </View>
@@ -355,8 +433,9 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         {refreshing ? <ActivityIndicator /> : null}
         <View style={{ backgroundColor: 'transparent', alignSelf: 'center' }}>
           <FlatList
+            contentContainerStyle={{ paddingBottom: filteredVendorArray.length * 65 }}
             showsVerticalScrollIndicator={false}
-            style={{ marginTop: 10 }}
+            style={{ marginTop: 10,  }}
             data={Object.keys(filteredVendorArray)}
             keyExtractor={(item) => filteredVendorArray[item].uid}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadNewData} />}

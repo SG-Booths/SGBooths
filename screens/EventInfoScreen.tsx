@@ -10,11 +10,12 @@ import {
   Platform,
   StatusBar,
   Dimensions,
+  Alert,
 } from 'react-native';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
 import { getAuth } from 'firebase/auth';
-import { ref as ref_db, onValue, set, ref, remove, update } from 'firebase/database';
+import { ref as ref_db, onValue, set, ref, remove, update, push } from 'firebase/database';
 import { db, storage } from '../config/firebase';
 import { Text, View } from '../components/Themed';
 import { ref as ref_storage, getDownloadURL } from 'firebase/storage';
@@ -37,6 +38,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
   const [starredFilter, setStarredFilter] = useState(false);
 
   const [vendorsFollowing, setVendorsFollowing]: any = useState([]);
+  const [vendorsBlocked, setVendorsBlocked]: any = useState([]);
 
   const [boothing, setBoothing] = useState(false);
   const [currentUser, setCurrentUser]: any = useState([]);
@@ -72,7 +74,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
       setBoothing(true);
       console.log('boothing');
     } else {
-      console.log(Object.keys(vendorList));
+      setBoothing(false)
     }
   }, [vendorList]);
 
@@ -132,6 +134,16 @@ export default function EventInfoScreen({ route, navigation }: any) {
 
   useEffect(() => {
     setRefreshing(true);
+    return onValue(ref_db(db, '/users/' + auth.currentUser?.uid + '/blocked'), (querySnapShot) => {
+      let data2 = querySnapShot.val() || {};
+      let blockedTemp = { ...data2 };
+      setVendorsBlocked(Object.keys(blockedTemp));
+      setRefreshing(false);
+    });
+  }, []);
+
+  useEffect(() => {
+    setRefreshing(true);
     return onValue(ref_db(db, '/users/' + auth.currentUser?.uid), (querySnapShot) => {
       let data3 = querySnapShot.val() || {};
       let userData = { ...data3 };
@@ -179,6 +191,12 @@ export default function EventInfoScreen({ route, navigation }: any) {
           // }));
         })
       );
+      if (Object.keys(vendorList).includes(auth?.currentUser?.uid!)) {
+        setBoothing(true);
+        console.log('boothing');
+      } else {
+        setBoothing(false)
+      }
       getStarred(starredFilter);
       setRefreshing(false);
     });
@@ -278,10 +296,12 @@ export default function EventInfoScreen({ route, navigation }: any) {
 
   const VendorItem = ({ id, self }: any) => {
     let name: string, instagram: string, uid: string | any;
+    let blocked = false;
     if (!self) {
       name = filteredVendors[id as keyof typeof filteredVendors]['name' as keyof typeof filteredVendors];
       instagram = filteredVendors[id as keyof typeof filteredVendors]['instagram' as keyof typeof filteredVendors];
       uid = filteredVendors[id as keyof typeof filteredVendors]['uid' as keyof typeof filteredVendors];
+      blocked = vendorsBlocked.includes(uid);
       // boothNumber = filteredVendors[id as keyof typeof filteredVendors]['boothNumber' as keyof typeof filteredVendors];
     } else {
       name = currentUser.name;
@@ -298,30 +318,31 @@ export default function EventInfoScreen({ route, navigation }: any) {
     const [imgUrl3, setImgUrl3] = useState<string | undefined>(undefined);
     const ref3 = ref_storage(storage, uid + '_3.png');
 
-    getDownloadURL(ref1)
-      .then((url) => {
-        setImgUrl1(url);
-      })
-      .catch((error) => {
-        console.log('error:' + error);
-      });
+    if (!blocked) {
+      getDownloadURL(ref1)
+        .then((url) => {
+          setImgUrl1(url);
+        })
+        .catch((error) => {
+          console.log('error:' + error);
+        });
 
-    getDownloadURL(ref2)
-      .then((url) => {
-        setImgUrl2(url);
-      })
-      .catch((error) => {
-        console.log('error:' + error);
-      });
+      getDownloadURL(ref2)
+        .then((url) => {
+          setImgUrl2(url);
+        })
+        .catch((error) => {
+          console.log('error:' + error);
+        });
 
-    getDownloadURL(ref3)
-      .then((url) => {
-        setImgUrl3(url);
-      })
-      .catch((error) => {
-        console.log('error:' + error);
-      });
-
+      getDownloadURL(ref3)
+        .then((url) => {
+          setImgUrl3(url);
+        })
+        .catch((error) => {
+          console.log('error:' + error);
+        });
+    }
     if (!self) {
       return (
         <View style={styles.eventDetailsContainer}>
@@ -341,7 +362,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
           >
             <Text style={styles.vendorName}>{name}</Text>
             <View style={{ backgroundColor: 'transparent', flexDirection: 'row' }}>
-              {instagram && (
+              {instagram && !blocked && (
                 <TouchableOpacity
                   onPress={() =>
                     Linking.openURL('https://instagram.com/' + instagram).catch((err) => {
@@ -353,16 +374,80 @@ export default function EventInfoScreen({ route, navigation }: any) {
                   <Icon name="instagram" color="#575FCC" size={25} style={{ marginRight: 20 }} />
                 </TouchableOpacity>
               )}
-              <TouchableOpacity onPress={() => updateStarred(uid)}>
-                <Icon name={vendorsFollowing.includes(uid) ? 'bookmark' : 'bookmark-o'} size={25} color="#575FCC" />
+              {!blocked && (
+                <TouchableOpacity onPress={() => updateStarred(uid)}>
+                  <Icon
+                    name={vendorsFollowing.includes(uid) ? 'bookmark' : 'bookmark-o'}
+                    size={25}
+                    color="#575FCC"
+                    style={{ marginRight: 20 }}
+                  />
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity
+                onPress={() =>
+                  Alert.alert(
+                    'Report Inappropriate Content',
+                    'Reported content will be checked within 24 hours and removed if deemed inappropriate.',
+                    [
+                      {
+                        text: 'Cancel',
+                        onPress: () => console.log('Cancel Pressed'),
+                        style: 'cancel',
+                      },
+                      {
+                        text: 'Report',
+                        onPress: () => {
+                          update(ref(db, '/reportedUsers/'), {
+                            [uid]: '',
+                          });
+                          Alert.alert(
+                            'Reported successfully',
+                            'We will review the content in 24 hours and remove it if inappropriate.'
+                          );
+                        },
+                      },
+                      {
+                        text: blocked ? 'Unblock user' : 'Block User and Report',
+                        onPress: !blocked
+                          ? () => {
+                              update(ref(db, '/reportedUsers/'), {
+                                [uid]: '',
+                              });
+                              update(ref(db, '/users/' + auth?.currentUser?.uid + '/blocked'), {
+                                [uid]: '',
+                              });
+                              Alert.alert(
+                                'Reported and blocked successfully',
+                                "We will review the content in 24 hours and remove it if inappropriate. You will no longer see this user's details."
+                              );
+                            }
+                          : () => {
+                              remove(ref(db, '/reportedUsers/' + uid));
+                              remove(ref(db, '/users/' + auth?.currentUser?.uid + '/blocked/' + uid));
+                              remove(ref(db, '/users/' + auth?.currentUser?.uid + '/vendorsFollowing/' + uid));
+                              Alert.alert('Successfully unblocked.');
+                            },
+                      },
+                    ]
+                  )
+                }
+              >
+                <Icon2 name={'report'} size={25} color="#D54826FF" />
               </TouchableOpacity>
             </View>
           </View>
-          <View style={styles.eventImageContainer}>
-            <Image source={{ uri: imgUrl1 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
-            <Image source={{ uri: imgUrl2 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
-            <Image source={{ uri: imgUrl3 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
-          </View>
+          {blocked ? (
+            <Text style={{ color: 'black', alignSelf: 'flex-start', marginLeft: 30, marginTop: 10 }}>
+              Blocked! Click on the red icon to unblock.
+            </Text>
+          ) : (
+            <View style={styles.eventImageContainer}>
+              <Image source={{ uri: imgUrl1 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
+              <Image source={{ uri: imgUrl2 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
+              <Image source={{ uri: imgUrl3 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />
+            </View>
+          )}
         </View>
       );
     } else {
@@ -427,9 +512,10 @@ export default function EventInfoScreen({ route, navigation }: any) {
   };
 
   const removeBoothFromEvent = () => {
-    setBoothing(false);
     remove(ref(db, '/events/' + eventID + '/vendors/' + auth.currentUser?.uid));
     remove(ref(db, '/users/' + auth.currentUser?.uid + '/upcomingBooths/' + eventID));
+    setBoothing(false);
+    loadNewData()
   };
 
   const NotBoothing = () => {
@@ -557,6 +643,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
         </View>
         <View style={{ alignSelf: 'center', backgroundColor: 'transparent' }}>
           <FlatList
+            contentContainerStyle={{ paddingBottom: 90 + filteredVendors.length * 90 }}
             style={styles.eventList}
             showsVerticalScrollIndicator={false}
             data={Object.keys(filteredVendors)}
@@ -668,7 +755,6 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderWidth: 1,
     borderColor: '#C4C4C4',
-    justifyContent: 'center',
   },
   contentContainerStyle: {},
   eventList: {
