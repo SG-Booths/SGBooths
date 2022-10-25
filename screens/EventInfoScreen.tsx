@@ -27,7 +27,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
   const [refreshing, setRefreshing] = useState(true);
   const { user } = useAuthentication();
   const auth = getAuth();
-  const { eventID, month, day, location, year, imgUrl, name, following } = route.params;
+  const { eventID, month, startDay, endDay, location, year, imgUrl, name, following } = route.params;
   const [boothFollowed, setBoothFollowed] = useState(following);
   const [vendorList, setVendorList] = useState({});
 
@@ -433,7 +433,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
                   )
                 }
               >
-                <Icon2 name={'report'} size={25} color="#575FCC" />
+                <Icon2 name={'report'} size={25} color="#D54826FF" />
               </TouchableOpacity>
             </View>
           </View>
@@ -507,7 +507,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
     });
     update(ref(db, '/users/' + auth.currentUser?.uid + '/upcomingBooths/' + eventID), {
       eventID: eventID,
-      [eventID]: '' + day + (month + 1) + year,
+      [eventID]: '' + startDay + (month + 1) + year,
     });
   };
 
@@ -605,7 +605,8 @@ export default function EventInfoScreen({ route, navigation }: any) {
           }}
         >
           <Text style={styles.date}>
-            {monthNames[month - 1]} {day}, {year}
+            {monthNames[month - 1]} {startDay}
+            {startDay != endDay && ' - ' + endDay}, {year}
           </Text>
           <Text style={styles.name}>{name}</Text>
           <Text style={styles.location}>{location}</Text>

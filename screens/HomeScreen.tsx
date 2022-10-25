@@ -149,7 +149,8 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
               imgUrl: imgUrl,
               eventID: eventItem['key'],
               month: month,
-              day: eventItem['date']['day'],
+              startDay: eventItem['date']['startDay'],
+              endDay: eventItem['date']['endDay'],
               location: eventItem['location'],
               avail: eventItem['avail'],
               name: eventItem['name'],
@@ -193,7 +194,13 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             </ImageBackground>
           </View>
           <View style={styles.eventDetailsContainer}>
-            <Text style={styles.eventDate}>{eventItem['date']['day']}</Text>
+            {eventItem['date']['startDay'] === eventItem['date']['endDay'] ? (
+              <Text style={styles.eventDate}>{eventItem['date']['startDay']}</Text>
+            ) : (
+              <Text style={styles.eventDate}>
+                {eventItem['date']['startDay']} - {eventItem['date']['endDay']}
+              </Text>
+            )}
             <Text style={styles.eventName}>{eventItem['name']}</Text>
           </View>
         </Pressable>
@@ -209,8 +216,8 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 
       let newArray: any = Object.values(eventItems).sort((a: any, b: any) => {
         return (
-          new Date(a.date.year, a.date.month, a.date.day).getTime() -
-          new Date(b.date.year, b.date.month, b.date.day).getTime()
+          new Date(a.date.year, a.date.month, a.date.startDay).getTime() -
+          new Date(b.date.year, b.date.month, b.date.startDay).getTime()
         );
       });
 
@@ -218,7 +225,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         if (
           isPast(
             zonedTimeToUtc(
-              new Date(newArray[i].date.year, newArray[i].date.month - 1, newArray[i].date.day, 11, 59, 59),
+              new Date(newArray[i].date.year, newArray[i].date.month - 1, newArray[i].date.endDay, 11, 59, 59),
               'Asia/Singapore'
             )
           )
@@ -243,8 +250,8 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 
             newArray = Object.values(eventItems).sort((a: any, b: any) => {
               return (
-                new Date(a.date.year, a.date.month, a.date.day).getTime() -
-                new Date(b.date.year, b.date.month, b.date.day).getTime()
+                new Date(a.date.year, a.date.month, a.date.startDay).getTime() -
+                new Date(b.date.year, b.date.month, b.date.startDay).getTime()
               );
             });
           });

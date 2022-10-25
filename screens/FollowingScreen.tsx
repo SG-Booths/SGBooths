@@ -227,10 +227,12 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           imgUrl: url,
           eventID: events[boothKey.eventID as keyof typeof events]['key'],
           month: events[boothKey.eventID as keyof typeof events]['date']['month'],
-          day: events[boothKey.eventID as keyof typeof events]['date']['day'],
+          startDay: events[boothKey.eventID as keyof typeof events]['date']['startDay'],
+          endDay: events[boothKey.eventID as keyof typeof events]['date']['endDay'],
           location: events[boothKey.eventID as keyof typeof events]['location'],
           avail: events[boothKey.eventID as keyof typeof events]['avail'],
           name: events[boothKey.eventID as keyof typeof events]['name'],
+          year: events[boothKey.eventID as keyof typeof events]['date']['year'],
         });
       })
       .catch((error) => {
@@ -377,14 +379,17 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
                     >
                       <Text style={{ color: '#2A3242', marginLeft: 15, marginTop: 10 }}>
                         {monthNames[events[boothKey.eventID as keyof typeof events]['date']['month'] - 1]}{' '}
-                        {events[boothKey.eventID as keyof typeof events]['date']['day']} @{' '}
-                        {events[boothKey.eventID as keyof typeof events]['name']}
+                        {events[boothKey.eventID as keyof typeof events]['date']['startDay']}{' '}
+                        {events[boothKey.eventID as keyof typeof events]['date']['startDay'] !=
+                          events[boothKey.eventID as keyof typeof events]['date']['endDay'] &&
+                          '- ' + events[boothKey.eventID as keyof typeof events]['date']['endDay'] + ' '}
+                        @ {events[boothKey.eventID as keyof typeof events]['name']}
                       </Text>
                       <Icon2 name="keyboard-arrow-right" size={20} color="#2A3242" style={{ marginRight: 10 }} />
                     </TouchableOpacity>
                   ))
               ) : (
-                <Text style={{ color: '#2A3242', marginTop: 10, fontWeight: '400', marginLeft: 15 }}>
+                <Text style={{ color: '#2A3242', marginTop: 10, fontWeight: '400', marginLeft: 20 }}>
                   no upcoming booths...
                 </Text>
               )}

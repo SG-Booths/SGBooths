@@ -12,7 +12,8 @@ import Icon from 'react-native-vector-icons/Entypo';
 export default function AddEventScreen({ navigation }: RootStackScreenProps<'AddEvent'>) {
   const [value, setValue] = React.useState({
     name: '',
-    day: '',
+    startDay: '',
+    endDay: '',
     month: '',
     year: '',
     location: '',
@@ -52,7 +53,8 @@ export default function AddEventScreen({ navigation }: RootStackScreenProps<'Add
       const newReference = push(ref(db, '/events/'), {
         name: value.name,
         date: {
-          day: value.day,
+          startDay: value.startDay,
+          endDay: value.endDay,
           month: value.month,
           year: value.year,
         },
@@ -82,7 +84,8 @@ export default function AddEventScreen({ navigation }: RootStackScreenProps<'Add
         alert('uploaded');
         setValue({
           name: '',
-          day: '',
+          startDay: '',
+          endDay: '',
           month: '',
           year: '',
           location: '',
@@ -107,11 +110,22 @@ export default function AddEventScreen({ navigation }: RootStackScreenProps<'Add
       />
       <View style={{ backgroundColor: 'transparent', flexDirection: 'row' }}>
         <TextInput
-          style={[styles.input, { width: 100, marginHorizontal: 10 }]}
-          placeholder="day"
+          style={[styles.input, { width: 50, marginHorizontal: 10 }]}
+          placeholder="start day"
           placeholderTextColor="#C4C4C4"
-          onChangeText={(text) => setValue({ ...value, day: text })}
-          value={value.day}
+          onChangeText={(text) => setValue({ ...value, startDay: text })}
+          value={value.startDay}
+          underlineColorAndroid="transparent"
+          autoCapitalize="none"
+          keyboardType="numeric"
+          maxLength={2}
+        />
+        <TextInput
+          style={[styles.input, { width: 50, marginHorizontal: 10 }]}
+          placeholder="end day"
+          placeholderTextColor="#C4C4C4"
+          onChangeText={(text) => setValue({ ...value, endDay: text })}
+          value={value.endDay}
           underlineColorAndroid="transparent"
           autoCapitalize="none"
           keyboardType="numeric"
