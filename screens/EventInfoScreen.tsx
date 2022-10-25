@@ -433,7 +433,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
                   )
                 }
               >
-                <Icon2 name={'report'} size={25} color="#D54826FF" />
+                <Icon2 name={'report'} size={25} color="#575FCC" />
               </TouchableOpacity>
             </View>
           </View>

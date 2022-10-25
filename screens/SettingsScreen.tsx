@@ -270,7 +270,6 @@ export default function SettingsScreen({ route, navigation }: any) {
     getData();
   }
 
-  // TODO: add contact us
   return (
     <SafeAreaView style={styles.container}>
       <TouchableWithoutFeedback
@@ -521,7 +520,7 @@ export default function SettingsScreen({ route, navigation }: any) {
               style={{
                 backgroundColor: '#575FCC',
                 height: 48,
-                width: '90%',
+                width: '85%',
                 borderRadius: 20,
                 alignItems: 'center',
                 alignSelf: 'center',

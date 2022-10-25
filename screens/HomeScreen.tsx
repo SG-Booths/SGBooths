@@ -218,7 +218,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
         if (
           isPast(
             zonedTimeToUtc(
-              new Date(newArray[i].date.year, newArray[i].date.month - 1, newArray[i].date.day),
+              new Date(newArray[i].date.year, newArray[i].date.month - 1, newArray[i].date.day, 11, 59, 59),
               'Asia/Singapore'
             )
           )
