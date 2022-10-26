@@ -198,7 +198,15 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
               </TouchableOpacity>
             </ImageBackground>
           </View>
-          <View style={styles.eventDetailsContainer}>
+          <View style={{
+            width: 350,
+            height: 50 + (eventItem['name'].length/34) * 12,
+            backgroundColor: 'white',
+            borderBottomLeftRadius: 20,
+            borderBottomRightRadius: 20,
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}>
             {eventItem['date']['startDay'] === eventItem['date']['endDay'] ? (
               <Text style={styles.eventDate}>{eventItem['date']['startDay']}</Text>
             ) : (
@@ -478,15 +486,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
-  eventDetailsContainer: {
-    width: 350,
-    height: 50,
-    backgroundColor: 'white',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   eventDate: {
     fontWeight: '800',
     fontSize: 20,
@@ -498,6 +497,7 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     color: '#2A3242',
     fontWeight: '500',
+    maxWidth: 260
   },
   searchBar: {
     height: 40,
