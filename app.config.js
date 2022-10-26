@@ -4,7 +4,7 @@ export default {
   expo: {
     name: 'SG Booths',
     slug: 'SGBooths',
-    version: '1.0.1',
+    version: '1.0.3',
     orientation: 'portrait',
     icon: './assets/images/icon.png',
     scheme: 'myapp',
@@ -19,8 +19,9 @@ export default {
     },
     assetBundlePatterns: ['**/*'],
     ios: {
-      supportsTablet: false,
+      supportsTablet: true,
       bundleIdentifier: 'SGBooths',
+      buildNumber: "3"
     },
     android: {
       adaptiveIcon: {
@@ -28,7 +29,7 @@ export default {
         backgroundColor: '#5857CC',
       },
       package: 'com.StudioMOOK.SGBooths',
-      versionCode: 2,
+      versionCode: 4,
     },
     web: {
       favicon: './assets/images/favicon.png',

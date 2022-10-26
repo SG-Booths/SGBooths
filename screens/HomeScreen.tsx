@@ -75,7 +75,12 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       let eventItems = { ...data };
       setEvents(eventItems);
 
-      let newArray: any = Object.values(eventItems).reverse();
+      let newArray: any = Object.values(eventItems).sort((a: any, b: any) => {
+        return (
+          new Date(a.date.year, a.date.month, a.date.startDay).getTime() -
+          new Date(b.date.year, b.date.month, b.date.startDay).getTime()
+        );
+      });
 
       // uses state to set cardArray and filteredCards to the reverse of this data
       setEventArray(newArray);
@@ -230,7 +235,6 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             )
           )
         ) {
-          remove(ref(db, '/events/' + newArray[i].key));
           onValue(ref(db, '/users'), (querySnapShot) => {
             let data = querySnapShot.val() || {};
             let users = { ...data };
@@ -242,6 +246,7 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           });
 
           deleteObject(ref_storage(storage, newArray[i].key + '.png'));
+          remove(ref(db, '/events/' + newArray[i].key));
 
           return onValue(ref(db, '/events'), (querySnapShot) => {
             let data = querySnapShot.val() || {};
@@ -250,8 +255,8 @@ const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
 
             newArray = Object.values(eventItems).sort((a: any, b: any) => {
               return (
-                new Date(a.date.year, a.date.month, a.date.startDay).getTime() -
-                new Date(b.date.year, b.date.month, b.date.startDay).getTime()
+                new Date(a.date.year, a.date.month, a.date.startDay).getDate() -
+                new Date(b.date.year, b.date.month, b.date.startDay).getDate()
               );
             });
           });

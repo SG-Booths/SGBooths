@@ -165,7 +165,6 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       let data = (await querySnapShot.val()) || {};
       let vendorData = { ...data };
       setVendorsFollowing(Object.keys(vendorData));
-      console.log('vendors following:', Object.keys(vendorData));
       setRefreshing(false);
     });
   }, []);
@@ -362,7 +361,9 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
               {vendor.upcomingBooths ? (
                 Object.values(vendor.upcomingBooths)
                   .sort((a: any, b: any) => {
-                    return a.date - b.date;
+                    return (
+                      a.date - b.date
+                    );
                   })
                   .map((boothKey: any) => (
                     <TouchableOpacity

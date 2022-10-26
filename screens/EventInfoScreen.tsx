@@ -507,7 +507,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
     });
     update(ref(db, '/users/' + auth.currentUser?.uid + '/upcomingBooths/' + eventID), {
       eventID: eventID,
-      [eventID]: '' + startDay + (month + 1) + year,
+      date: '' + startDay + (month + 1) + year,
     });
   };
 
