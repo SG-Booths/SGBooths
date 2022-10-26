@@ -497,7 +497,7 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     color: '#2A3242',
     fontWeight: '500',
-    maxWidth: 260
+    maxWidth: 230
   },
   searchBar: {
     height: 40,

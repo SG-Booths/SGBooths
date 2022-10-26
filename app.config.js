@@ -19,9 +19,9 @@ export default {
     },
     assetBundlePatterns: ['**/*'],
     ios: {
-      supportsTablet: true,
+      supportsTablet: false,
       bundleIdentifier: 'SGBooths',
-      buildNumber: "3"
+      buildNumber: "4"
     },
     android: {
       adaptiveIcon: {

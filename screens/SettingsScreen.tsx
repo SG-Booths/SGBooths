@@ -470,6 +470,7 @@ export default function SettingsScreen({ route, navigation }: any) {
                   underlineColorAndroid="transparent"
                   autoCapitalize="none"
                   defaultValue={auth?.currentUser?.email!}
+                  editable={false}
                 />
               </View>
             )}
