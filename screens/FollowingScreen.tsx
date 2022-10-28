@@ -21,7 +21,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/MaterialIcons';
 import { ref as ref_storage, getDownloadURL } from 'firebase/storage';
 
-const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
+export default function FollowingScreen({ route, navigation }: any) {
   const { user } = useAuthentication();
   const auth = getAuth();
 
@@ -31,7 +31,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
   const [vendorArray, setVendorArray]: any = useState([]);
   const [filteredVendorArray, setFilteredVendorArray]: any = useState([]);
   const [search, setSearch] = useState('');
-  const [events, setEvents] = useState({});
+  const [events, setEvents]: any = useState({});
   const [refreshing, setRefreshing] = useState(true);
 
   const [starredFilter, setStarredFilter] = useState(false);
@@ -379,7 +379,7 @@ const FollowingScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
                       onPress={() => getImgUrl(events[boothKey.eventID as keyof typeof events]['key'], boothKey)}
                     >
                       <Text style={{ color: '#2A3242', marginLeft: 15, marginTop: 10 }}>
-                        {monthNames[events[boothKey.eventID as keyof typeof events]['date']['month'] - 1]}{' '}
+                      {monthNames[events[boothKey.eventID as keyof typeof events]['date']['month'] - 1]}{' '}
                         {events[boothKey.eventID as keyof typeof events]['date']['startDay']}{' '}
                         {events[boothKey.eventID as keyof typeof events]['date']['startDay'] !=
                           events[boothKey.eventID as keyof typeof events]['date']['endDay'] &&
@@ -514,5 +514,3 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
   },
 });
-
-export default FollowingScreen;

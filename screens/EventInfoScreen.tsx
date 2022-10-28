@@ -567,7 +567,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
             >
               <Icon2 name="keyboard-arrow-left" size={30} color="#2A3242" />
             </TouchableOpacity>
-            <TouchableOpacity
+              <TouchableOpacity
               style={{
                 backgroundColor: 'white',
                 borderRadius: 100,
@@ -590,7 +590,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
               }}
             >
               <Icon name={boothFollowed ? 'bookmark' : 'bookmark-o'} size={25} color="#575FCC" />
-            </TouchableOpacity>
+            </TouchableOpacity>            
           </SafeAreaView>
         </ImageBackground>
       </View>
@@ -610,6 +610,22 @@ export default function EventInfoScreen({ route, navigation }: any) {
           </Text>
           <Text style={styles.name}>{name}</Text>
           <Text style={styles.location}>{location}</Text>
+          <TouchableOpacity
+              style={{
+                backgroundColor: '#565FCC',
+                borderRadius: 100,
+                height: 40,
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingHorizontal: 15,
+                marginTop: 15,
+              }} 
+              onPress={() => Linking.openURL('https://instagram.com/buaytahansia').catch((err) => {
+                console.error('Failed opening page because: ', err);
+                alert('Failed to open page');
+              })}>
+              <Text style={{fontWeight: 'bold', color: 'white'}}>PERSONAL SHOPPER SERVICE</Text>
+            </TouchableOpacity>
           <View
             style={{
               flexDirection: 'row',
@@ -642,9 +658,9 @@ export default function EventInfoScreen({ route, navigation }: any) {
             </TouchableOpacity>
           </View>
         </View>
-        <View style={{ alignSelf: 'center', backgroundColor: 'transparent' }}>
+        <View style={{ alignSelf: 'center', backgroundColor: 'transparent', paddingBottom: 70 + filteredVendors.length * 90 }}>
           <FlatList
-            contentContainerStyle={{ paddingBottom: 90 + filteredVendors.length * 90 }}
+            contentContainerStyle={{ paddingBottom: 70 + filteredVendors.length * 90, marginTop: -10 }}
             showsVerticalScrollIndicator={false}
             data={Object.keys(filteredVendors)}
             renderItem={({ item }) => <VendorItem id={item} self={false} />}
@@ -678,7 +694,6 @@ export default function EventInfoScreen({ route, navigation }: any) {
                           borderWidth: 1,
                           borderColor: 'transparent',
                           backgroundColor: '#8FD8B5',
-                          marginTop: -2,
                           height: 70,
                           alignItems: 'center',
                         }}
@@ -692,7 +707,6 @@ export default function EventInfoScreen({ route, navigation }: any) {
                           borderWidth: 1,
                           borderColor: '#8FD8B5',
                           backgroundColor: 'white',
-                          marginTop: -2,
                           height: 180,
                           alignItems: 'center',
                         }}
@@ -746,7 +760,7 @@ const styles = StyleSheet.create({
     width: Dimensions.get('window').width * 0.85,
   },
   eventDetailsContainer: {
-    width: 350,
+    width: 355,
     height: 170,
     backgroundColor: 'white',
     borderRadius: 20,

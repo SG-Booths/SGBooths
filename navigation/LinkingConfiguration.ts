@@ -32,7 +32,6 @@ const linking: LinkingOptions<RootStackParamList> = {
           },
         },
       },
-      NotFound: '*',
     },
   },
 };

@@ -4,7 +4,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialIcons, Entypo } from '@expo/vector-icons';
 import { RootTabParamList, RootTabScreenProps } from '../types';
-import NotFoundScreen from '../screens/NotFoundScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import HomeScreen from '../screens/HomeScreen';
 import FollowingScreen from '../screens/FollowingScreen';
@@ -61,7 +60,6 @@ export default function UserStack() {
         <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false }} />
         <Stack.Screen name="SettingsScreen" component={SettingsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="EventInfoScreen" component={EventInfoScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
         <Stack.Screen name="AddEvent" component={AddEventScreen} options={{ headerShown: false }} />
         <Stack.Screen
           name="VerifyAccountScreen"

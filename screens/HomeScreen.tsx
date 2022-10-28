@@ -23,7 +23,7 @@ import { StackScreenProps } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/Ionicons';
 
-const HomeScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
+export default function HomeScreen({ route, navigation }: any) {
   const { user } = useAuthentication();
   const auth = getAuth();
 
@@ -518,5 +518,3 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
-
-export default HomeScreen;

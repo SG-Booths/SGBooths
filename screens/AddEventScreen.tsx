@@ -6,10 +6,9 @@ import { ref as ref_storage, getDownloadURL, uploadBytesResumable } from 'fireba
 import * as ImagePicker from 'expo-image-picker';
 
 import { Text, View } from '../components/Themed';
-import { RootStackScreenProps } from '../types';
 import Icon from 'react-native-vector-icons/Entypo';
 
-export default function AddEventScreen({ navigation }: RootStackScreenProps<'AddEvent'>) {
+export default function AddEventScreen({ route, navigation }: any) {
   const [value, setValue] = React.useState({
     name: '',
     startDay: '',

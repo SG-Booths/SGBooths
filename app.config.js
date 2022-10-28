@@ -21,7 +21,7 @@ export default {
     ios: {
       supportsTablet: false,
       bundleIdentifier: 'SGBooths',
-      buildNumber: "4"
+      buildNumber: "8"
     },
     android: {
       adaptiveIcon: {
