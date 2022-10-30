@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Dimensions
 } from 'react-native';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
 import { getAuth } from 'firebase/auth';
@@ -40,6 +41,8 @@ export default function HomeScreen({ route, navigation }: any) {
   const eventKeys = Object.keys(filteredEvents);
 
   const [refreshing, setRefreshing] = useState(true);
+
+  const [uploadedImages, setUploadedImages]: any = useState(true);
 
   const today = new Date();
   const months = eachMonthOfInterval({
@@ -147,7 +150,7 @@ export default function HomeScreen({ route, navigation }: any) {
       });
 
     return (
-      <View style={{ marginBottom: 20, borderWidth: 1, borderRadius: 20, borderColor: '#C4C4C4' }}>
+      <View style={{ marginBottom: 20, borderWidth: 1, borderRadius: 20, borderColor: '#C4C4C4', width: Dimensions.get('window').width - 60 }}>
         <Pressable
           onPress={() =>
             navigation.navigate('EventInfoScreen', {
@@ -167,10 +170,10 @@ export default function HomeScreen({ route, navigation }: any) {
           <View style={styles.eventImageContainer}>
             <ImageBackground
               source={{ uri: imgUrl }}
-              imageStyle={{ borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
+              imageStyle={{ borderTopLeftRadius: 20, borderTopRightRadius: 20,  }}
               style={{
                 flex: 1,
-                width: undefined,
+                width: Dimensions.get('window').width - 60,
                 height: undefined,
                 zIndex: 0,
               }}
@@ -199,13 +202,15 @@ export default function HomeScreen({ route, navigation }: any) {
             </ImageBackground>
           </View>
           <View style={{
-            width: 350,
+            width: Dimensions.get('window').width - 60,
             height: 50 + (eventItem['name'].length/34) * 12,
             backgroundColor: 'white',
             borderBottomLeftRadius: 20,
             borderBottomRightRadius: 20,
             flexDirection: 'row',
             alignItems: 'center',
+            borderRightWidth: 1,
+            borderColor: '#C4C4C4'
           }}>
             {eventItem['date']['startDay'] === eventItem['date']['endDay'] ? (
               <Text style={styles.eventDate}>{eventItem['date']['startDay']}</Text>
@@ -220,6 +225,18 @@ export default function HomeScreen({ route, navigation }: any) {
       </View>
     );
   };
+
+  useEffect(() => {
+    if (value.type === 'vendor') {
+      getDownloadURL(ref_storage(storage, auth?.currentUser?.uid + '_3.png'))
+      .then((url) => {
+        setUploadedImages(true)
+      })
+      .catch((error) => {
+        setUploadedImages(false)
+      });
+    }
+  })
 
   useEffect(() => {
     return onValue(ref(db, '/events'), (querySnapShot) => {
@@ -238,7 +255,7 @@ export default function HomeScreen({ route, navigation }: any) {
         if (
           isPast(
             zonedTimeToUtc(
-              new Date(newArray[i].date.year, newArray[i].date.month - 1, newArray[i].date.endDay, 11, 59, 59),
+              new Date(newArray[i].date.year, newArray[i].date.month - 1, newArray[i].date.endDay, 23, 59, 59),
               'Asia/Singapore'
             )
           )
@@ -374,10 +391,11 @@ export default function HomeScreen({ route, navigation }: any) {
         <TouchableOpacity
           style={{ alignSelf: 'center' }}
           onPress={() =>
+            uploadedImages ?
             navigation.navigate('SettingsScreen', {
               instagram: value.instagram,
               type: value.type,
-            })
+            }) : alert('Wait a while! Your shop images are uploading')
           }
         >
           <Icon2 name="person-circle-outline" size={35} color="#2A3242" style={{ marginRight: 20 }} />
@@ -411,6 +429,7 @@ export default function HomeScreen({ route, navigation }: any) {
         contentContainerStyle={styles.contentContainerStyle}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadNewData} />}
+        horizontal={false}
       >
         {months.map((monthKey) => (
           <View key={monthKey.toString()}>
@@ -480,7 +499,7 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   eventImageContainer: {
-    width: 350,
+    width: Dimensions.get('window').width - 60,
     height: 120,
     backgroundColor: 'white',
     borderTopLeftRadius: 20,
@@ -497,11 +516,11 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     color: '#2A3242',
     fontWeight: '500',
-    maxWidth: 230
+    maxWidth: Dimensions.get('window').width - 190,
   },
   searchBar: {
     height: 40,
-    width: 300,
+    width: (Dimensions.get('window').width - 60) * 0.85,
     borderRadius: 20,
     backgroundColor: 'white',
     marginTop: 20,

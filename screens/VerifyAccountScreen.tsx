@@ -175,7 +175,7 @@ export default function VerifyAccountScreen({ route, navigation }: any) {
           <TouchableOpacity style={{ marginTop: 5, marginRight: 5 }} onPress={() => navigation.goBack()}>
             <Icon name="keyboard-arrow-left" size={50} color="#575FCC" style={{ marginTop: 5 }} />
           </TouchableOpacity>
-          <Text style={[styles.title, { textAlignVertical: 'center' }]}>verify account</Text>
+          <Text style={[styles.title, { textAlignVertical: 'center' }]}>verification</Text>
         </View>
         <Text style={{ color: '#2A3242', fontWeight: '500', marginTop: 20, marginLeft: 10 }}>
           Please sign in again to {type === 'delete account' ? 'delete your account' : 'change your email'}

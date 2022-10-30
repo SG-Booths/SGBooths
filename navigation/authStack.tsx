@@ -28,7 +28,6 @@ export default function AuthStack() {
     }
   };
 
-  console.log(isAppFirstLaunched);
   return isAppFirstLaunched != null ? (
     <NavigationContainer>
       <Stack.Navigator

@@ -8,8 +8,9 @@ import {
   Keyboard,
   ImageBackground,
   TouchableWithoutFeedback,
-  Dimensions,
+  ScrollView,
   Linking,
+  Dimensions
 } from 'react-native';
 import { getAuth, signOut, sendPasswordResetEmail, updateProfile } from 'firebase/auth';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
@@ -271,7 +272,9 @@ export default function SettingsScreen({ route, navigation }: any) {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={{backgroundColor: '#FFF8F3', flex: 1}}>
+      <ScrollView style={styles.container} horizontal={false}>
+
       <TouchableWithoutFeedback
         onPress={() => {
           Keyboard.dismiss(), updateAccount();
@@ -534,6 +537,7 @@ export default function SettingsScreen({ route, navigation }: any) {
           </View>
         </View>
       </TouchableWithoutFeedback>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -542,6 +546,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFF8F3',
+    paddingBottom: 20
   },
   title: {
     alignSelf: 'flex-start',
@@ -642,8 +647,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   vendorImage: {
-    width: 105,
-    height: 105,
+    width: (Dimensions.get('window').width - 100) / 3,
+    height: (Dimensions.get('window').width - 100) / 3,
     marginRight: 20,
     borderRadius: 20,
     backgroundColor: 'white',

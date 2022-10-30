@@ -7,6 +7,7 @@ import { ref as ref_storage, getDownloadURL, deleteObject, uploadBytesResumable 
 import * as ImagePicker from 'expo-image-picker';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
 import Icon from 'react-native-vector-icons/Entypo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const auth = getAuth();
 
@@ -65,9 +66,9 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
       otherOtherName = value.tooBig2;
     }
 
-    if (result.fileSize > 4000000) {
+    if (result.fileSize > 3000000) {
       setValue({ ...value, [name]: true, error: 'Image is too large! Please pick another one.' });
-    } else if (result.fileSize < 4000000) {
+    } else if (result.fileSize < 3000000) {
       setValue({ ...value, [name]: false });
 
       if (!otherName && !otherOtherName) {
@@ -103,6 +104,7 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
       console.log('img3:', imgUrl3Final.current);
       await createUserWithEmailAndPassword(auth, email, password)
         .then(async (data) => {
+          AsyncStorage.setItem('uploadedImages', 'false');
           console.log('UID:', data.user.uid);
           const metadata = {
             contentType: 'image/png',
@@ -147,7 +149,7 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
                   uploadBytesResumable(ref3, file3, metadata)
                     .then(async (snapshot) => {
                       console.log('Uploaded image 3');
-
+                      AsyncStorage.setItem('uploadedImages', 'true');
                       await updateProfile(auth.currentUser!, {
                         displayName: name.trim(),
                       });
@@ -165,8 +167,9 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
                         ...value,
                         error: error.message,
                       });
+                      return
                     });
-                  setUploading(false);
+                    setUploading(false);
                 })
                 .catch((error) => {
                   // Uh-oh, an error occurred!
@@ -175,6 +178,7 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
                     ...value,
                     error: error.message,
                   });
+                  return
                 });
             })
             .catch((error) => {
@@ -211,7 +215,7 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
         <TouchableOpacity onPress={() => _pickImage(1)}>
           <ImageBackground
             source={{ uri: imgUrl1 }}
-            style={[styles.vendorImage, imgUrl1 ? { borderWidth: 0 } : { borderWidth: 1 }]}
+            style={[styles.vendorImage, imgUrl1 ? { borderWidth: 0 } : { borderWidth: 1 }, {marginRight: 20}]}
             imageStyle={{ borderRadius: 20 }}
           >
             {!imgUrl1 && <Icon name="plus" color="#C4C4C4" size={40} />}
@@ -220,7 +224,7 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
         <TouchableOpacity onPress={() => _pickImage(2)}>
           <ImageBackground
             source={{ uri: imgUrl2 }}
-            style={[styles.vendorImage, imgUrl2 ? { borderWidth: 0 } : { borderWidth: 1 }]}
+            style={[styles.vendorImage, imgUrl2 ? { borderWidth: 0 } : { borderWidth: 1 }, {marginRight: 20}]}
             imageStyle={{ borderRadius: 20 }}
           >
             {!imgUrl2 && <Icon name="plus" color="#C4C4C4" size={40} />}
@@ -329,7 +333,6 @@ const styles = StyleSheet.create({
   vendorImage: {
     width: 98,
     height: 98,
-    marginRight: 20,
     borderRadius: 20,
     backgroundColor: 'white',
     borderWidth: 1,

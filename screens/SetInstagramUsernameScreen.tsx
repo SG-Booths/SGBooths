@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, TextInput, Text, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, TextInput, Text, View, Dimensions } from 'react-native';
 import React from 'react';
 export default function SetInstagramUsernameScreen({ route, navigation }: any) {
   const { name, email, password } = route.params;
@@ -53,11 +53,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '400',
     textAlign: 'left',
-    marginLeft: 30,
+    marginHorizontal: 30,
     marginBottom: 10,
   },
   input: {
-    width: '90%',
+    width: Dimensions.get('window').width - 60,
     height: 48,
     borderRadius: 20,
     overflow: 'hidden',

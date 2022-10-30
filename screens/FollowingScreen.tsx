@@ -246,14 +246,13 @@ export default function FollowingScreen({ route, navigation }: any) {
         <View
           style={{
             flexDirection: 'row',
-            width: 320,
+            width: Dimensions.get('window').width - 100,
             borderRadius: 20,
             backgroundColor: 'transparent',
             flex: 1,
             maxHeight: 30,
             marginTop: 20,
             justifyContent: 'space-between',
-            paddingHorizontal: 5,
           }}
         >
           <Text style={styles.vendorName}>{vendor.name}</Text>
@@ -272,12 +271,12 @@ export default function FollowingScreen({ route, navigation }: any) {
               </TouchableOpacity>
             )}
             {!blocked && (
-              <TouchableOpacity onPress={() => updateStarred(vendor.uid)}>
+              <TouchableOpacity                   style={{ marginRight: 20 }}
+              onPress={() => updateStarred(vendor.uid)}>
                 <Icon
                   name={vendorsFollowing.includes(vendor.uid) ? 'bookmark' : 'bookmark-o'}
                   size={25}
                   color="white"
-                  style={{ marginRight: 20 }}
                 />
               </TouchableOpacity>
             )}
@@ -337,7 +336,7 @@ export default function FollowingScreen({ route, navigation }: any) {
         <View
           style={{
             backgroundColor: 'white',
-            width: 350,
+            width: Dimensions.get('window').width - 60,
             marginTop: 15,
             borderBottomLeftRadius: 20,
             borderBottomRightRadius: 20,
@@ -438,7 +437,7 @@ export default function FollowingScreen({ route, navigation }: any) {
         {refreshing ? <ActivityIndicator /> : null}
         <View style={{ backgroundColor: 'transparent', alignSelf: 'center' }}>
           <FlatList
-            contentContainerStyle={{ paddingBottom: filteredVendorArray.length * 65 }}
+            contentContainerStyle={{ paddingBottom: 325 }}
             showsVerticalScrollIndicator={false}
             style={{ marginTop: 10 }}
             data={Object.keys(filteredVendorArray)}
@@ -477,7 +476,7 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     height: 40,
-    width: 290,
+    width: (Dimensions.get('window').width - 60) * 0.85,
     borderRadius: 20,
     backgroundColor: 'white',
     marginTop: 20,
@@ -486,7 +485,7 @@ const styles = StyleSheet.create({
     borderColor: '#C4C4C4',
   },
   eventDetailsContainer: {
-    width: 350,
+    width: Dimensions.get('window').width - 60,
     flex: 1,
     backgroundColor: '#575FCC',
     borderRadius: 20,

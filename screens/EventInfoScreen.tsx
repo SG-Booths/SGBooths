@@ -349,7 +349,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
           <View
             style={{
               flexDirection: 'row',
-              width: 300,
+              width: (Dimensions.get('window').width - 110),
               borderRadius: 20,
               backgroundColor: 'transparent',
               flex: 1,
@@ -358,6 +358,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
               paddingHorizontal: 5,
               justifyContent: 'space-between',
               alignContent: 'center',
+              marginHorizontal: 30
             }}
           >
             <Text style={styles.vendorName}>{name}</Text>
@@ -454,9 +455,9 @@ export default function EventInfoScreen({ route, navigation }: any) {
       return (
         <View
           style={{
-            width: 355,
+            width: Dimensions.get('window').width - 60,
             height: 170,
-            backgroundColor: 'white',
+            backgroundColor: 'transparent',
             flexDirection: 'column',
             alignItems: 'center',
             borderBottomLeftRadius: 20,
@@ -467,7 +468,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
           <View
             style={{
               flexDirection: 'row',
-              width: 300,
+              width: Dimensions.get('window').width - 110,
               borderRadius: 20,
               backgroundColor: 'transparent',
               flex: 1,
@@ -536,66 +537,85 @@ export default function EventInfoScreen({ route, navigation }: any) {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#FFF8F3' }}>
-      <View style={styles.image}>
-        <ImageBackground
-          source={{ uri: imgUrl }}
-          style={{
-            flex: 1,
-            width: undefined,
-            height: undefined,
-          }}
-        >
-          <SafeAreaView
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              backgroundColor: 'transparent',
-              paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-            }}
-          >
-            <TouchableOpacity
-              style={{
-                backgroundColor: '#FFF8F3',
-                borderRadius: 100,
-                height: 40,
-                width: 40,
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginLeft: 15,
-              }}
-              onPress={() => navigation.goBack()}
-            >
-              <Icon2 name="keyboard-arrow-left" size={30} color="#2A3242" />
-            </TouchableOpacity>
-              <TouchableOpacity
-              style={{
-                backgroundColor: 'white',
-                borderRadius: 100,
-                height: 40,
-                width: 40,
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginRight: 15,
-              }}
-              onPress={() => {
-                if (boothFollowed) {
-                  remove(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/' + eventID));
-                  setBoothFollowed(false);
-                } else {
-                  update(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/'), {
-                    [eventID]: '',
-                  });
-                  setBoothFollowed(true);
-                }
-              }}
-            >
-              <Icon name={boothFollowed ? 'bookmark' : 'bookmark-o'} size={25} color="#575FCC" />
-            </TouchableOpacity>            
-          </SafeAreaView>
-        </ImageBackground>
-      </View>
+      
 
-      <View style={styles.container}>
+      
+        <View style={{ alignSelf: 'center', backgroundColor: 'transparent' }}>
+          <FlatList
+            contentContainerStyle={{ paddingBottom: filteredVendors.length * 40, width: Dimensions.get('window').width }}
+            showsVerticalScrollIndicator={false}
+            data={Object.keys(filteredVendors)}
+            renderItem={({ item }) => <VendorItem id={item} self={false} />}
+            keyExtractor={(item) => filteredVendors[item]['uid' as keyof typeof filteredVendors]}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadNewData} />}
+            ListEmptyComponent={() =>
+              !starredFilter ? (
+                <Text style={{marginLeft: 30, paddingBottom: 15}}>no creators yet!</Text>
+              ) : !search ? (
+                <Text style={{marginLeft: 30, paddingBottom: 15}}>no creators you follow are boothing here!</Text>
+              ) : null
+            }
+            ListHeaderComponent={() => (
+              <View style={{ flex: 1, backgroundColor: '#FFF8F3' }}>
+              <View style={styles.image}>
+                <ImageBackground
+                  source={{ uri: imgUrl }}
+                  style={{
+                    flex: 1,
+                    width: Dimensions.get('window').width,
+                    height: undefined,
+                  }}
+                >
+                  <SafeAreaView
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      backgroundColor: 'transparent',
+                      paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+                    }}
+                  >
+                    <TouchableOpacity
+                      style={{
+                        backgroundColor: '#FFF8F3',
+                        borderRadius: 100,
+                        height: 40,
+                        width: 40,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginLeft: 15,
+                      }}
+                      onPress={() => navigation.goBack()}
+                    >
+                      <Icon2 name="keyboard-arrow-left" size={30} color="#2A3242" />
+                    </TouchableOpacity>
+                      <TouchableOpacity
+                      style={{
+                        backgroundColor: 'white',
+                        borderRadius: 100,
+                        height: 40,
+                        width: 40,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginRight: 15,
+                      }}
+                      onPress={() => {
+                        if (boothFollowed) {
+                          remove(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/' + eventID));
+                          setBoothFollowed(false);
+                        } else {
+                          update(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/'), {
+                            [eventID]: '',
+                          });
+                          setBoothFollowed(true);
+                        }
+                      }}
+                    >
+                      <Icon name={boothFollowed ? 'bookmark' : 'bookmark-o'} size={25} color="#575FCC" />
+                    </TouchableOpacity>            
+                  </SafeAreaView>
+                </ImageBackground>
+              </View>
+              <View style={styles.container}>
         <View
           style={{
             marginTop: 10,
@@ -658,23 +678,8 @@ export default function EventInfoScreen({ route, navigation }: any) {
             </TouchableOpacity>
           </View>
         </View>
-        <View style={{ alignSelf: 'center', backgroundColor: 'transparent', paddingBottom: 70 + filteredVendors.length * 90 }}>
-          <FlatList
-            contentContainerStyle={{ paddingBottom: 70 + filteredVendors.length * 90, marginTop: -10 }}
-            showsVerticalScrollIndicator={false}
-            data={Object.keys(filteredVendors)}
-            renderItem={({ item }) => <VendorItem id={item} self={false} />}
-            keyExtractor={(item) => filteredVendors[item]['uid' as keyof typeof filteredVendors]}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadNewData} />}
-            ListEmptyComponent={() =>
-              !starredFilter ? (
-                <Text>no creators yet!</Text>
-              ) : !search ? (
-                <Text>no creators you follow are boothing here!</Text>
-              ) : null
-            }
-            ListHeaderComponent={() => (
-              <View style={{ backgroundColor: 'transparent' }}>
+        </View>
+              <View style={{ backgroundColor: 'transparent', width: Dimensions.get('window').width - 60, alignSelf: 'center' }}>
                 {currentUser.type === 'vendor' ? (
                   boothing ? (
                     <View
@@ -721,10 +726,10 @@ export default function EventInfoScreen({ route, navigation }: any) {
                   <View></View>
                 )}
               </View>
+              </View>
             )}
           />
         </View>
-      </View>
     </View>
   );
 }
@@ -760,7 +765,7 @@ const styles = StyleSheet.create({
     width: Dimensions.get('window').width * 0.85,
   },
   eventDetailsContainer: {
-    width: 355,
+    width: Dimensions.get('window').width - 60,
     height: 170,
     backgroundColor: 'white',
     borderRadius: 20,
@@ -769,6 +774,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderWidth: 1,
     borderColor: '#C4C4C4',
+    alignSelf: 'center'
   },
   eventImageContainer: {
     width: 85,
@@ -792,7 +798,7 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     height: 40,
-    width: 290,
+    width: (Dimensions.get('window').width - 60) * 0.85,
     borderRadius: 20,
     backgroundColor: 'white',
     marginTop: 20,
@@ -813,7 +819,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#8FD8B5',
-    width: 350,
+    width: Dimensions.get('window').width - 60,
     height: 45,
     marginVertical: 20,
     backgroundColor: 'transparent',
@@ -823,7 +829,7 @@ const styles = StyleSheet.create({
   boothing: {
     borderRadius: 20,
     borderWidth: 1,
-    width: 320,
+    width: Dimensions.get('window').width - 110,
     height: 45,
     marginTop: 10,
     backgroundColor: 'white',
