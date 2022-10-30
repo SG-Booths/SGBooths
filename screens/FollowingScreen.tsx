@@ -250,9 +250,9 @@ export default function FollowingScreen({ route, navigation }: any) {
             borderRadius: 20,
             backgroundColor: 'transparent',
             flex: 1,
-            maxHeight: 30,
             marginTop: 20,
             justifyContent: 'space-between',
+            alignContent: 'center',
           }}
         >
           <Text style={styles.vendorName}>{vendor.name}</Text>
@@ -502,6 +502,10 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: '500',
     alignSelf: 'center',
+    width: Dimensions.get('window').width - 220,
+    backgroundColor: 'transparent',
+    flexShrink:1,
+    flexWrap: 'wrap'
   },
   savedButton: {
     borderRadius: 30,

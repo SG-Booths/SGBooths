@@ -353,12 +353,11 @@ export default function EventInfoScreen({ route, navigation }: any) {
               borderRadius: 20,
               backgroundColor: 'transparent',
               flex: 1,
-              maxHeight: 30,
-              marginTop: 20,
               paddingHorizontal: 5,
               justifyContent: 'space-between',
               alignContent: 'center',
-              marginHorizontal: 30
+              marginHorizontal: 30,
+              alignItems: 'center'
             }}
           >
             <Text style={styles.vendorName}>{name}</Text>
@@ -542,7 +541,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
       
         <View style={{ alignSelf: 'center', backgroundColor: 'transparent' }}>
           <FlatList
-            contentContainerStyle={{ paddingBottom: filteredVendors.length * 40, width: Dimensions.get('window').width }}
+            contentContainerStyle={{ paddingBottom: 50, width: Dimensions.get('window').width }}
             showsVerticalScrollIndicator={false}
             data={Object.keys(filteredVendors)}
             renderItem={({ item }) => <VendorItem id={item} self={false} />}
@@ -766,7 +765,6 @@ const styles = StyleSheet.create({
   },
   eventDetailsContainer: {
     width: Dimensions.get('window').width - 60,
-    height: 170,
     backgroundColor: 'white',
     borderRadius: 20,
     flexDirection: 'column',
@@ -774,7 +772,8 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderWidth: 1,
     borderColor: '#C4C4C4',
-    alignSelf: 'center'
+    alignSelf: 'center',
+    paddingVertical: 20
   },
   eventImageContainer: {
     width: 85,
@@ -789,6 +788,10 @@ const styles = StyleSheet.create({
     color: '#2A3242',
     fontWeight: '500',
     alignSelf: 'center',
+    maxWidth: Dimensions.get('window').width - 240,
+    backgroundColor: 'transparent',
+    flexWrap: 'wrap',
+    flex: 1
   },
   vendorImage: {
     width: 85,
@@ -798,7 +801,7 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     height: 40,
-    width: (Dimensions.get('window').width - 60) * 0.85,
+    width: (Dimensions.get('window').width - 60) * 0.83,
     borderRadius: 20,
     backgroundColor: 'white',
     marginTop: 20,
