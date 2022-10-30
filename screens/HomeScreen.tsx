@@ -228,12 +228,31 @@ export default function HomeScreen({ route, navigation }: any) {
 
   useEffect(() => {
     if (value.type === 'vendor') {
-      getDownloadURL(ref_storage(storage, auth?.currentUser?.uid + '_3.png'))
+      getDownloadURL(ref_storage(storage, auth?.currentUser?.uid + '_1.png'))
       .then((url) => {
-        setUploadedImages(true)
+        getDownloadURL(ref_storage(storage, auth?.currentUser?.uid + '_2.png'))
+        .then((url) => {
+          getDownloadURL(ref_storage(storage, auth?.currentUser?.uid + '_3.png'))
+          .then((url) => {
+            setUploadedImages(true)
+          })
+          .catch((error) => {
+            setUploadedImages(false)
+          });
+        })
+        .catch((error) => {
+          setUploadedImages(false)
+        });
       })
       .catch((error) => {
         setUploadedImages(false)
+      });
+    }
+    if (!value.type) {
+      set(ref(db, '/users/' + auth?.currentUser?.uid), {
+        type: 'vendor',
+        uid: auth?.currentUser?.uid,
+        name: ''
       });
     }
   })
@@ -391,8 +410,9 @@ export default function HomeScreen({ route, navigation }: any) {
         <TouchableOpacity
           style={{ alignSelf: 'center' }}
           onPress={() =>
-            uploadedImages ?
+            (uploadedImages || value.name === '') ?
             navigation.navigate('SettingsScreen', {
+              name: '',
               instagram: value.instagram,
               type: value.type,
             }) : alert('Wait a while! Your shop images are uploading')

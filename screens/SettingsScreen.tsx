@@ -78,10 +78,11 @@ export default function SettingsScreen({ route, navigation }: any) {
 
     let tooBig = false;
 
-    if (result.fileSize > 3000000) {
+    if (result.fileSize > 1500000) {
       tooBig = true;
       setValue({ ...value, error: 'Image is too large! Please pick another one.' });
-    } else if (result.fileSize < 3000000) {
+      return
+    } else if (result.fileSize < 1500000) {
       tooBig = false;
       setValue({ ...value, error: '' });
     }
@@ -114,6 +115,7 @@ export default function SettingsScreen({ route, navigation }: any) {
               if (error.code === 'storage/object-not-found') {
                 uploadBytes(ref1, blob1, metadata).then((snapshot) => {
                   console.log('Uploaded image 1');
+                  setImgUrl1(result.uri);
                 });
               } else {
                 console.log(error);
@@ -142,6 +144,7 @@ export default function SettingsScreen({ route, navigation }: any) {
               if (error.code === 'storage/object-not-found') {
                 uploadBytes(ref2, blob2, metadata).then((snapshot) => {
                   console.log('Uploaded image 2');
+                  setImgUrl2(result.uri);
                 });
               } else {
                 console.log(error);
@@ -170,6 +173,7 @@ export default function SettingsScreen({ route, navigation }: any) {
               if (error.code === 'storage/object-not-found') {
                 uploadBytes(ref3, blob3, metadata).then((snapshot) => {
                   console.log('Uploaded image 3');
+                  setImgUrl3(result.uri);
                 });
               } else {
                 console.log(error);
@@ -182,7 +186,7 @@ export default function SettingsScreen({ route, navigation }: any) {
     }
   };
 
-  useMemo(() => {
+  useEffect(() => {
     if (value.type === 'vendor') {
       getDownloadURL(ref1)
         .then((url) => {
@@ -209,7 +213,7 @@ export default function SettingsScreen({ route, navigation }: any) {
         });
     }
     // getPermissionAsync();
-  }, [value]);
+  }, []);
 
   useEffect(() => {
     getData();
@@ -248,7 +252,6 @@ export default function SettingsScreen({ route, navigation }: any) {
       return;
     }
 
-    if (value.name != auth.currentUser?.displayName) {
       try {
         updateProfile(auth.currentUser!, { displayName: value.name });
       } catch (error: any) {
@@ -260,7 +263,6 @@ export default function SettingsScreen({ route, navigation }: any) {
       update(ref(db, '/users/' + auth.currentUser?.uid), {
         name: value.name,
       });
-    }
 
     if (value.instagram != initialInstagram) {
       update(ref(db, '/users/' + auth.currentUser?.uid), {
@@ -290,7 +292,7 @@ export default function SettingsScreen({ route, navigation }: any) {
               alignItems: 'center',
             }}
           >
-            <TouchableOpacity onPress={() => navigation.goBack()}>
+            <TouchableOpacity onPress={() => value.name ? ((imgUrl1 && imgUrl2 && imgUrl3) ? navigation.goBack() : alert('Please upload all 3 shop images!')) : (alert('Please enter a name!'), updateAccount())}>
               <Icon name="keyboard-arrow-left" size={50} color="#575FCC" style={{ marginTop: 5 }} />
             </TouchableOpacity>
             <Text style={styles.title}>profile</Text>
@@ -316,7 +318,6 @@ export default function SettingsScreen({ route, navigation }: any) {
                       });
                       return;
                     }
-                    if (value.name != auth.currentUser?.displayName) {
                       try {
                         updateProfile(auth.currentUser!, { displayName: nativeEvent.text.trim() });
                         setValue({ ...value, name: nativeEvent.text.trim() });
@@ -330,7 +331,6 @@ export default function SettingsScreen({ route, navigation }: any) {
                       update(ref(db, '/users/' + auth.currentUser?.uid), {
                         name: nativeEvent.text,
                       });
-                    }
                   }}
                   value={value.name}
                   underlineColorAndroid="transparent"
@@ -345,6 +345,12 @@ export default function SettingsScreen({ route, navigation }: any) {
                   placeholder="instagram username (without @)"
                   placeholderTextColor="#C4C4C4"
                   onChangeText={(text) => setValue({ ...value, instagram: text })}
+                  onSubmitEditing={({ nativeEvent }) => {
+                    console.log(nativeEvent.text);
+                    update(ref(db, '/users/' + auth.currentUser?.uid), {
+                      instagram: nativeEvent.text,
+                    });
+                  }}
                   value={value.instagram}
                   underlineColorAndroid="transparent"
                   autoCapitalize="none"

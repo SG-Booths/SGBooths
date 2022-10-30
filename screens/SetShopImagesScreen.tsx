@@ -68,6 +68,7 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
 
     if (result.fileSize > 3000000) {
       setValue({ ...value, [name]: true, error: 'Image is too large! Please pick another one.' });
+      return
     } else if (result.fileSize < 3000000) {
       setValue({ ...value, [name]: false });
 
