@@ -10,7 +10,7 @@ import {
   TouchableWithoutFeedback,
   ScrollView,
   Linking,
-  Dimensions
+  Dimensions,
 } from 'react-native';
 import { getAuth, signOut, sendPasswordResetEmail, updateProfile } from 'firebase/auth';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
@@ -81,7 +81,7 @@ export default function SettingsScreen({ route, navigation }: any) {
     if (result.fileSize > 1500000) {
       tooBig = true;
       setValue({ ...value, error: 'Image is too large! Please pick another one.' });
-      return
+      return;
     } else if (result.fileSize < 1500000) {
       tooBig = false;
       setValue({ ...value, error: '' });
@@ -252,36 +252,27 @@ export default function SettingsScreen({ route, navigation }: any) {
       return;
     }
 
-      try {
-        updateProfile(auth.currentUser!, { displayName: value.name });
-      } catch (error: any) {
-        setValue({
-          ...value,
-          error: error.message,
-        });
-      }
-      update(ref(db, '/users/' + auth.currentUser?.uid), {
-        name: value.name,
+    try {
+      updateProfile(auth.currentUser!, { displayName: value.name });
+    } catch (error: any) {
+      setValue({
+        ...value,
+        error: error.message,
       });
-
-    if (value.instagram != initialInstagram) {
-      update(ref(db, '/users/' + auth.currentUser?.uid), {
-        instagram: value.instagram,
-      });
+      return;
     }
+
+    update(ref(db, '/users/' + auth.currentUser?.uid), {
+      name: value.name,
+      instagram: value.instagram,
+    });
 
     getData();
   }
 
   return (
-    <SafeAreaView style={{backgroundColor: '#FFF8F3', flex: 1}}>
+    <SafeAreaView style={{ backgroundColor: '#FFF8F3', flex: 1 }}>
       <ScrollView style={styles.container} horizontal={false}>
-
-      <TouchableWithoutFeedback
-        onPress={() => {
-          Keyboard.dismiss(), updateAccount();
-        }}
-      >
         <View style={styles.container}>
           <View
             style={{
@@ -292,7 +283,15 @@ export default function SettingsScreen({ route, navigation }: any) {
               alignItems: 'center',
             }}
           >
-            <TouchableOpacity onPress={() => value.name ? ((imgUrl1 && imgUrl2 && imgUrl3) ? navigation.goBack() : alert('Please upload all 3 shop images!')) : (alert('Please enter a name!'), updateAccount())}>
+            <TouchableOpacity
+              onPress={() =>
+                value.name
+                  ? imgUrl1 && imgUrl2 && imgUrl3
+                    ? navigation.goBack()
+                    : alert('Please upload all 3 shop images!')
+                  : (alert('Please enter a name!'), updateAccount())
+              }
+            >
               <Icon name="keyboard-arrow-left" size={50} color="#575FCC" style={{ marginTop: 5 }} />
             </TouchableOpacity>
             <Text style={styles.title}>profile</Text>
@@ -309,6 +308,29 @@ export default function SettingsScreen({ route, navigation }: any) {
                   placeholder="shop name"
                   placeholderTextColor="#C4C4C4"
                   onChangeText={(text) => setValue({ ...value, name: text })}
+                  onBlur={({ nativeEvent }) => {
+                    console.log(nativeEvent.text);
+                    if (nativeEvent.text === '') {
+                      setValue({
+                        ...value,
+                        error: 'Name is mandatory',
+                      });
+                      return;
+                    }
+                    try {
+                      updateProfile(auth.currentUser!, { displayName: nativeEvent.text.trim() });
+                      setValue({ ...value, name: nativeEvent.text.trim() });
+                      getData();
+                    } catch (error: any) {
+                      setValue({
+                        ...value,
+                        error: error.message,
+                      });
+                    }
+                    update(ref(db, '/users/' + auth.currentUser?.uid), {
+                      name: nativeEvent.text,
+                    });
+                  }}
                   onSubmitEditing={({ nativeEvent }) => {
                     console.log(nativeEvent.text);
                     if (nativeEvent.text === '') {
@@ -318,19 +340,19 @@ export default function SettingsScreen({ route, navigation }: any) {
                       });
                       return;
                     }
-                      try {
-                        updateProfile(auth.currentUser!, { displayName: nativeEvent.text.trim() });
-                        setValue({ ...value, name: nativeEvent.text.trim() });
-                        getData();
-                      } catch (error: any) {
-                        setValue({
-                          ...value,
-                          error: error.message,
-                        });
-                      }
-                      update(ref(db, '/users/' + auth.currentUser?.uid), {
-                        name: nativeEvent.text,
+                    try {
+                      updateProfile(auth.currentUser!, { displayName: nativeEvent.text.trim() });
+                      setValue({ ...value, name: nativeEvent.text.trim() });
+                      getData();
+                    } catch (error: any) {
+                      setValue({
+                        ...value,
+                        error: error.message,
                       });
+                    }
+                    update(ref(db, '/users/' + auth.currentUser?.uid), {
+                      name: nativeEvent.text,
+                    });
                   }}
                   value={value.name}
                   underlineColorAndroid="transparent"
@@ -345,6 +367,12 @@ export default function SettingsScreen({ route, navigation }: any) {
                   placeholder="instagram username (without @)"
                   placeholderTextColor="#C4C4C4"
                   onChangeText={(text) => setValue({ ...value, instagram: text })}
+                  onBlur={({ nativeEvent }) => {
+                    console.log(nativeEvent.text);
+                    update(ref(db, '/users/' + auth.currentUser?.uid), {
+                      instagram: nativeEvent.text,
+                    });
+                  }}
                   onSubmitEditing={({ nativeEvent }) => {
                     console.log(nativeEvent.text);
                     update(ref(db, '/users/' + auth.currentUser?.uid), {
@@ -542,7 +570,6 @@ export default function SettingsScreen({ route, navigation }: any) {
             </TouchableOpacity>
           </View>
         </View>
-      </TouchableWithoutFeedback>
       </ScrollView>
     </SafeAreaView>
   );
@@ -552,7 +579,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFF8F3',
-    paddingBottom: 20
+    paddingBottom: 20,
   },
   title: {
     alignSelf: 'flex-start',

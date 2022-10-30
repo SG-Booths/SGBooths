@@ -21,9 +21,10 @@ export default {
     ios: {
       supportsTablet: false,
       bundleIdentifier: 'SGBooths',
-      buildNumber: "16",
+      buildNumber: '16',
       infoPlist: {
-        NSPhotoLibraryUsageDescription: "The app accesses your photos to let you share them with visitors browsing your creator profile."
+        NSPhotoLibraryUsageDescription:
+          'The app accesses your photos to let you share them with visitors browsing your creator profile.',
       },
     },
     android: {

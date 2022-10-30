@@ -133,7 +133,7 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
               ...value,
               error: error.message,
             });
-            return
+            return;
           }
         });
     }

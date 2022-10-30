@@ -18,6 +18,7 @@ export default function AddEventScreen({ route, navigation }: any) {
     location: '',
     error: '',
     tooBig: false,
+    instagram: '',
   });
 
   const [imgUrl1, setImgUrl1] = useState<string | undefined>(undefined);
@@ -58,6 +59,7 @@ export default function AddEventScreen({ route, navigation }: any) {
           year: value.year,
         },
         location: value.location,
+        instagram: value.instagram,
       });
 
       update(newReference, {
@@ -90,6 +92,7 @@ export default function AddEventScreen({ route, navigation }: any) {
           location: '',
           error: '',
           tooBig: false,
+          instagram: '',
         });
       });
     }
@@ -104,6 +107,15 @@ export default function AddEventScreen({ route, navigation }: any) {
         placeholderTextColor="#C4C4C4"
         onChangeText={(text) => setValue({ ...value, name: text.toLowerCase() })}
         value={value.name}
+        underlineColorAndroid="transparent"
+        autoCapitalize="none"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="instagram"
+        placeholderTextColor="#C4C4C4"
+        onChangeText={(text) => setValue({ ...value, instagram: text.toLowerCase() })}
+        value={value.instagram}
         underlineColorAndroid="transparent"
         autoCapitalize="none"
       />

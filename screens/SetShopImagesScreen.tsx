@@ -68,7 +68,7 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
 
     if (result.fileSize > 3000000) {
       setValue({ ...value, [name]: true, error: 'Image is too large! Please pick another one.' });
-      return
+      return;
     } else if (result.fileSize < 3000000) {
       setValue({ ...value, [name]: false });
 
@@ -168,9 +168,9 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
                         ...value,
                         error: error.message,
                       });
-                      return
+                      return;
                     });
-                    setUploading(false);
+                  setUploading(false);
                 })
                 .catch((error) => {
                   // Uh-oh, an error occurred!
@@ -179,7 +179,7 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
                     ...value,
                     error: error.message,
                   });
-                  return
+                  return;
                 });
             })
             .catch((error) => {
@@ -216,7 +216,7 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
         <TouchableOpacity onPress={() => _pickImage(1)}>
           <ImageBackground
             source={{ uri: imgUrl1 }}
-            style={[styles.vendorImage, imgUrl1 ? { borderWidth: 0 } : { borderWidth: 1 }, {marginRight: 20}]}
+            style={[styles.vendorImage, imgUrl1 ? { borderWidth: 0 } : { borderWidth: 1 }, { marginRight: 20 }]}
             imageStyle={{ borderRadius: 20 }}
           >
             {!imgUrl1 && <Icon name="plus" color="#C4C4C4" size={40} />}
@@ -225,7 +225,7 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
         <TouchableOpacity onPress={() => _pickImage(2)}>
           <ImageBackground
             source={{ uri: imgUrl2 }}
-            style={[styles.vendorImage, imgUrl2 ? { borderWidth: 0 } : { borderWidth: 1 }, {marginRight: 20}]}
+            style={[styles.vendorImage, imgUrl2 ? { borderWidth: 0 } : { borderWidth: 1 }, { marginRight: 20 }]}
             imageStyle={{ borderRadius: 20 }}
           >
             {!imgUrl2 && <Icon name="plus" color="#C4C4C4" size={40} />}

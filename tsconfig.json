@@ -3,6 +3,6 @@
   "compilerOptions": {
     "strict": true,
     "allowJs": true,
-    "jsx": "react",
+    "jsx": "react"
   }
 }

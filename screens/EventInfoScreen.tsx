@@ -27,7 +27,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
   const [refreshing, setRefreshing] = useState(true);
   const { user } = useAuthentication();
   const auth = getAuth();
-  const { eventID, month, startDay, endDay, location, year, imgUrl, name, following } = route.params;
+  const { eventID, month, startDay, endDay, location, year, imgUrl, name, following, instagram } = route.params;
   const [boothFollowed, setBoothFollowed] = useState(following);
   const [vendorList, setVendorList] = useState({});
 
@@ -349,7 +349,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
           <View
             style={{
               flexDirection: 'row',
-              width: (Dimensions.get('window').width - 110),
+              width: Dimensions.get('window').width - 110,
               borderRadius: 20,
               backgroundColor: 'transparent',
               flex: 1,
@@ -357,7 +357,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
               justifyContent: 'space-between',
               alignContent: 'center',
               marginHorizontal: 30,
-              alignItems: 'center'
+              alignItems: 'center',
             }}
           >
             <Text style={styles.vendorName}>{name}</Text>
@@ -536,26 +536,23 @@ export default function EventInfoScreen({ route, navigation }: any) {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#FFF8F3' }}>
-      
-
-      
-        <View style={{ alignSelf: 'center', backgroundColor: 'transparent' }}>
-          <FlatList
-            contentContainerStyle={{ paddingBottom: 50, width: Dimensions.get('window').width }}
-            showsVerticalScrollIndicator={false}
-            data={Object.keys(filteredVendors)}
-            renderItem={({ item }) => <VendorItem id={item} self={false} />}
-            keyExtractor={(item) => filteredVendors[item]['uid' as keyof typeof filteredVendors]}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadNewData} />}
-            ListEmptyComponent={() =>
-              !starredFilter ? (
-                <Text style={{marginLeft: 30, paddingBottom: 15}}>no creators yet!</Text>
-              ) : !search ? (
-                <Text style={{marginLeft: 30, paddingBottom: 15}}>no creators you follow are boothing here!</Text>
-              ) : null
-            }
-            ListHeaderComponent={() => (
-              <View style={{ flex: 1, backgroundColor: '#FFF8F3' }}>
+      <View style={{ alignSelf: 'center', backgroundColor: 'transparent' }}>
+        <FlatList
+          contentContainerStyle={{ paddingBottom: 50, width: Dimensions.get('window').width }}
+          showsVerticalScrollIndicator={false}
+          data={Object.keys(filteredVendors)}
+          renderItem={({ item }) => <VendorItem id={item} self={false} />}
+          keyExtractor={(item) => filteredVendors[item]['uid' as keyof typeof filteredVendors]}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadNewData} />}
+          ListEmptyComponent={() =>
+            !starredFilter ? (
+              <Text style={{ marginLeft: 30, paddingBottom: 15 }}>no creators yet!</Text>
+            ) : !search ? (
+              <Text style={{ marginLeft: 30, paddingBottom: 15 }}>no creators you follow are boothing here!</Text>
+            ) : null
+          }
+          ListHeaderComponent={() => (
+            <View style={{ flex: 1, backgroundColor: '#FFF8F3' }}>
               <View style={styles.image}>
                 <ImageBackground
                   source={{ uri: imgUrl }}
@@ -587,98 +584,130 @@ export default function EventInfoScreen({ route, navigation }: any) {
                     >
                       <Icon2 name="keyboard-arrow-left" size={30} color="#2A3242" />
                     </TouchableOpacity>
+                    <View style={{ backgroundColor: 'transparent', flexDirection: 'row' }}>
+                      {instagram && (
+                        <TouchableOpacity
+                          style={{
+                            backgroundColor: 'white',
+                            borderRadius: 100,
+                            height: 40,
+                            width: 40,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginRight: 15,
+                          }}
+                          onPress={() => {
+                            Linking.openURL('https://instagram.com/' + instagram).catch((err) => {
+                              console.error('Failed opening page because: ', err);
+                              alert('Failed to open page');
+                            });
+                          }}
+                        >
+                          <Icon name={'instagram'} size={25} color="#575FCC" />
+                        </TouchableOpacity>
+                      )}
                       <TouchableOpacity
-                      style={{
-                        backgroundColor: 'white',
-                        borderRadius: 100,
-                        height: 40,
-                        width: 40,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginRight: 15,
-                      }}
-                      onPress={() => {
-                        if (boothFollowed) {
-                          remove(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/' + eventID));
-                          setBoothFollowed(false);
-                        } else {
-                          update(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/'), {
-                            [eventID]: '',
-                          });
-                          setBoothFollowed(true);
-                        }
-                      }}
-                    >
-                      <Icon name={boothFollowed ? 'bookmark' : 'bookmark-o'} size={25} color="#575FCC" />
-                    </TouchableOpacity>            
+                        style={{
+                          backgroundColor: 'white',
+                          borderRadius: 100,
+                          height: 40,
+                          width: 40,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          marginRight: 15,
+                        }}
+                        onPress={() => {
+                          if (boothFollowed) {
+                            remove(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/' + eventID));
+                            setBoothFollowed(false);
+                          } else {
+                            update(ref(db, '/users/' + auth.currentUser?.uid + '/boothsFollowing/'), {
+                              [eventID]: '',
+                            });
+                            setBoothFollowed(true);
+                          }
+                        }}
+                      >
+                        <Icon name={boothFollowed ? 'bookmark' : 'bookmark-o'} size={25} color="#575FCC" />
+                      </TouchableOpacity>
+                    </View>
                   </SafeAreaView>
                 </ImageBackground>
               </View>
               <View style={styles.container}>
-        <View
-          style={{
-            marginTop: 10,
-            marginLeft: 30,
-            width: Dimensions.get('window').width - 60,
-            backgroundColor: 'transparent',
-          }}
-        >
-          <Text style={styles.date}>
-            {monthNames[month - 1]} {startDay}
-            {startDay != endDay && ' - ' + endDay}, {year}
-          </Text>
-          <Text style={styles.name}>{name}</Text>
-          <Text style={styles.location}>{location}</Text>
-          <TouchableOpacity
-              style={{
-                backgroundColor: '#565FCC',
-                borderRadius: 100,
-                height: 40,
-                alignItems: 'center',
-                justifyContent: 'center',
-                paddingHorizontal: 15,
-                marginTop: 15,
-              }} 
-              onPress={() => Linking.openURL('https://instagram.com/buaytahansia').catch((err) => {
-                console.error('Failed opening page because: ', err);
-                alert('Failed to open page');
-              })}>
-              <Text style={{fontWeight: 'bold', color: 'white'}}>PERSONAL SHOPPER SERVICE</Text>
-            </TouchableOpacity>
-          <View
-            style={{
-              flexDirection: 'row',
-              backgroundColor: 'transparent',
-              alignContent: 'flex-end',
-              marginBottom: 10,
-              justifyContent: 'center',
-              alignSelf: 'center',
-            }}
-          >
-            <TextInput
-              style={styles.searchBar}
-              value={search}
-              placeholder="search by creator..."
-              underlineColorAndroid="transparent"
-              onChangeText={(text) => searchVendors(text)}
-              textAlign="left"
-              placeholderTextColor="#C4C4C4"
-              autoCapitalize="none"
-              autoComplete="off"
-              autoCorrect={false}
-            />
-            <TouchableOpacity style={styles.savedButton} onPress={() => applyStarredFilter()}>
-              <Icon
-                name={starredFilter ? 'bookmark' : 'bookmark-o'}
-                size={20}
-                color="#FFFFFF"
-                style={{ alignSelf: 'center' }}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-        </View>
-              <View style={{ backgroundColor: 'transparent', width: Dimensions.get('window').width - 60, alignSelf: 'center' }}>
+                <View
+                  style={{
+                    marginTop: 10,
+                    marginLeft: 30,
+                    width: Dimensions.get('window').width - 60,
+                    backgroundColor: 'transparent',
+                  }}
+                >
+                  <Text style={styles.date}>
+                    {monthNames[month - 1]} {startDay}
+                    {startDay != endDay && ' - ' + endDay}, {year}
+                  </Text>
+                  <Text style={styles.name}>{name}</Text>
+                  <Text style={styles.location}>{location}</Text>
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: '#565FCC',
+                      borderRadius: 100,
+                      height: 40,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      paddingHorizontal: 15,
+                      marginTop: 15,
+                    }}
+                    onPress={() =>
+                      Linking.openURL('https://instagram.com/buaytahansia').catch((err) => {
+                        console.error('Failed opening page because: ', err);
+                        alert('Failed to open page');
+                      })
+                    }
+                  >
+                    <Text style={{ fontWeight: 'bold', color: 'white' }}>PERSONAL SHOPPER SERVICE</Text>
+                  </TouchableOpacity>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      backgroundColor: 'transparent',
+                      alignContent: 'flex-end',
+                      marginBottom: 10,
+                      justifyContent: 'center',
+                      alignSelf: 'center',
+                    }}
+                  >
+                    <TextInput
+                      style={styles.searchBar}
+                      value={search}
+                      placeholder="search by creator..."
+                      underlineColorAndroid="transparent"
+                      onChangeText={(text) => searchVendors(text)}
+                      textAlign="left"
+                      placeholderTextColor="#C4C4C4"
+                      autoCapitalize="none"
+                      autoComplete="off"
+                      autoCorrect={false}
+                    />
+                    <TouchableOpacity style={styles.savedButton} onPress={() => applyStarredFilter()}>
+                      <Icon
+                        name={starredFilter ? 'bookmark' : 'bookmark-o'}
+                        size={20}
+                        color="#FFFFFF"
+                        style={{ alignSelf: 'center' }}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+              <View
+                style={{
+                  backgroundColor: 'transparent',
+                  width: Dimensions.get('window').width - 60,
+                  alignSelf: 'center',
+                }}
+              >
                 {currentUser.type === 'vendor' ? (
                   boothing ? (
                     <View
@@ -725,10 +754,10 @@ export default function EventInfoScreen({ route, navigation }: any) {
                   <View></View>
                 )}
               </View>
-              </View>
-            )}
-          />
-        </View>
+            </View>
+          )}
+        />
+      </View>
     </View>
   );
 }
@@ -773,7 +802,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#C4C4C4',
     alignSelf: 'center',
-    paddingVertical: 20
+    paddingVertical: 20,
   },
   eventImageContainer: {
     width: 85,
@@ -791,7 +820,7 @@ const styles = StyleSheet.create({
     maxWidth: Dimensions.get('window').width - 240,
     backgroundColor: 'transparent',
     flexWrap: 'wrap',
-    flex: 1
+    flex: 1,
   },
   vendorImage: {
     width: 85,

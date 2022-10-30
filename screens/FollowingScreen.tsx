@@ -58,16 +58,11 @@ export default function FollowingScreen({ route, navigation }: any) {
       setFilteredVendorArray(
         vendorArray.filter((obj: any) => {
           return (
-            (obj.name
+            obj.name
               .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
               .replace(/\s{2,}/g, ' ')
               .toLowerCase()
-              .includes(search) ||
-              obj.instagram
-                .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
-                .replace(/\s{2,}/g, ' ')
-                .toLowerCase()
-                .includes(search)) &&
+              .includes(search) &&
             //   ||
             // obj.boothNumber
             //   .toString()
@@ -201,18 +196,11 @@ export default function FollowingScreen({ route, navigation }: any) {
     // since Card is an object, checks if any of the english, chinese, and pinyin properties include the search term
     setFilteredVendorArray(
       vendorArray.filter((obj: any) => {
-        return (
-          obj.name
-            .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
-            .replace(/\s{2,}/g, ' ')
-            .toLowerCase()
-            .includes(text) ||
-          obj.instagram
-            .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
-            .replace(/\s{2,}/g, ' ')
-            .toLowerCase()
-            .includes(text)
-        );
+        return obj.name
+          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+          .replace(/\s{2,}/g, ' ')
+          .toLowerCase()
+          .includes(text);
       })
     );
   };
@@ -232,6 +220,7 @@ export default function FollowingScreen({ route, navigation }: any) {
           avail: events[boothKey.eventID as keyof typeof events]['avail'],
           name: events[boothKey.eventID as keyof typeof events]['name'],
           year: events[boothKey.eventID as keyof typeof events]['date']['year'],
+          instagram: events[boothKey.eventID as keyof typeof events]['instagram'],
         });
       })
       .catch((error) => {
@@ -271,8 +260,7 @@ export default function FollowingScreen({ route, navigation }: any) {
               </TouchableOpacity>
             )}
             {!blocked && (
-              <TouchableOpacity                   style={{ marginRight: 20 }}
-              onPress={() => updateStarred(vendor.uid)}>
+              <TouchableOpacity style={{ marginRight: 20 }} onPress={() => updateStarred(vendor.uid)}>
                 <Icon
                   name={vendorsFollowing.includes(vendor.uid) ? 'bookmark' : 'bookmark-o'}
                   size={25}
@@ -360,9 +348,7 @@ export default function FollowingScreen({ route, navigation }: any) {
               {vendor.upcomingBooths ? (
                 Object.values(vendor.upcomingBooths)
                   .sort((a: any, b: any) => {
-                    return (
-                      a.date - b.date
-                    );
+                    return a.date - b.date;
                   })
                   .map((boothKey: any) => (
                     <TouchableOpacity
@@ -378,7 +364,7 @@ export default function FollowingScreen({ route, navigation }: any) {
                       onPress={() => getImgUrl(events[boothKey.eventID as keyof typeof events]['key'], boothKey)}
                     >
                       <Text style={{ color: '#2A3242', marginLeft: 15, marginTop: 10 }}>
-                      {monthNames[events[boothKey.eventID as keyof typeof events]['date']['month'] - 1]}{' '}
+                        {monthNames[events[boothKey.eventID as keyof typeof events]['date']['month'] - 1]}{' '}
                         {events[boothKey.eventID as keyof typeof events]['date']['startDay']}{' '}
                         {events[boothKey.eventID as keyof typeof events]['date']['startDay'] !=
                           events[boothKey.eventID as keyof typeof events]['date']['endDay'] &&
@@ -460,7 +446,7 @@ export default function FollowingScreen({ route, navigation }: any) {
       </View>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -504,8 +490,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: Dimensions.get('window').width - 220,
     backgroundColor: 'transparent',
-    flexShrink:1,
-    flexWrap: 'wrap'
+    flexShrink: 1,
+    flexWrap: 'wrap',
   },
   savedButton: {
     borderRadius: 30,

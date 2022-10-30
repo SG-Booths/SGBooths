@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
-  Dimensions
+  Dimensions,
 } from 'react-native';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
 import { getAuth } from 'firebase/auth';
@@ -23,8 +23,9 @@ import { zonedTimeToUtc } from 'date-fns-tz';
 import { StackScreenProps } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/Ionicons';
+import { checkVersion } from 'react-native-check-version';
 
-export default function HomeScreen({ route, navigation }: any) {
+export default async function HomeScreen({ route, navigation }: any) {
   const { user } = useAuthentication();
   const auth = getAuth();
 
@@ -43,6 +44,9 @@ export default function HomeScreen({ route, navigation }: any) {
   const [refreshing, setRefreshing] = useState(true);
 
   const [uploadedImages, setUploadedImages]: any = useState(true);
+
+  const version = await checkVersion();
+  console.log('Got version info:', version);
 
   const today = new Date();
   const months = eachMonthOfInterval({
@@ -150,7 +154,15 @@ export default function HomeScreen({ route, navigation }: any) {
       });
 
     return (
-      <View style={{ marginBottom: 20, borderWidth: 1, borderRadius: 20, borderColor: '#C4C4C4', width: Dimensions.get('window').width - 60 }}>
+      <View
+        style={{
+          marginBottom: 20,
+          borderWidth: 1,
+          borderRadius: 20,
+          borderColor: '#C4C4C4',
+          width: Dimensions.get('window').width - 60,
+        }}
+      >
         <Pressable
           onPress={() =>
             navigation.navigate('EventInfoScreen', {
@@ -164,13 +176,14 @@ export default function HomeScreen({ route, navigation }: any) {
               name: eventItem['name'],
               year: eventItem['date']['year'],
               following: boothsFollowing.includes(eventItem['key']),
+              instagram: eventItem['instagram'],
             })
           }
         >
           <View style={styles.eventImageContainer}>
             <ImageBackground
               source={{ uri: imgUrl }}
-              imageStyle={{ borderTopLeftRadius: 20, borderTopRightRadius: 20,  }}
+              imageStyle={{ borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
               style={{
                 flex: 1,
                 width: Dimensions.get('window').width - 60,
@@ -201,17 +214,19 @@ export default function HomeScreen({ route, navigation }: any) {
               </TouchableOpacity>
             </ImageBackground>
           </View>
-          <View style={{
-            width: Dimensions.get('window').width - 60,
-            height: 50 + (eventItem['name'].length/34) * 12,
-            backgroundColor: 'white',
-            borderBottomLeftRadius: 20,
-            borderBottomRightRadius: 20,
-            flexDirection: 'row',
-            alignItems: 'center',
-            borderRightWidth: 1,
-            borderColor: '#C4C4C4'
-          }}>
+          <View
+            style={{
+              width: Dimensions.get('window').width - 60,
+              height: 50 + (eventItem['name'].length / 34) * 12,
+              backgroundColor: 'white',
+              borderBottomLeftRadius: 20,
+              borderBottomRightRadius: 20,
+              flexDirection: 'row',
+              alignItems: 'center',
+              borderRightWidth: 1,
+              borderColor: '#C4C4C4',
+            }}
+          >
             {eventItem['date']['startDay'] === eventItem['date']['endDay'] ? (
               <Text style={styles.eventDate}>{eventItem['date']['startDay']}</Text>
             ) : (
@@ -229,33 +244,33 @@ export default function HomeScreen({ route, navigation }: any) {
   useEffect(() => {
     if (value.type === 'vendor') {
       getDownloadURL(ref_storage(storage, auth?.currentUser?.uid + '_1.png'))
-      .then((url) => {
-        getDownloadURL(ref_storage(storage, auth?.currentUser?.uid + '_2.png'))
         .then((url) => {
-          getDownloadURL(ref_storage(storage, auth?.currentUser?.uid + '_3.png'))
-          .then((url) => {
-            setUploadedImages(true)
-          })
-          .catch((error) => {
-            setUploadedImages(false)
-          });
+          getDownloadURL(ref_storage(storage, auth?.currentUser?.uid + '_2.png'))
+            .then((url) => {
+              getDownloadURL(ref_storage(storage, auth?.currentUser?.uid + '_3.png'))
+                .then((url) => {
+                  setUploadedImages(true);
+                })
+                .catch((error) => {
+                  setUploadedImages(false);
+                });
+            })
+            .catch((error) => {
+              setUploadedImages(false);
+            });
         })
         .catch((error) => {
-          setUploadedImages(false)
+          setUploadedImages(false);
         });
-      })
-      .catch((error) => {
-        setUploadedImages(false)
-      });
     }
-    if (!value.type) {
-      set(ref(db, '/users/' + auth?.currentUser?.uid), {
-        type: 'vendor',
-        uid: auth?.currentUser?.uid,
-        name: ''
-      });
-    }
-  })
+    // if (!value.type) {
+    //   set(ref(db, '/users/' + auth?.currentUser?.uid), {
+    //     type: 'vendor',
+    //     uid: auth?.currentUser?.uid,
+    //     name: '',
+    //   });
+    // }
+  });
 
   useEffect(() => {
     return onValue(ref(db, '/events'), (querySnapShot) => {
@@ -395,7 +410,9 @@ export default function HomeScreen({ route, navigation }: any) {
     getStarred(newStarredFilter);
   };
 
-  return (
+  return version.needsUpdate ? (
+    alert('Please update the app.')
+  ) : (
     <SafeAreaView style={styles.container}>
       <View
         style={{
@@ -410,12 +427,16 @@ export default function HomeScreen({ route, navigation }: any) {
         <TouchableOpacity
           style={{ alignSelf: 'center' }}
           onPress={() =>
-            (uploadedImages || value.name === '') ?
-            navigation.navigate('SettingsScreen', {
-              name: '',
-              instagram: value.instagram,
-              type: value.type,
-            }) : alert('Wait a while! Your shop images are uploading')
+            uploadedImages
+              ? value.name != '' &&
+                setTimeout(() => {
+                  navigation.navigate('SettingsScreen', {
+                    name: '',
+                    instagram: value.instagram,
+                    type: value.type,
+                  });
+                }, 500)
+              : alert('Wait a while! Your shop images are uploading')
           }
         >
           <Icon2 name="person-circle-outline" size={35} color="#2A3242" style={{ marginRight: 20 }} />
@@ -491,7 +512,7 @@ export default function HomeScreen({ route, navigation }: any) {
       </ScrollView>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
