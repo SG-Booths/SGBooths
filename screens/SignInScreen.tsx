@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { StackScreenProps } from '@react-navigation/stack';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const auth = getAuth();
 const SignInScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
@@ -75,6 +76,12 @@ const SignInScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
       }
     }
   }
+
+  // useEffect(() => {
+  //   AsyncStorage.setItem('img1', '');
+  //   AsyncStorage.setItem('img2', '');
+  //   AsyncStorage.setItem('img3', '');
+  // }, []);
 
   return (
     <SafeAreaView style={styles.container}>

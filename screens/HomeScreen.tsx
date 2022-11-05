@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   StyleSheet,
   View,
@@ -12,20 +12,21 @@ import {
   ActivityIndicator,
   RefreshControl,
   Dimensions,
+  Alert,
+  Platform,
 } from 'react-native';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
 import { getAuth } from 'firebase/auth';
 import { db, storage } from '../config/firebase';
 import { ref, onValue, remove, set, update } from 'firebase/database';
-import { ref as ref_storage, getDownloadURL, deleteObject } from 'firebase/storage';
+import { ref as ref_storage, getDownloadURL, deleteObject, uploadBytesResumable } from 'firebase/storage';
 import { eachMonthOfInterval, addMonths, getMonth, getYear, isPast, compareAsc, compareDesc } from 'date-fns';
 import { zonedTimeToUtc } from 'date-fns-tz';
-import { StackScreenProps } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/Ionicons';
-import { checkVersion } from 'react-native-check-version';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default async function HomeScreen({ route, navigation }: any) {
+export default function HomeScreen({ route, navigation }: any) {
   const { user } = useAuthentication();
   const auth = getAuth();
 
@@ -44,9 +45,6 @@ export default async function HomeScreen({ route, navigation }: any) {
   const [refreshing, setRefreshing] = useState(true);
 
   const [uploadedImages, setUploadedImages]: any = useState(true);
-
-  const version = await checkVersion();
-  console.log('Got version info:', version);
 
   const today = new Date();
   const months = eachMonthOfInterval({
@@ -241,36 +239,110 @@ export default async function HomeScreen({ route, navigation }: any) {
     );
   };
 
-  useEffect(() => {
+  useMemo(() => {
     if (value.type === 'vendor') {
+      console.log('use effect');
       getDownloadURL(ref_storage(storage, auth?.currentUser?.uid + '_1.png'))
-        .then((url) => {
-          getDownloadURL(ref_storage(storage, auth?.currentUser?.uid + '_2.png'))
-            .then((url) => {
-              getDownloadURL(ref_storage(storage, auth?.currentUser?.uid + '_3.png'))
-                .then((url) => {
-                  setUploadedImages(true);
-                })
-                .catch((error) => {
-                  setUploadedImages(false);
-                });
-            })
-            .catch((error) => {
-              setUploadedImages(false);
-            });
+        .then(() => {
+          console.log('image already uploaded');
         })
         .catch((error) => {
-          setUploadedImages(false);
+          console.log('uploading images');
+          uploadImages();
         });
     }
     // if (!value.type) {
     //   set(ref(db, '/users/' + auth?.currentUser?.uid), {
     //     type: 'vendor',
     //     uid: auth?.currentUser?.uid,
-    //     name: '',
+    //     name: 'unnamed',
     //   });
+    //   uploadImages()
     // }
-  });
+  }, [value.type]);
+
+  const uploadImages = async () => {
+    setUploadedImages(false);
+    const imgUrl1Final = await AsyncStorage.getItem('img1');
+    const imgUrl2Final = await AsyncStorage.getItem('img2');
+    const imgUrl3Final = await AsyncStorage.getItem('img3');
+
+    if (imgUrl1Final != null || imgUrl2Final != null || imgUrl3Final != null) {
+      const metadata = {
+        contentType: 'image/png',
+      };
+
+      // TODO: issue when user clicks on profile straight away after account creation
+      const ref1 = ref_storage(storage, auth.currentUser?.uid + '_1.png');
+      console.log('ref 1 done');
+      const response1 = await fetch(imgUrl1Final!);
+      console.log('response 1 done');
+      const blob1 = await response1.blob();
+      console.log('blob 1 done');
+
+      const file1 = new File([blob1], `${auth.currentUser?.uid}_1.png`, {
+        type: 'image/png',
+      });
+      uploadBytesResumable(ref1, file1, metadata)
+        .then(async (snapshot) => {
+          console.log('Uploaded image 1');
+          AsyncStorage.setItem('img1', '');
+
+          const ref2 = ref_storage(storage, auth.currentUser?.uid + '_2.png');
+          console.log('ref 2 done');
+          const response2 = await fetch(imgUrl2Final!);
+          console.log('response 2 done');
+          const blob2 = await response2.blob();
+          console.log('blob 2 done');
+
+          const file2 = new File([blob2], `${auth.currentUser?.uid}_2.png`, {
+            type: 'image/png',
+          });
+          uploadBytesResumable(ref2, file2, metadata)
+            .then(async (snapshot) => {
+              console.log('Uploaded image 2');
+              AsyncStorage.setItem('img2', '');
+
+              const ref3 = ref_storage(storage, auth.currentUser?.uid + '_3.png');
+              console.log('ref 3 done');
+              const response3 = await fetch(imgUrl3Final!);
+              console.log('response 3 done');
+              const blob3 = await response3.blob();
+              console.log('blob 3 done');
+
+              const file3 = new File([blob3], `${auth.currentUser?.uid}_3.png`, {
+                type: 'image/png',
+              });
+              uploadBytesResumable(ref3, file3, metadata)
+                .then(async (snapshot) => {
+                  console.log('Uploaded image 3');
+                  AsyncStorage.setItem('img3', '');
+                  setUploadedImages(true);
+                })
+                .catch((error) => console.log(error));
+            })
+            .catch((error) => console.log(error));
+        })
+        .catch((error) => console.log(error));
+    } else {
+      console.log('missing images');
+      setUploadedImages(false);
+      Alert.alert('Oh no, some of your shop images are missing!', 'Please upload all 3 images', [
+        {
+          text: 'Okay',
+          onPress: () => {
+            navigation.navigate('SettingsScreen', {
+              name: '',
+              instagram: value.instagram,
+              type: value.type,
+            });
+            setUploadedImages(true);
+          },
+          style: 'default',
+        },
+      ]);
+    }
+  };
 
   useEffect(() => {
     return onValue(ref(db, '/events'), (querySnapShot) => {
@@ -410,9 +482,7 @@ export default async function HomeScreen({ route, navigation }: any) {
     getStarred(newStarredFilter);
   };
 
-  return version.needsUpdate ? (
-    alert('Please update the app.')
-  ) : (
+  return (
     <SafeAreaView style={styles.container}>
       <View
         style={{
@@ -436,7 +506,7 @@ export default async function HomeScreen({ route, navigation }: any) {
                     type: value.type,
                   });
                 }, 500)
-              : alert('Wait a while! Your shop images are uploading')
+              : alert('Please wait a moment! Your shop images are uploading')
           }
         >
           <Icon2 name="person-circle-outline" size={35} color="#2A3242" style={{ marginRight: 20 }} />

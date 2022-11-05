@@ -10,7 +10,8 @@ export default function SetInstagramUsernameScreen({ route, navigation }: any) {
       email: email,
       password: password,
       name: name,
-      instagram: value.instagram,
+      // TODO: check if this works
+      instagram: value.instagram.replace('@', ''),
     });
   };
   return (

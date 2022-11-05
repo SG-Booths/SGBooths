@@ -105,91 +105,18 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
       console.log('img3:', imgUrl3Final.current);
       await createUserWithEmailAndPassword(auth, email, password)
         .then(async (data) => {
-          AsyncStorage.setItem('uploadedImages', 'false');
           console.log('UID:', data.user.uid);
-          const metadata = {
-            contentType: 'image/png',
-          };
-          setUploading(true);
-          const ref1 = ref_storage(storage, data.user.uid + '_1.png');
-          console.log('ref 1 done');
-          const response1 = await fetch(imgUrl1Final.current);
-          console.log('response 1 done');
-          const blob1 = await response1.blob();
-          console.log('blob 1 done');
 
-          const file1 = new File([blob1], `${data.user.uid}_1.png`, {
-            type: 'image/png',
+          AsyncStorage.setItem('img1', imgUrl1Final.current);
+          AsyncStorage.setItem('img2', imgUrl2Final.current);
+          AsyncStorage.setItem('img3', imgUrl3Final.current);
+
+          set(ref(db, '/users/' + data.user.uid), {
+            type: 'vendor',
+            name: name.trim(),
+            uid: data.user.uid,
+            instagram: instagram.replace(/\s+/g, ''),
           });
-          uploadBytesResumable(ref1, file1, metadata)
-            .then(async (snapshot) => {
-              console.log('Uploaded image 1');
-
-              const ref2 = ref_storage(storage, data.user.uid + '_2.png');
-              console.log('ref 2 done');
-              const response2 = await fetch(imgUrl2Final.current);
-              console.log('response 2 done');
-              const blob2 = await response2.blob();
-              console.log('blob 2 done');
-              const file2 = new File([blob2], `${data.user.uid}_2.png`, {
-                type: 'image/png',
-              });
-              uploadBytesResumable(ref2, file2, metadata)
-                .then(async (snapshot) => {
-                  console.log('Uploaded image 2');
-
-                  const ref3 = ref_storage(storage, data.user.uid + '_3.png');
-                  console.log('ref 3 done');
-                  const response3 = await fetch(imgUrl3Final.current);
-                  console.log('response 3 done');
-                  const blob3 = await response3.blob();
-                  console.log('blob 3 done');
-                  const file3 = new File([blob3], `${data.user.uid}_3.png`, {
-                    type: 'image/png',
-                  });
-                  uploadBytesResumable(ref3, file3, metadata)
-                    .then(async (snapshot) => {
-                      console.log('Uploaded image 3');
-                      AsyncStorage.setItem('uploadedImages', 'true');
-                      await updateProfile(auth.currentUser!, {
-                        displayName: name.trim(),
-                      });
-                      set(ref(db, '/users/' + data.user.uid), {
-                        type: 'vendor',
-                        name: name.trim(),
-                        uid: data.user.uid,
-                        instagram: instagram.replace(/\s+/g, ''),
-                      });
-                    })
-                    .catch((error) => {
-                      // Uh-oh, an error occurred!
-                      console.log(error);
-                      setValue({
-                        ...value,
-                        error: error.message,
-                      });
-                      return;
-                    });
-                  setUploading(false);
-                })
-                .catch((error) => {
-                  // Uh-oh, an error occurred!
-                  console.log(error);
-                  setValue({
-                    ...value,
-                    error: error.message,
-                  });
-                  return;
-                });
-            })
-            .catch((error) => {
-              // Uh-oh, an error occurred!
-              console.log(error);
-              setValue({
-                ...value,
-                error: error.message,
-              });
-            });
         })
         .catch((error) => {
           setValue({
@@ -204,6 +131,25 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
       });
     }
   }
+
+  useEffect(() => {
+    if (value.error.includes('email-already-in-use')) {
+      console.log('UID:', auth.currentUser?.uid);
+
+      AsyncStorage.setItem('img1', imgUrl1Final.current);
+      AsyncStorage.setItem('img2', imgUrl2Final.current);
+      AsyncStorage.setItem('img3', imgUrl3Final.current);
+
+      set(ref(db, '/users/' + auth.currentUser?.uid), {
+        type: 'vendor',
+        name: name.trim(),
+        uid: auth.currentUser?.uid,
+        instagram: instagram.replace(/\s+/g, ''),
+      });
+
+      navigation.navigate('Home');
+    }
+  });
 
   return (
     <View style={styles.container}>

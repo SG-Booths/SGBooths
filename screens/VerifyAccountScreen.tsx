@@ -94,6 +94,7 @@ export default function VerifyAccountScreen({ route, navigation }: any) {
                 remove(ref(db, '/users/' + auth?.currentUser?.uid));
                 removeFollows();
                 removeBooths();
+
                 await deleteUser(auth?.currentUser!)
                   .then(() => {
                     let ref1: any;
@@ -103,17 +104,40 @@ export default function VerifyAccountScreen({ route, navigation }: any) {
                     let ref3: any;
                     if (type === 'vendor') ref3 = ref_storage(storage, auth?.currentUser?.uid + '_3.png');
 
-                    deleteObject(ref1).catch((error) => {
-                      console.log(error);
-                    });
+                    deleteObject(ref1)
+                      .then(() => {
+                        console.log('deleted img 1');
 
-                    deleteObject(ref2).catch((error) => {
-                      console.log(error);
-                    });
+                        deleteObject(ref2)
+                          .then(() => {
+                            console.log('deleted img 2');
 
-                    deleteObject(ref3).catch((error) => {
-                      console.log(error);
-                    });
+                            deleteObject(ref3)
+                              .then(async () => {
+                                console.log('deleted img 3');
+
+                                await deleteUser(auth?.currentUser!)
+                                  .then(() => {
+                                    console.log('Successfully deleted user');
+                                    Alert.alert('Your account has been deleted');
+                                  })
+                                  .catch((error) => {
+                                    setError(error.message);
+                                    console.log('error:', error.message);
+                                  });
+                              })
+                              .catch((error) => {
+                                console.log(error);
+                              });
+                          })
+                          .catch((error) => {
+                            console.log(error);
+                          });
+                      })
+                      .catch((error) => {
+                        console.log(error);
+                      });
+
                     console.log('Successfully deleted user');
                     Alert.alert('Your account has been deleted');
                   })
@@ -184,7 +208,7 @@ export default function VerifyAccountScreen({ route, navigation }: any) {
         <TextInput
           style={[styles.input, { width: '90%', marginLeft: 10, marginTop: 20 }]}
           placeholder="email address"
-          placeholderTextColor="#C4C4C4"
+          placeholderTextColor="#FABF48"
           onChangeText={(text) => setVerifyEmail(text)}
           value={verifyEmail}
           keyboardType="email-address"

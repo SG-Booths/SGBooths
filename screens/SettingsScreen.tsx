@@ -286,9 +286,11 @@ export default function SettingsScreen({ route, navigation }: any) {
             <TouchableOpacity
               onPress={() =>
                 value.name
-                  ? imgUrl1 && imgUrl2 && imgUrl3
-                    ? navigation.goBack()
-                    : alert('Please upload all 3 shop images!')
+                  ? value.type === 'vendor'
+                    ? imgUrl1 && imgUrl2 && imgUrl3
+                      ? navigation.goBack()
+                      : alert('Please upload all 3 shop images!')
+                    : navigation.goBack()
                   : (alert('Please enter a name!'), updateAccount())
               }
             >

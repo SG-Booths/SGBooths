@@ -20,6 +20,7 @@ import { ref as ref_db, onValue, ref, remove, update, set } from 'firebase/datab
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/MaterialIcons';
 import { ref as ref_storage, getDownloadURL } from 'firebase/storage';
+import Image from 'react-native-image-progress';
 
 export default function FollowingScreen({ route, navigation }: any) {
   const { user } = useAuthentication();
@@ -54,6 +55,7 @@ export default function FollowingScreen({ route, navigation }: any) {
   // gets all cards that match the starred filter (while still matching the search term)
   const getStarred = (newStarredFilter: boolean) => {
     // if starred is true, filters cardArray by starred and then applies the search
+    // TODO: sort by number of booths
     if (newStarredFilter) {
       setFilteredVendorArray(
         vendorArray.filter((obj: any) => {
@@ -230,6 +232,41 @@ export default function FollowingScreen({ route, navigation }: any) {
 
   const VendorItem = ({ vendor }: any) => {
     let blocked = vendorsBlocked.includes(vendor.uid);
+
+    const [imgUrl1, setImgUrl1] = useState<string | undefined>(undefined);
+    const ref1 = ref_storage(storage, vendor.uid + '_1.png');
+
+    const [imgUrl2, setImgUrl2] = useState<string | undefined>(undefined);
+    const ref2 = ref_storage(storage, vendor.uid + '_2.png');
+
+    const [imgUrl3, setImgUrl3] = useState<string | undefined>(undefined);
+    const ref3 = ref_storage(storage, vendor.uid + '_3.png');
+
+    if (!blocked) {
+      getDownloadURL(ref1)
+        .then((url) => {
+          setImgUrl1(url);
+        })
+        .catch((error) => {
+          console.log('error:' + error);
+        });
+
+      getDownloadURL(ref2)
+        .then((url) => {
+          setImgUrl2(url);
+        })
+        .catch((error) => {
+          console.log('error:' + error);
+        });
+
+      getDownloadURL(ref3)
+        .then((url) => {
+          setImgUrl3(url);
+        })
+        .catch((error) => {
+          console.log('error:' + error);
+        });
+    }
     return (
       <View style={styles.eventDetailsContainer}>
         <View
@@ -245,7 +282,13 @@ export default function FollowingScreen({ route, navigation }: any) {
           }}
         >
           <Text style={styles.vendorName}>{vendor.name}</Text>
-          <View style={{ backgroundColor: 'transparent', flexDirection: 'row' }}>
+          <View
+            style={{
+              backgroundColor: 'transparent',
+              flexDirection: 'row',
+              marginBottom: (imgUrl1 || imgUrl2 || imgUrl3) && 5,
+            }}
+          >
             {vendor.instagram && !blocked && (
               <TouchableOpacity
                 style={{ marginRight: 20 }}
@@ -320,6 +363,11 @@ export default function FollowingScreen({ route, navigation }: any) {
               <Icon2 name={'report'} size={25} color="white" />
             </TouchableOpacity>
           </View>
+        </View>
+        <View style={[styles.eventImageContainer, { marginVertical: (imgUrl1 || imgUrl2 || imgUrl3) && 5 }]}>
+          {imgUrl1 && <Image source={{ uri: imgUrl1 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />}
+          {imgUrl2 && <Image source={{ uri: imgUrl2 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />}
+          {imgUrl3 && <Image source={{ uri: imgUrl3 }} style={styles.vendorImage} imageStyle={{ borderRadius: 20 }} />}
         </View>
         <View
           style={{
@@ -501,5 +549,18 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     justifyContent: 'center',
     alignSelf: 'flex-end',
+  },
+  eventImageContainer: {
+    maxWidth: 85,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 10,
+    backgroundColor: 'transparent',
+  },
+  vendorImage: {
+    width: 90,
+    height: 90,
+    marginHorizontal: 10,
+    borderRadius: 20,
   },
 });
