@@ -12,7 +12,7 @@ import {
 } from 'firebase/auth';
 import { ref as ref_storage, getDownloadURL, deleteObject, uploadBytes } from 'firebase/storage';
 import { db, storage } from '../config/firebase';
-import { ref as ref_db, onValue, set, ref, remove, update } from 'firebase/database';
+import { onValue, set, ref, remove, update } from 'firebase/database';
 
 export default function VerifyAccountScreen({ route, navigation }: any) {
   const { type, newEmail } = route.params;

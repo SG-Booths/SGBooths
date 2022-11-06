@@ -12,7 +12,7 @@ import {
   Dimensions,
   Alert,
 } from 'react-native';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
 import { getAuth } from 'firebase/auth';
 import { ref as ref_db, onValue, set, ref, remove, update, push } from 'firebase/database';
@@ -27,7 +27,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
   const [refreshing, setRefreshing] = useState(true);
   const { user } = useAuthentication();
   const auth = getAuth();
-  const { eventID, month, startDay, endDay, location, year, imgUrl, name, following, instagram } = route.params;
+  const { eventID, month, startDay, endDay, location, year, imgUrl, name, following, instagram, time } = route.params;
   const [boothFollowed, setBoothFollowed] = useState(following);
   const [vendorList, setVendorList] = useState({});
 
@@ -99,12 +99,12 @@ export default function EventInfoScreen({ route, navigation }: any) {
           setVendorArray((vendorInfo: any) =>
             Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
               return item.uid != auth.currentUser?.uid;
-            })
+            }).sort((a: any, b: any) => b.referrals - a.referrals)
           );
           setFilteredVendors((vendorInfo: any) =>
             Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
               return item.uid != auth.currentUser?.uid;
-            })
+            }).sort((a: any, b: any) => b.referrals - a.referrals)
           );
           // setVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }).sort((a: any, b: any) => {
           //   return a.boothNumber - b.boothNumber
@@ -119,35 +119,15 @@ export default function EventInfoScreen({ route, navigation }: any) {
   }, []);
 
   useEffect(() => {
-    // const orderedData = query(
-    //   ref_db(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing'),
-    //   orderByChild('boothNumber')
-    // );
-    setRefreshing(true);
-    return onValue(ref_db(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing'), (querySnapShot) => {
-      let data2 = querySnapShot.val() || {};
-      let vendorsFollowingTemp = { ...data2 };
-      setVendorsFollowing(Object.keys(vendorsFollowingTemp));
-      setRefreshing(false);
-    });
-  }, []);
-
-  useEffect(() => {
-    setRefreshing(true);
-    return onValue(ref_db(db, '/users/' + auth.currentUser?.uid + '/blocked'), (querySnapShot) => {
-      let data2 = querySnapShot.val() || {};
-      let blockedTemp = { ...data2 };
-      setVendorsBlocked(Object.keys(blockedTemp));
-      setRefreshing(false);
-    });
-  }, []);
-
-  useEffect(() => {
     setRefreshing(true);
     return onValue(ref_db(db, '/users/' + auth.currentUser?.uid), (querySnapShot) => {
       let data3 = querySnapShot.val() || {};
       let userData = { ...data3 };
       setCurrentUser(userData);
+      setRefreshing(false);
+
+      userData.blocked && setVendorsBlocked(Object.keys(userData.blocked));
+      userData.vendorsFollowing && setVendorsFollowing(Object.keys(userData.vendorsFollowing));
       setRefreshing(false);
     });
   }, []);
@@ -175,12 +155,12 @@ export default function EventInfoScreen({ route, navigation }: any) {
             setVendorArray((vendorInfo: any) =>
               Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
                 return item.uid != auth.currentUser?.uid;
-              })
+              }).sort((a: any, b: any) => b.referrals - a.referrals)
             );
             setFilteredVendors((vendorInfo: any) =>
               Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
                 return item.uid != auth.currentUser?.uid;
-              })
+              }).sort((a: any, b: any) => b.referrals - a.referrals)
             );
           }
           // setVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }).sort((a: any, b: any) => {
@@ -216,7 +196,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
           .replace(/\s{2,}/g, ' ')
           .toLowerCase()
           .includes(text);
-      })
+      }).sort((a: any, b: any) => b.referrals - a.referrals)
     );
     console.log(
       'filtered: ',
@@ -226,7 +206,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
           .replace(/\s{2,}/g, ' ')
           .toLowerCase()
           .includes(text);
-      })
+      }).sort((a: any, b: any) => b.referrals - a.referrals)
     );
   };
 
@@ -251,7 +231,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
             //   .includes(search)
             vendorsFollowing.includes(obj.uid)
           );
-        })
+        }).sort((a: any, b: any) => b.referrals - a.referrals)
       );
     }
     // if starred is false, ignores the starred filter and only applies the search
@@ -270,12 +250,12 @@ export default function EventInfoScreen({ route, navigation }: any) {
         setVendorsFollowing(
           vendorsFollowing.filter((obj: string) => {
             return !(obj === uid);
-          })
+          }).sort((a: any, b: any) => b.referrals - a.referrals)
         );
         setFilteredVendors(
           filteredVendors.filter((obj: any) => {
             return !(obj.uid === uid);
-          })
+          }).sort((a: any, b: any) => b.referrals - a.referrals)
         );
       } else if (vendorsFollowing.includes(uid)) {
         remove(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/' + uid));
@@ -538,6 +518,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
     <View style={{ flex: 1, backgroundColor: '#FFF8F3' }}>
       <View style={{ alignSelf: 'center', backgroundColor: 'transparent' }}>
         <FlatList
+          initialNumToRender={7}
           contentContainerStyle={{ paddingBottom: 50, width: Dimensions.get('window').width }}
           showsVerticalScrollIndicator={false}
           data={Object.keys(filteredVendors)}
@@ -645,7 +626,7 @@ export default function EventInfoScreen({ route, navigation }: any) {
                 >
                   <Text style={styles.date}>
                     {monthNames[month - 1]} {startDay}
-                    {startDay != endDay && ' - ' + endDay}, {year}
+                    {startDay != endDay && ' - ' + endDay}, {year} {time && '(' + time + ')'}
                   </Text>
                   <Text style={styles.name}>{name}</Text>
                   <Text style={styles.location}>{location}</Text>

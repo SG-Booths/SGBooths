@@ -1,36 +1,39 @@
 import { StyleSheet, TouchableOpacity, TextInput, Text, View, Dimensions } from 'react-native';
 import React from 'react';
-export default function SetInstagramUsernameScreen({ route, navigation }: any) {
-  const { name, email, password, referral } = route.params;
+export default function ReferralScreen({ route, navigation }: any) {
+  const { name, email, password } = route.params;
   const [value, setValue] = React.useState({
-    instagram: '',
+    referral: '',
   });
   const signUp = () => {
-    navigation.navigate('SetShopImagesScreen', {
+    navigation.navigate('SetInstagramUsernameScreen', {
       email: email,
       password: password,
       name: name,
-      instagram: value.instagram.replace('@', ''),
-      referral: referral,
+      referral: value.referral,
     });
   };
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Shop Instagram</Text>
-      <Text style={styles.subtitle}>This will allow visitors to visit your Instagram!</Text>
+      <Text style={styles.title}>Referral Code</Text>
+      <Text style={styles.subtitle}>
+        If another creator referred you, please enter their referral code! This will boost your and their shop when
+        visitors are browsing creators and events.
+      </Text>
       <TextInput
         style={styles.input}
-        placeholder="instagram username (without @)"
+        placeholder="referral code"
         placeholderTextColor="#C4C4C4"
-        onChangeText={(text) => setValue({ ...value, instagram: text })}
-        value={value.instagram}
+        onChangeText={(text) => setValue({ ...value, referral: text })}
+        value={value.referral}
         underlineColorAndroid="transparent"
         autoCapitalize="none"
         autoCorrect={false}
+        maxLength={6}
       />
-      <TouchableOpacity style={value.instagram ? styles.button : styles.altButton} onPress={() => signUp()}>
-        <Text style={value.instagram ? styles.buttonTitle : styles.altButtonTitle}>
-          {value.instagram ? 'NEXT →' : 'SKIP →'}
+      <TouchableOpacity style={value.referral ? styles.button : styles.altButton} onPress={() => signUp()}>
+        <Text style={value.referral ? styles.buttonTitle : styles.altButtonTitle}>
+          {value.referral ? 'NEXT →' : 'SKIP →'}
         </Text>
       </TouchableOpacity>
     </View>

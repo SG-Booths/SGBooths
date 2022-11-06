@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   StyleSheet,
   SafeAreaView,
@@ -36,11 +36,11 @@ export default function FollowingScreen({ route, navigation }: any) {
   const [refreshing, setRefreshing] = useState(true);
 
   const [starredFilter, setStarredFilter] = useState(false);
+  const [loaded, setLoaded] = useState(false)
+  const [newRender, setNewRender] = useState(false)
 
   const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-
-  let imgUrl: any = useRef();
-
+  
   // applies the starred filter
   const applyStarredFilter = () => {
     // sets the new filter to the opposite of what it was previously
@@ -55,8 +55,9 @@ export default function FollowingScreen({ route, navigation }: any) {
   // gets all cards that match the starred filter (while still matching the search term)
   const getStarred = (newStarredFilter: boolean) => {
     // if starred is true, filters cardArray by starred and then applies the search
-    // TODO: sort by number of booths
     if (newStarredFilter) {
+      console.log('getting starred')
+      console.log('following right now:', vendorsFollowing)
       setFilteredVendorArray(
         vendorArray.filter((obj: any) => {
           return (
@@ -65,57 +66,82 @@ export default function FollowingScreen({ route, navigation }: any) {
               .replace(/\s{2,}/g, ' ')
               .toLowerCase()
               .includes(search) &&
-            //   ||
-            // obj.boothNumber
-            //   .toString()
-            //   .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
-            //   .replace(/\s{2,}/g, ' ')
-            //   .toLowerCase()
-            //   .includes(search)
             vendorsFollowing.includes(obj.uid)
           );
-        })
+        }).sort((a: any, b: any) => b.referrals - a.referrals)
       );
+      setNewRender(!newRender)
     }
     // if starred is false, ignores the starred filter and only applies the search
     else {
+      console.log('vendors following', vendorsFollowing)
       setFilteredVendorArray(vendorArray);
       searchVendors(search);
+      setNewRender(!newRender)
     }
   };
 
   // toggles a card's starred status
-  const updateStarred = (uid: string) => {
+  const updateStarred = (uid: string, following: boolean) => {
     console.log('updating starred');
-    loadNewData();
     if (vendorsFollowing && vendorsFollowing.length > 0) {
-      if (vendorsFollowing.includes(uid) && starredFilter === true) {
+      console.log('following:', following)
+      if (following && starredFilter === true) {
+        console.log('unfollowing')
         remove(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/' + uid));
         getStarred(starredFilter);
-        setVendorsFollowing(
-          vendorsFollowing.filter((obj: string) => {
-            return !(obj === uid);
-          })
-        );
         setFilteredVendorArray(
           filteredVendorArray.filter((obj: any) => {
             return !(obj.uid === uid) && obj.type === 'vendor';
+          }).sort((a: any, b: any) => (a.referrals && b.referrals) && b.referrals - a.referrals)
+        );
+        vendorsFollowing &&
+        setVendorsFollowing(
+          vendorsFollowing.filter((obj: any) => {
+            return !(obj.uid === uid);
           })
         );
-      } else if (vendorsFollowing.includes(uid)) {
+      } else if (following) {
+        console.log('unfollowing')
         remove(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/' + uid));
+        setFilteredVendorArray(
+          filteredVendorArray.filter((obj: any) => {
+            return !(obj.uid === uid) && obj.type === 'vendor';
+          }).sort((a: any, b: any) => b.referrals - a.referrals)
+        );
+        vendorsFollowing &&
+        setVendorsFollowing(
+          vendorsFollowing.filter((obj: any) => {
+            return !(obj.uid === uid);
+          })
+        );
       } else {
         update(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/'), {
           [uid]: '',
         });
+        let newArray = [...filteredVendorArray, uid]
+        newArray &&
+        setVendorsFollowing(
+          newArray.sort((a: any, b: any) => b.referrals - a.referrals)
+        );
         getStarred(starredFilter);
       }
     } else {
-      console.log(vendorsFollowing.length);
       set(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/'), {
         [uid]: '',
       });
+      setFilteredVendorArray(
+        {...filteredVendorArray, uid}.sort((a: any, b: any) => b.referrals - a.referrals)
+      );
+      let newArray = [...filteredVendorArray, uid]
+      newArray &&
+      setVendorsFollowing(
+        newArray.sort((a: any, b: any) => b.referrals - a.referrals)
+      );
       getStarred(starredFilter);
+    }
+    if (!following && search != '') {
+      setNewRender(!newRender)
     }
   };
 
@@ -125,25 +151,25 @@ export default function FollowingScreen({ route, navigation }: any) {
       let data = querySnapShot.val() || {};
       let eventItems = { ...data };
       setEvents(eventItems);
-
-      onValue(ref(db, '/users/' + auth?.currentUser?.uid + '/vendorsFollowing'), (querySnapShot) => {
-        let data = querySnapShot.val() || {};
-        let vendorsFollowing = { ...data };
-        setVendorsFollowing(Object.keys(vendorsFollowing));
-
-        onValue(ref(db, '/users'), (querySnapShot) => {
-          let data = querySnapShot.val() || {};
-          let vendorList = { ...data };
-          let newArray: any = Object.values(vendorList).filter((a: any) => {
-            return a.type === 'vendor' && a.uid != auth?.currentUser?.uid;
-          });
-          setVendorArray(newArray);
-          setFilteredVendorArray(newArray);
-        });
-      });
     });
+
+      onValue(ref(db, '/users'), (querySnapShot) => {
+        let data = querySnapShot.val() || {};
+        let vendorList = { ...data };
+        let newArray: any = Object.values(vendorList).filter((a: any) => {
+          return a.type === 'vendor' && a.uid != auth?.currentUser?.uid;
+        }).sort((a: any, b: any) => b.referrals - a.referrals);
+        let currentUser: any = Object.values(vendorList).filter((a: any) => {
+          return a.uid === auth?.currentUser?.uid;
+        });
+  
+        currentUser[0].vendorsFollowing && setVendorsFollowing(Object.keys(currentUser[0].vendorsFollowing))
+        setVendorArray(newArray);
+        setFilteredVendorArray(newArray);
+      });
     getStarred(starredFilter);
     setRefreshing(false);
+    setNewRender(!newRender)
   };
 
   useEffect(() => {
@@ -156,25 +182,15 @@ export default function FollowingScreen({ route, navigation }: any) {
     });
   }, []);
 
-  useEffect(() => {
-    setRefreshing(true);
-    return onValue(ref(db, '/users/' + auth?.currentUser?.uid + '/vendorsFollowing'), async (querySnapShot) => {
-      let data = (await querySnapShot.val()) || {};
-      let vendorData = { ...data };
-      setVendorsFollowing(Object.keys(vendorData));
-      setRefreshing(false);
-    });
-  }, []);
-
-  useEffect(() => {
-    setRefreshing(true);
-    return onValue(ref_db(db, '/users/' + auth.currentUser?.uid + '/blocked'), (querySnapShot) => {
-      let data2 = querySnapShot.val() || {};
-      let blockedTemp = { ...data2 };
-      setVendorsBlocked(Object.keys(blockedTemp));
-      setRefreshing(false);
-    });
-  }, []);
+  // useEffect(() => {
+  //   setRefreshing(true);
+  //   return onValue(ref(db, '/users/' + auth?.currentUser?.uid + '/vendorsFollowing'), async (querySnapShot) => {
+  //     let data = (await querySnapShot.val()) || {};
+  //     let vendorData = { ...data };
+  //     setVendorsFollowing(Object.keys(vendorData))
+  //     setRefreshing(false);
+  //   });
+  // }, []);
 
   useEffect(() => {
     setRefreshing(true);
@@ -184,9 +200,21 @@ export default function FollowingScreen({ route, navigation }: any) {
       let newArray: any = Object.values(vendorList).filter((a: any) => {
         return a.type === 'vendor' && a.uid != auth?.currentUser?.uid;
       });
+      newArray = newArray.sort((a: any, b: any) => b.referrals - a.referrals)
       setVendorArray(newArray);
       setFilteredVendorArray(newArray);
       setRefreshing(false);
+
+      setRefreshing(true);
+
+      let currentUser: any = Object.values(vendorList).filter((a: any) => {
+        return a.uid === auth?.currentUser?.uid;
+      });
+
+      currentUser[0].vendorsFollowing && setVendorsFollowing(Object.keys(currentUser[0].vendorsFollowing))
+      currentUser[0].blocked && setVendorsBlocked(Object.keys(currentUser[0].blocked));
+      setRefreshing(false);
+      setLoaded(true)
     });
   }, []);
 
@@ -203,8 +231,15 @@ export default function FollowingScreen({ route, navigation }: any) {
           .replace(/\s{2,}/g, ' ')
           .toLowerCase()
           .includes(text);
-      })
+      }).sort((a: any, b: any) => b.referrals - a.referrals)
     );
+    
+    if (text === '') {
+      setFilteredVendorArray(
+        vendorArray.sort((a: any, b: any) => b.referrals - a.referrals)
+      );
+      setNewRender(!newRender)
+    }
   };
 
   const getImgUrl = (key: any, boothKey: any) => {
@@ -223,6 +258,7 @@ export default function FollowingScreen({ route, navigation }: any) {
           name: events[boothKey.eventID as keyof typeof events]['name'],
           year: events[boothKey.eventID as keyof typeof events]['date']['year'],
           instagram: events[boothKey.eventID as keyof typeof events]['instagram'],
+          time: events[boothKey.eventID as keyof typeof events]['time']
         });
       })
       .catch((error) => {
@@ -230,8 +266,10 @@ export default function FollowingScreen({ route, navigation }: any) {
       });
   };
 
-  const VendorItem = ({ vendor }: any) => {
+  const VendorItem = React.memo(({ vendor }: any) => {
+    // console.log('vendor', vendor)
     let blocked = vendorsBlocked.includes(vendor.uid);
+    const [following, setFollowing] = useState(vendorsFollowing.includes(vendor.uid));
 
     const [imgUrl1, setImgUrl1] = useState<string | undefined>(undefined);
     const ref1 = ref_storage(storage, vendor.uid + '_1.png');
@@ -248,7 +286,6 @@ export default function FollowingScreen({ route, navigation }: any) {
           setImgUrl1(url);
         })
         .catch((error) => {
-          console.log('error:' + error);
         });
 
       getDownloadURL(ref2)
@@ -256,7 +293,6 @@ export default function FollowingScreen({ route, navigation }: any) {
           setImgUrl2(url);
         })
         .catch((error) => {
-          console.log('error:' + error);
         });
 
       getDownloadURL(ref3)
@@ -264,7 +300,6 @@ export default function FollowingScreen({ route, navigation }: any) {
           setImgUrl3(url);
         })
         .catch((error) => {
-          console.log('error:' + error);
         });
     }
     return (
@@ -303,9 +338,12 @@ export default function FollowingScreen({ route, navigation }: any) {
               </TouchableOpacity>
             )}
             {!blocked && (
-              <TouchableOpacity style={{ marginRight: 20 }} onPress={() => updateStarred(vendor.uid)}>
+              <TouchableOpacity style={{ marginRight: 20 }} onPress={() => {
+                following ? setFollowing(false) : setFollowing(true)
+                updateStarred(vendor.uid, following)
+                }}>
                 <Icon
-                  name={vendorsFollowing.includes(vendor.uid) ? 'bookmark' : 'bookmark-o'}
+                  name={following ? 'bookmark' : 'bookmark-o'}
                   size={25}
                   color="white"
                 />
@@ -431,8 +469,17 @@ export default function FollowingScreen({ route, navigation }: any) {
           )}
         </View>
       </View>
-    );
-  };
+    )
+  }, (prevProps, nextProps) => {
+    // if (vendorsFollowing.includes(prevProps.vendor.uid) === vendorsFollowing.includes(nextProps.vendor.uid)) return true;
+    if (prevProps === nextProps) return true;
+    return false;
+  });
+
+  const renderItemFn = useCallback((item: any) => (
+    // console.log('item is', filteredVendorArray[item])
+    <VendorItem vendor={filteredVendorArray[item]} />
+    ), [loaded, newRender])
 
   return (
     <SafeAreaView style={styles.container}>
@@ -452,7 +499,7 @@ export default function FollowingScreen({ route, navigation }: any) {
             value={search}
             placeholder="search by creator..."
             underlineColorAndroid="transparent"
-            onChangeText={(text) => searchVendors(text)}
+            onChangeText={(text) => {setNewRender(!newRender); searchVendors(text)}}
             textAlign="left"
             placeholderTextColor="#C4C4C4"
             autoCapitalize="none"
@@ -469,19 +516,17 @@ export default function FollowingScreen({ route, navigation }: any) {
           </TouchableOpacity>
         </View>
         {refreshing ? <ActivityIndicator /> : null}
+        { loaded && 
         <View style={{ backgroundColor: 'transparent', alignSelf: 'center' }}>
           <FlatList
+            initialNumToRender={7}
             contentContainerStyle={{ paddingBottom: 325 }}
             showsVerticalScrollIndicator={false}
             style={{ marginTop: 10 }}
             data={Object.keys(filteredVendorArray)}
             keyExtractor={(item) => filteredVendorArray[item].uid}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadNewData} />}
-            renderItem={({ item }) => (
-              <View style={{ backgroundColor: '#FFfF8F3', marginBottom: 20 }}>
-                <VendorItem vendor={filteredVendorArray[item]} />
-              </View>
-            )}
+            renderItem={({ item }) => renderItemFn(item)}
             ListEmptyComponent={() =>
               search ? null : (
                 <Text style={{ marginTop: 10, marginLeft: 10, color: '#2A3242', height: 500 }}>
@@ -491,6 +536,7 @@ export default function FollowingScreen({ route, navigation }: any) {
             }
           />
         </View>
+        }
       </View>
     </SafeAreaView>
   );
@@ -530,6 +576,7 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     borderTopWidth: 1,
     borderColor: '#C4C4C4',
+    marginBottom: 20
   },
   vendorName: {
     fontSize: 16,

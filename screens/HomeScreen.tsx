@@ -14,6 +14,7 @@ import {
   Dimensions,
   Alert,
   Platform,
+  Linking,
 } from 'react-native';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
 import { getAuth } from 'firebase/auth';
@@ -25,6 +26,8 @@ import { zonedTimeToUtc } from 'date-fns-tz';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Icon2 from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import checkVersion from 'react-native-store-version';
+import * as Application from 'expo-application';
 
 export default function HomeScreen({ route, navigation }: any) {
   const { user } = useAuthentication();
@@ -73,6 +76,56 @@ export default function HomeScreen({ route, navigation }: any) {
     'november',
     'december',
   ];
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const check = await checkVersion({
+          version: Application.nativeApplicationVersion || '1.0.0', // app local version
+          iosStoreURL: 'https://apps.apple.com/us/app/sg-booths/id6443992125',
+          androidStoreURL: 'https://play.google.com/store/apps/details?id=com.StudioMOOK.SGBooths',
+          country: 'sg',
+        });
+        console.log('local version is', Application.nativeApplicationVersion);
+        console.log('check is', check.result);
+        if (check.result === 'new') {
+          Alert.alert('New Update', 'Please install the latest version of the app', [
+            {
+              text: 'Update Now',
+              onPress: () => {
+                {
+                  const link =
+                    Platform.OS === 'ios'
+                      ? 'https://apps.apple.com/us/app/sg-booths/id6443992125'
+                      : 'https://play.google.com/store/apps/details?id=com.StudioMOOK.SGBooths';
+                  Linking.openURL(link).catch((err) => {
+                    console.error('Failed opening page because: ', err);
+                    alert('Failed to open page');
+                  });
+                }
+              },
+              style: 'default',
+            },
+          ]);
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    };
+
+    init();
+  }, []);
+
+  const notifyCreatorOfReferral = async () => {
+    const notified = await AsyncStorage.getItem('notifiedOfReferral');
+    if (notified === 'false') {
+      Alert.alert(
+        'Limited Time Creator Referrals',
+        'Refer another creator to SG Booths with your referral code (found in Profile) and both of you will be boosted to the top of creator lists and search results!'
+      );
+      AsyncStorage.setItem('notifiedOfReferral', 'true');
+    }
+  };
 
   const loadNewData = () => {
     onValue(ref(db, '/events'), (querySnapShot) => {
@@ -175,6 +228,7 @@ export default function HomeScreen({ route, navigation }: any) {
               year: eventItem['date']['year'],
               following: boothsFollowing.includes(eventItem['key']),
               instagram: eventItem['instagram'],
+              time: eventItem['time'],
             })
           }
         >
@@ -272,7 +326,6 @@ export default function HomeScreen({ route, navigation }: any) {
         contentType: 'image/png',
       };
 
-      // TODO: issue when user clicks on profile straight away after account creation
       const ref1 = ref_storage(storage, auth.currentUser?.uid + '_1.png');
       console.log('ref 1 done');
       const response1 = await fetch(imgUrl1Final!);
@@ -416,6 +469,10 @@ export default function HomeScreen({ route, navigation }: any) {
         instagram: data2.instagram,
         type: data2.type,
       });
+
+      if (data2.type === 'vendor') {
+        notifyCreatorOfReferral();
+      }
     });
   }, []);
 

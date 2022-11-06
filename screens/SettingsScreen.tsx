@@ -7,14 +7,15 @@ import {
   TextInput,
   Keyboard,
   ImageBackground,
-  TouchableWithoutFeedback,
+  Platform,
   ScrollView,
   Linking,
   Dimensions,
+  Share,
 } from 'react-native';
 import { getAuth, signOut, sendPasswordResetEmail, updateProfile } from 'firebase/auth';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
-import { onValue, ref, update } from 'firebase/database';
+import { onValue, ref, update, set } from 'firebase/database';
 import { db, storage } from '../config/firebase';
 import Image from 'react-native-image-progress';
 import { ref as ref_storage, getDownloadURL, deleteObject, uploadBytes } from 'firebase/storage';
@@ -23,6 +24,9 @@ import * as ImagePicker from 'expo-image-picker';
 import { Text, View } from '../components/Themed';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Icon2 from 'react-native-vector-icons/Entypo';
+import Icon3 from 'react-native-vector-icons/Feather';
+import Icon4 from 'react-native-vector-icons/FontAwesome';
+var voucher_codes = require('voucher-code-generator');
 
 export default function SettingsScreen({ route, navigation }: any) {
   const { user } = useAuthentication();
@@ -38,6 +42,7 @@ export default function SettingsScreen({ route, navigation }: any) {
     name: '',
     instagram: initialInstagram,
     type: initialType,
+    referralCode: '',
   });
 
   const [imgUrl1, setImgUrl1] = useState<string | undefined>(undefined);
@@ -219,6 +224,29 @@ export default function SettingsScreen({ route, navigation }: any) {
     getData();
   }, []);
 
+  const onShare = async () => {
+    const link =
+      Platform.OS === 'ios'
+        ? 'https://apps.apple.com/us/app/sg-booths/id6443992125'
+        : 'https://play.google.com/store/apps/details?id=com.StudioMOOK.SGBooths';
+    try {
+      const result = await Share.share({
+        message: 'Download SG Booths now with my referral code ' + value.referralCode + ': ' + link,
+      });
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // shared with activity type of result.activityType
+        } else {
+          // shared
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // dismissed
+      }
+    } catch (error: any) {
+      alert(error.message);
+    }
+  };
+
   const getData = async () => {
     return await onValue(ref(db, '/users/' + auth?.currentUser?.uid), (querySnapShot) => {
       let data = querySnapShot.val() || {};
@@ -229,7 +257,36 @@ export default function SettingsScreen({ route, navigation }: any) {
         name: userData.name,
         email: auth?.currentUser?.email!,
         instagram: userData.instagram,
+        referralCode: userData.referralCode,
       });
+
+      if (!userData.referralCode) {
+        let unique = false;
+        let newCode = [''];
+        while (!unique) {
+          console.log('generating referral code');
+          newCode = voucher_codes.generate({
+            length: 6,
+            count: 1,
+          });
+          unique = true;
+          onValue(ref(db, '/users'), (querySnapShot) => {
+            let data = querySnapShot.val() || {};
+            let userData = { ...data };
+
+            Object.values(userData).map((vendorKey: any) => {
+              if (vendorKey.referralCode === newCode[0] && vendorKey.uid != auth.currentUser?.uid) {
+                console.log(vendorKey);
+                unique = false;
+              }
+            });
+          });
+        }
+
+        update(ref(db, '/users/' + auth.currentUser?.uid), {
+          referralCode: newCode[0],
+        });
+      }
     });
   };
 
@@ -302,7 +359,37 @@ export default function SettingsScreen({ route, navigation }: any) {
             {value.type === 'vendor' ? (
               <View style={{ backgroundColor: 'transparent' }}>
                 {value.error && <Text style={styles.error}>{value.error}</Text>}
-                <Text style={{ marginLeft: 30, marginBottom: 10, fontWeight: '700', color: '#2A3242', marginTop: 30 }}>
+                <View
+                  style={{
+                    backgroundColor: 'transparent',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    marginHorizontal: 30,
+                    marginTop: 20,
+                    alignItems: 'center',
+                  }}
+                >
+                  <View style={{ backgroundColor: 'transparent', flexDirection: 'row' }}>
+                    <Text style={{ fontWeight: '700', color: '#2A3242' }}>Referral Code:</Text>
+                    <Text style={{ fontWeight: '600', color: '#2A3242', marginLeft: 5 }}>{value.referralCode}</Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', backgroundColor: 'transparent', alignItems: 'center' }}>
+                    <TouchableOpacity style={{ marginRight: 15 }} onPress={() => onShare()}>
+                      <Icon3 name="share" color="#575FCC" size={25} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() =>
+                        Alert.alert(
+                          'What is this?',
+                          'For every new creator who signs up with your referral code, both your and their shop will be boosted in search listings.'
+                        )
+                      }
+                    >
+                      <Icon3 name="info" color="#575FCC" size={25} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                <Text style={{ marginLeft: 30, marginBottom: 10, fontWeight: '700', color: '#2A3242', marginTop: 20 }}>
                   Shop Name
                 </Text>
                 <TextInput
@@ -361,9 +448,28 @@ export default function SettingsScreen({ route, navigation }: any) {
                   autoCapitalize="none"
                   defaultValue={auth?.currentUser?.displayName!}
                 />
-                <Text style={{ marginLeft: 30, marginVertical: 10, fontWeight: '700', color: '#2A3242' }}>
-                  Instagram
-                </Text>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    backgroundColor: 'transparent',
+                    justifyContent: 'space-between',
+                    marginHorizontal: 30,
+                    marginVertical: 10,
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text style={{ fontWeight: '700', color: '#2A3242' }}>Instagram</Text>
+                  <TouchableOpacity
+                    onPress={() =>
+                      Linking.openURL('https://instagram.com/' + value.instagram).catch((err) => {
+                        console.error('Failed opening page because: ', err);
+                        alert('Failed to open page');
+                      })
+                    }
+                  >
+                    <Icon4 name="instagram" color="#575FCC" size={25} />
+                  </TouchableOpacity>
+                </View>
                 <TextInput
                   style={styles.input}
                   placeholder="instagram username (without @)"

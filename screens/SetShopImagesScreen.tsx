@@ -1,20 +1,20 @@
 import { Dimensions, StyleSheet, TouchableOpacity, Text, View, ImageBackground, ActivityIndicator } from 'react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import { db, storage } from '../config/firebase';
-import { ref, set } from 'firebase/database';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { ref as ref_storage, getDownloadURL, deleteObject, uploadBytesResumable } from 'firebase/storage';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuthentication } from '../utils/hooks/useAuthentication';
 import Icon from 'react-native-vector-icons/Entypo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { onValue, set, ref, get, update } from 'firebase/database';
 
 const auth = getAuth();
 
 export default function SetShopImagesScreen({ route, navigation }: any) {
   const { user } = useAuthentication();
   const auth = getAuth();
-  const { name, email, password, instagram } = route.params;
+  const { name, email, password, instagram, referral } = route.params;
   const [value, setValue] = React.useState({
     error: '',
     tooBig1: false,
@@ -31,8 +31,6 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
 
   const [imgUrl3, setImgUrl3] = useState<string | undefined>(undefined);
   let imgUrl3Final: any = useRef();
-
-  useEffect(() => {}, []);
 
   const _pickImage = async (number: number) => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -98,6 +96,8 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
   };
 
   async function signUp() {
+    console.log('sign up');
+
     console.log(value.tooBig1 + ' ' + value.tooBig2 + ' ' + value.tooBig3);
     if (imgUrl1 && imgUrl2 && imgUrl3 && !value.tooBig1 && !value.tooBig2 && !value.tooBig3) {
       console.log('img1:', imgUrl1Final.current);
@@ -106,6 +106,7 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
       await createUserWithEmailAndPassword(auth, email, password)
         .then(async (data) => {
           console.log('UID:', data.user.uid);
+          AsyncStorage.setItem('notifiedOfReferral', 'false');
 
           AsyncStorage.setItem('img1', imgUrl1Final.current);
           AsyncStorage.setItem('img2', imgUrl2Final.current);
@@ -116,6 +117,34 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
             name: name.trim(),
             uid: data.user.uid,
             instagram: instagram.replace(/\s+/g, ''),
+            referrals: 0,
+          });
+
+          console.log('referral code is', referral);
+
+          const userRef = ref(db, '/users');
+          get(userRef).then((querySnapShot) => {
+            let data = querySnapShot.val();
+            let users = { ...data };
+
+            Object.values(users).map((vendorKey: any) => {
+              let referralNum = 0;
+              if (vendorKey.type === 'vendor' && vendorKey.referralCode === referral) {
+                referralNum = parseInt(vendorKey.referrals) + 1;
+                update(ref(db, '/users/' + vendorKey.uid), {
+                  referrals: referralNum,
+                });
+
+                update(ref(db, '/users/' + auth.currentUser?.uid), {
+                  referrals: 1,
+                });
+              }
+              if (vendorKey.referrals === null) {
+                update(ref(db, '/users/' + auth.currentUser?.uid), {
+                  referrals: 0,
+                });
+              }
+            });
           });
         })
         .catch((error) => {
@@ -189,7 +218,8 @@ export default function SetShopImagesScreen({ route, navigation }: any) {
       </View>
       <TouchableOpacity
         style={imgUrl1 && imgUrl2 && imgUrl3 ? styles.button : styles.altButton}
-        onPress={() => !uploading && signUp()}
+        // onPress={() => !uploading && signUp()}
+        onPress={() => signUp()}
       >
         <Text style={imgUrl1 && imgUrl2 && imgUrl3 ? styles.buttonTitle : styles.altButtonTitle}>NEXT →</Text>
       </TouchableOpacity>

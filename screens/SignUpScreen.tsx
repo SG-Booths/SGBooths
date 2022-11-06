@@ -83,7 +83,7 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
             error: 'Password must be at least 6 characters',
           });
         } else if (error.message.includes('user-not-found')) {
-          navigation.navigate('SetInstagramUsernameScreen', {
+          navigation.navigate('ReferralScreen', {
             email: value.email,
             password: value.password,
             name: value.name,
