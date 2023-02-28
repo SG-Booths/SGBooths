@@ -23,7 +23,6 @@ export default function VerifyAccountScreen({ route, navigation }: any) {
 
   useEffect(() => {
     setVerifyEmail(auth?.currentUser?.email!);
-    console.log('verify account screen');
   }, []);
 
   const verifyAccount = () => {
@@ -199,7 +198,7 @@ export default function VerifyAccountScreen({ route, navigation }: any) {
           <TouchableOpacity style={{ marginTop: 5, marginRight: 5 }} onPress={() => navigation.goBack()}>
             <Icon name="keyboard-arrow-left" size={50} color="#575FCC" style={{ marginTop: 5 }} />
           </TouchableOpacity>
-          <Text style={[styles.title, { textAlignVertical: 'center' }]}>verification</Text>
+          <Text style={[styles.title, { textAlignVertical: 'center' }]}>delete account</Text>
         </View>
         <Text style={{ color: '#2A3242', fontWeight: '500', marginTop: 20, marginLeft: 10 }}>
           Please sign in again to {type === 'delete account' ? 'delete your account' : 'change your email'}
@@ -253,7 +252,7 @@ export default function VerifyAccountScreen({ route, navigation }: any) {
               alignItems: 'center',
               alignSelf: 'center',
               justifyContent: 'center',
-              marginTop: 10,
+              marginTop: 20,
             }}
             onPress={() => deleteAccount()}
           >

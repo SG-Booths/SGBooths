@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   Alert,
   TextInput,
-  Keyboard,
   ImageBackground,
   Platform,
   ScrollView,
@@ -17,7 +16,6 @@ import { getAuth, signOut, sendPasswordResetEmail, updateProfile } from 'firebas
 import { useAuthentication } from '../utils/hooks/useAuthentication';
 import { onValue, ref, update, set } from 'firebase/database';
 import { db, storage } from '../config/firebase';
-import Image from 'react-native-image-progress';
 import { ref as ref_storage, getDownloadURL, deleteObject, uploadBytes } from 'firebase/storage';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -29,7 +27,6 @@ import Icon4 from 'react-native-vector-icons/FontAwesome';
 var voucher_codes = require('voucher-code-generator');
 
 export default function SettingsScreen({ route, navigation }: any) {
-  const { user } = useAuthentication();
   const auth = getAuth();
 
   const initialInstagram = route.params.instagram;
@@ -281,11 +278,12 @@ export default function SettingsScreen({ route, navigation }: any) {
               }
             });
           });
+          if (unique && !userData.referralCode) {
+            update(ref(db, '/users/' + auth.currentUser?.uid), {
+              referralCode: newCode[0],
+            });
+          }
         }
-
-        update(ref(db, '/users/' + auth.currentUser?.uid), {
-          referralCode: newCode[0],
-        });
       }
     });
   };

@@ -97,14 +97,18 @@ export default function EventInfoScreen({ route, navigation }: any) {
           let updatedValue = { [vendorKey]: info };
           setVendorList((vendorInfo) => ({ ...vendorInfo, ...updatedValue }));
           setVendorArray((vendorInfo: any) =>
-            Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
-              return item.uid != auth.currentUser?.uid;
-            }).sort((a: any, b: any) => b.referrals - a.referrals)
+            Object.values({ ...vendorInfo, ...updatedValue })
+              .filter((item: any) => {
+                return item.uid != auth.currentUser?.uid;
+              })
+              .sort((a: any, b: any) => b.referrals - a.referrals)
           );
           setFilteredVendors((vendorInfo: any) =>
-            Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
-              return item.uid != auth.currentUser?.uid;
-            }).sort((a: any, b: any) => b.referrals - a.referrals)
+            Object.values({ ...vendorInfo, ...updatedValue })
+              .filter((item: any) => {
+                return item.uid != auth.currentUser?.uid;
+              })
+              .sort((a: any, b: any) => b.referrals - a.referrals)
           );
           // setVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }).sort((a: any, b: any) => {
           //   return a.boothNumber - b.boothNumber
@@ -153,14 +157,18 @@ export default function EventInfoScreen({ route, navigation }: any) {
             let updatedValue = { [vendorKey]: info };
             setVendorList((vendorInfo) => ({ ...vendorInfo, ...updatedValue }));
             setVendorArray((vendorInfo: any) =>
-              Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
-                return item.uid != auth.currentUser?.uid;
-              }).sort((a: any, b: any) => b.referrals - a.referrals)
+              Object.values({ ...vendorInfo, ...updatedValue })
+                .filter((item: any) => {
+                  return item.uid != auth.currentUser?.uid;
+                })
+                .sort((a: any, b: any) => b.referrals - a.referrals)
             );
             setFilteredVendors((vendorInfo: any) =>
-              Object.values({ ...vendorInfo, ...updatedValue }).filter((item: any) => {
-                return item.uid != auth.currentUser?.uid;
-              }).sort((a: any, b: any) => b.referrals - a.referrals)
+              Object.values({ ...vendorInfo, ...updatedValue })
+                .filter((item: any) => {
+                  return item.uid != auth.currentUser?.uid;
+                })
+                .sort((a: any, b: any) => b.referrals - a.referrals)
             );
           }
           // setVendorArray((vendorInfo: any) => Object.values({ ...vendorInfo, ...updatedValue }).sort((a: any, b: any) => {
@@ -190,23 +198,27 @@ export default function EventInfoScreen({ route, navigation }: any) {
     // applies the search: sets filteredCards to Cards in cardArray that contain the search term
     // since Card is an object, checks if any of the english, chinese, and pinyin properties include the search term
     setFilteredVendors(
-      vendorArray.filter((obj: any) => {
-        return obj.name
-          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
-          .replace(/\s{2,}/g, ' ')
-          .toLowerCase()
-          .includes(text);
-      }).sort((a: any, b: any) => b.referrals - a.referrals)
+      vendorArray
+        .filter((obj: any) => {
+          return obj.name
+            .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+            .replace(/\s{2,}/g, ' ')
+            .toLowerCase()
+            .includes(text);
+        })
+        .sort((a: any, b: any) => b.referrals - a.referrals)
     );
     console.log(
       'filtered: ',
-      vendorArray.filter((obj: any) => {
-        return obj.name
-          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
-          .replace(/\s{2,}/g, ' ')
-          .toLowerCase()
-          .includes(text);
-      }).sort((a: any, b: any) => b.referrals - a.referrals)
+      vendorArray
+        .filter((obj: any) => {
+          return obj.name
+            .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+            .replace(/\s{2,}/g, ' ')
+            .toLowerCase()
+            .includes(text);
+        })
+        .sort((a: any, b: any) => b.referrals - a.referrals)
     );
   };
 
@@ -215,23 +227,25 @@ export default function EventInfoScreen({ route, navigation }: any) {
     // if starred is true, filters cardArray by starred and then applies the search
     if (newStarredFilter) {
       setFilteredVendors(
-        vendorArray.filter((obj: { name: string; uid: any }) => {
-          return (
-            obj.name
-              .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
-              .replace(/\s{2,}/g, ' ')
-              .toLowerCase()
-              .includes(search) &&
-            //   ||
-            // obj.boothNumber
-            //   .toString()
-            //   .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
-            //   .replace(/\s{2,}/g, ' ')
-            //   .toLowerCase()
-            //   .includes(search)
-            vendorsFollowing.includes(obj.uid)
-          );
-        }).sort((a: any, b: any) => b.referrals - a.referrals)
+        vendorArray
+          .filter((obj: { name: string; uid: any }) => {
+            return (
+              obj.name
+                .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+                .replace(/\s{2,}/g, ' ')
+                .toLowerCase()
+                .includes(search) &&
+              //   ||
+              // obj.boothNumber
+              //   .toString()
+              //   .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+              //   .replace(/\s{2,}/g, ' ')
+              //   .toLowerCase()
+              //   .includes(search)
+              vendorsFollowing.includes(obj.uid)
+            );
+          })
+          .sort((a: any, b: any) => b.referrals - a.referrals)
       );
     }
     // if starred is false, ignores the starred filter and only applies the search
@@ -248,14 +262,18 @@ export default function EventInfoScreen({ route, navigation }: any) {
         remove(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/' + uid));
         getStarred(starredFilter);
         setVendorsFollowing(
-          vendorsFollowing.filter((obj: string) => {
-            return !(obj === uid);
-          }).sort((a: any, b: any) => b.referrals - a.referrals)
+          vendorsFollowing
+            .filter((obj: string) => {
+              return !(obj === uid);
+            })
+            .sort((a: any, b: any) => b.referrals - a.referrals)
         );
         setFilteredVendors(
-          filteredVendors.filter((obj: any) => {
-            return !(obj.uid === uid);
-          }).sort((a: any, b: any) => b.referrals - a.referrals)
+          filteredVendors
+            .filter((obj: any) => {
+              return !(obj.uid === uid);
+            })
+            .sort((a: any, b: any) => b.referrals - a.referrals)
         );
       } else if (vendorsFollowing.includes(uid)) {
         remove(ref(db, '/users/' + auth.currentUser?.uid + '/vendorsFollowing/' + uid));

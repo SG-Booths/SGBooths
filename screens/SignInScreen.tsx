@@ -36,6 +36,7 @@ const SignInScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
           console.log(e);
         });
     } else {
+      alert('Please enter a valid email to reset your password!');
       setValue({ ...value, error: 'Please enter a valid email.' });
     }
   };
@@ -141,7 +142,7 @@ const styles = StyleSheet.create({
   },
   title: {
     alignSelf: 'center',
-    marginBottom: 30,
+    marginBottom: 20,
     fontSize: 48,
     color: '#575FCC',
     fontWeight: '500',

@@ -4,7 +4,7 @@ export default {
   expo: {
     name: 'SG Booths',
     slug: 'SGBooths',
-    version: '1.0.4',
+    version: '1.0.5',
     orientation: 'portrait',
     icon: './assets/images/icon.png',
     scheme: 'myapp',
@@ -21,7 +21,7 @@ export default {
     ios: {
       supportsTablet: false,
       bundleIdentifier: 'SGBooths',
-      buildNumber: '19',
+      buildNumber: '20',
       infoPlist: {
         NSPhotoLibraryUsageDescription:
           'The app accesses your photos to let you share them with visitors browsing your creator profile.',
@@ -33,7 +33,7 @@ export default {
         backgroundColor: '#5857CC',
       },
       package: 'com.StudioMOOK.SGBooths',
-      versionCode: 6,
+      versionCode: 7,
     },
     web: {
       favicon: './assets/images/favicon.png',

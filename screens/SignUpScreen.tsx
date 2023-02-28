@@ -118,7 +118,7 @@ const SignUpScreen: React.FC<StackScreenProps<any>> = ({ navigation }) => {
               ...value,
               error: 'Email already in use',
             });
-          } else if (error.message.includes('weak-passwrd')) {
+          } else if (error.message.includes('weak-password')) {
             setValue({
               ...value,
               error: 'Password must be at least 6 characters',
